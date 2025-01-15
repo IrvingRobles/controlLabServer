@@ -1,4 +1,4 @@
-// Función para obtener todos los registros y mostrar en la página
+// Función para obtener todos los registros y mostrarlos en la tabla
 async function obtenerRegistros() {
     const response = await fetch("/api/registro/obtener");
 
@@ -15,14 +15,12 @@ async function obtenerRegistros() {
 function mostrarRegistros(registros) {
     const listado = document.getElementById("listadoRegistros");
 
-    // Limpiar el contenido previo
+    // Limpiar contenido previo
     listado.innerHTML = "";
 
-    // Crear filas de la tabla con los registros
     registros.forEach(registro => {
         const fila = document.createElement("tr");
 
-        // Crear celdas para cada campo del registro
         fila.innerHTML = `
             <td>${registro.id}</td>
             <td>${registro.clave}</td>
@@ -33,17 +31,15 @@ function mostrarRegistros(registros) {
             <td>${registro.importe_cotizado}</td>
             <td>${registro.resultado}</td>
         `;
-
-        // Añadir la fila al listado
         listado.appendChild(fila);
     });
 }
 
-// Función para filtrar los registros según los criterios seleccionados
+// Función para filtrar los registros en la tabla
 function filtrarRegistros() {
     const filtroClave = document.getElementById("filtroClave").value.toLowerCase();
     const filtroEmpresa = document.getElementById("filtroEmpresa").value.toLowerCase();
-    const filtroFecha = document.getElementById("filtroFecha").value.toLowerCase();
+    const filtroFecha = document.getElementById("filtroFecha").value;
     const filtroResultado = document.getElementById("filtroResultado").value.toLowerCase();
 
     const filas = document.querySelectorAll("#listadoRegistros tr");
@@ -55,12 +51,11 @@ function filtrarRegistros() {
         const fechaEnvio = columnas[3].textContent.toLowerCase();
         const resultado = columnas[7].textContent.toLowerCase();
 
-        // Mostrar solo las filas que coincidan con al menos uno de los filtros
         if (
-            clave.includes(filtroClave) &&
-            empresa.includes(filtroEmpresa) &&
-            fechaEnvio.includes(filtroFecha) &&
-            resultado.includes(filtroResultado)
+            (filtroClave === "" || clave.includes(filtroClave)) &&
+            (filtroEmpresa === "" || empresa.includes(filtroEmpresa)) &&
+            (filtroFecha === "" || fechaEnvio.includes(filtroFecha)) &&
+            (filtroResultado === "" || resultado.includes(filtroResultado))
         ) {
             fila.style.display = "";
         } else {
@@ -69,67 +64,55 @@ function filtrarRegistros() {
     });
 }
 
-// Función para exportar la tabla a Excel con orientación horizontal usando SheetJS
+// Función para exportar la tabla a Excel
 function exportarAExcel() {
-    const wb = XLSX.utils.table_to_book(document.getElementById("tablaRegistros"));
-    
-    // Establecer la orientación horizontal de la hoja
+    const tabla = document.getElementById("tablaRegistros");
+    const wb = XLSX.utils.table_to_book(tabla);
+
     const ws = wb.Sheets[wb.SheetNames[0]];
     ws['!cols'] = [
-        { width: 15 }, { width: 30 }, { width: 50 }, { width: 30 },
-        { width: 50 }, { width: 30 }, { width: 40 }, { width: 20 }
-    ]; // Definir el ancho de las columnas
+        { wpx: 100 }, { wpx: 120 }, { wpx: 200 }, { wpx: 150 },
+        { wpx: 300 }, { wpx: 150 }, { wpx: 150 }, { wpx: 150 }
+    ];
 
-    // Establecer la hoja en formato horizontal (landscape)
-    const wsOpts = { bookType: "xlsx", type: "binary" };
-
-    // Descargar el archivo Excel
-    XLSX.writeFile(wb, "registros.xlsx");
+    XLSX.writeFile(wb, "Registros.xlsx");
 }
 
-// Función para exportar la tabla a PDF con formato horizontal en tamaño carta usando jsPDF
+// Función para exportar la tabla a PDF
 function exportarAPDF() {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF("landscape", "mm", "letter"); // Tamaño carta y orientación horizontal
+    const doc = new jsPDF("landscape", "mm", "letter");
 
     const tabla = document.getElementById("tablaRegistros");
-    const filas = tabla.getElementsByTagName("tr");
-    const columnas = tabla.getElementsByTagName("th");
+    const encabezados = Array.from(tabla.querySelectorAll("thead th")).map(th => th.innerText);
+    const datos = Array.from(tabla.querySelectorAll("tbody tr")).map(tr => 
+        Array.from(tr.querySelectorAll("td")).map(td => td.innerText)
+    );
 
-    // Agregar encabezados al PDF
-    let x = 10;
-    let y = 10;
-    const margen = 10; // Margen de la página
-    const altoFila = 10; // Altura de cada fila
+    doc.setFontSize(14);
+    doc.text("Listado de Registros", 14, 10);
 
-    // Ajustar la cabecera para que se ajuste dentro del espacio disponible
-    for (let i = 0; i < columnas.length; i++) {
-        doc.text(columnas[i].innerText, x + (i * 30), y);  // Espaciado para las columnas
-    }
-    y += altoFila;
+    doc.autoTable({
+        head: [encabezados],
+        body: datos,
+        startY: 20,
+        styles: { fontSize: 8, halign: "center" },
+        headStyles: { fillColor: [0, 123, 255] },
+        theme: "grid"
+    });
 
-    // Agregar filas al PDF
-    for (let i = 1; i < filas.length; i++) {
-        const celdas = filas[i].getElementsByTagName("td");
-        x = 10;
-        for (let j = 0; j < celdas.length; j++) {
-            doc.text(celdas[j].innerText, x + (j * 30), y); // Espaciado para las celdas
-        }
-        y += altoFila;
-    }
-
-    // Establecer el tamaño de la fuente y la posición para los datos
-    doc.setFontSize(8);
-    doc.save("registros.pdf");
+    doc.save("Registros.pdf");
 }
 
-
-
-// Llamar la función al cargar la página
+// Llamar la función para obtener registros al cargar la página
 document.addEventListener("DOMContentLoaded", obtenerRegistros);
 
-// Añadir evento de filtro en cada campo de búsqueda
+// Añadir eventos de filtro
 document.getElementById("filtroClave").addEventListener("input", filtrarRegistros);
 document.getElementById("filtroEmpresa").addEventListener("input", filtrarRegistros);
 document.getElementById("filtroFecha").addEventListener("input", filtrarRegistros);
 document.getElementById("filtroResultado").addEventListener("input", filtrarRegistros);
+
+// Eventos de exportación
+document.getElementById("exportExcel").addEventListener("click", exportarAExcel);
+document.getElementById("exportPDF").addEventListener("click", exportarAPDF);
