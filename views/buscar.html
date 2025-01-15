@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listado de Registros</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Listado de Registros</h2>
+
+        <!-- Filtros -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <label for="filtroClave" class="form-label">Filtrar por Clave</label>
+                <input type="text" id="filtroClave" class="form-control" placeholder="Escribe para filtrar...">
+            </div>
+            <div class="col-md-3">
+                <label for="filtroEmpresa" class="form-label">Filtrar por Empresa</label>
+                <input type="text" id="filtroEmpresa" class="form-control" placeholder="Escribe para filtrar...">
+            </div>
+            <div class="col-md-3">
+                <label for="filtroFecha" class="form-label">Filtrar por Fecha</label>
+                <input type="date" id="filtroFecha" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label for="filtroResultado" class="form-label">Filtrar por Resultado</label>
+                <input type="text" id="filtroResultado" class="form-control" placeholder="Escribe para filtrar...">
+            </div>
+        </div>
+
+        <!-- Botones de exportación -->
+        <div class="mb-3">
+            <button class="btn btn-success" onclick="exportarAExcel()">Exportar a Excel</button>
+            <button class="btn btn-danger" onclick="exportarAPDF()">Exportar a PDF</button>
+        </div>
+
+        <!-- Tabla para mostrar los registros -->
+        <table class="table table-striped mt-4" id="tablaRegistros">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Clave</th>
+                    <th>Empresa</th>
+                    <th>Fecha de Envío</th>
+                    <th>Descripción</th>
+                    <th>Contacto</th>
+                    <th>Importe Cotizado</th>
+                    <th>Resultado</th>
+                </tr>
+            </thead>
+            <tbody id="listadoRegistros">
+                <!-- Los registros se añadirán aquí -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+    <script src="/scripts/buscar.js"></script>
+</body>
+</html>
