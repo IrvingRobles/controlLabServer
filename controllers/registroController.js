@@ -1,15 +1,15 @@
-const db = require('../model/db'); // Configuración de la base de datos (ver explicación al final)
+const db = require('../model/db'); // Configuración de la base de datos
 
 // Crear un nuevo registro
 exports.crearRegistro = async (req, res) => {
-    const { clave, empresa, fechaEnvio, descripcion, contacto, importeCotizado, resultado } = req.body;
+    const { clave, OT, empresa, fechaEnvio, descripcion, contacto, importeCotizado, resultado } = req.body;
 
     try {
         const query = `
-            INSERT INTO registros (clave, empresa, fecha_envio, descripcion, contacto, importe_cotizado, resultado)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO registros (clave, OT, empresa, fecha_envio, descripcion, contacto, importe_cotizado, resultado)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
-        const values = [clave, empresa, fechaEnvio, descripcion, contacto, importeCotizado, resultado];
+        const values = [clave, OT, empresa, fechaEnvio, descripcion, contacto, importeCotizado, resultado];
 
         const [result] = await db.execute(query, values);
 
@@ -55,15 +55,15 @@ exports.obtenerRegistroPorId = async (req, res) => {
 // Actualizar un registro por ID
 exports.actualizarRegistro = async (req, res) => {
     const { id } = req.params;
-    const { clave, empresa, fechaEnvio, descripcion, contacto, importeCotizado, resultado } = req.body;
+    const { clave, OT, empresa, fechaEnvio, descripcion, contacto, importeCotizado, resultado } = req.body;
 
     try {
         const query = `
             UPDATE registros
-            SET clave = ?, empresa = ?, fecha_envio = ?, descripcion = ?, contacto = ?, importe_cotizado = ?, resultado = ?
+            SET clave = ?, OT = ?, empresa = ?, fecha_envio = ?, descripcion = ?, contacto = ?, importe_cotizado = ?, resultado = ?
             WHERE id = ?
         `;
-        const values = [clave, empresa, fechaEnvio, descripcion, contacto, importeCotizado, resultado, id];
+        const values = [clave, OT, empresa, fechaEnvio, descripcion, contacto, importeCotizado, resultado, id];
 
         const [result] = await db.execute(query, values);
 

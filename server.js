@@ -17,7 +17,7 @@ app.use('/api/registro', rutaRegistro);
 
 // Página principal (formulario)
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'registro.html'));
+    res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
 app.listen(port, () => {

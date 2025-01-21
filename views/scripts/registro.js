@@ -4,6 +4,7 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
 
     const data = {
         clave: document.getElementById("clave").value,
+        OT: document.getElementById("ordenTrabajo").value, // Campo añadido
         empresa: document.getElementById("empresa").value,
         fechaEnvio: document.getElementById("fechaEnvio").value,
         descripcion: document.getElementById("descripcion").value,
@@ -12,20 +13,24 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
         resultado: document.getElementById("resultado").value
     };
 
-    const response = await fetch("/api/registro/crear", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-    });
+    try {
+        const response = await fetch("/api/registro/crear", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
 
-    if (!response.ok) {
-        const error = await response.json();
-        alert(`Error: ${error.mensaje}`);
-    } else {
-        const result = await response.json();
-        alert(result.mensaje);
+        if (!response.ok) {
+            const error = await response.json();
+            alert(`Error: ${error.mensaje}`);
+        } else {
+            const result = await response.json();
+            alert(result.mensaje);
+        }
+    } catch (error) {
+        alert("Error de red o del servidor.");
+        console.error(error);
     }
 });
-
