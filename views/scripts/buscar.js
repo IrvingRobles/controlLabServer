@@ -298,10 +298,6 @@ document.addEventListener("DOMContentLoaded", () => {
     filtroFecha.addEventListener("input", filtrarRegistros);
     filtroResultado.addEventListener("input", filtrarRegistros);
 
-    // Eventos para botones
-    exportPDFBtn.addEventListener("click", exportarPDF);
-    restablecerFoliosBtn.addEventListener("click", restablecerFolios);
-
     // Cargar los registros al iniciar
     cargarRegistros();
 });
