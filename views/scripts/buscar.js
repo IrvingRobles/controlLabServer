@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const exportPDFBtn = document.querySelector("#exportPDF");
     const restablecerFoliosBtn = document.querySelector("#restablecerFolios");
 
+
     let folio = 1; // Variable para mantener el folio dinámico
 
     // Cargar registros al iniciar
@@ -120,143 +121,150 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Restablecer folios
+    function restablecerFolios() {
+        // Restablecer el contador de folios a 1 en localStorage
+        localStorage.setItem("ultimoFolio", 1);
+        alert("Folio restablecido a 1.");
+    }
 
-   function exportarPDF() {
-    const { jsPDF } = window.jspdf;
 
-    // Solicitar número de revisión
-    const revision = prompt("Ingrese el número de revisión:", "03");
-    if (!revision) return; // Si no se ingresa un número de revisión, no exporta
+    function exportarPDF() {
+        const { jsPDF } = window.jspdf;
 
-    const doc = new jsPDF("landscape", "mm", "letter"); // Orientación horizontal
+        // Solicitar número de revisión
+        const revision = prompt("Ingrese el número de revisión:", "03");
+        if (!revision) return; // Si no se ingresa un número de revisión, no exporta
 
-    // Obtener el último folio guardado en localStorage
-    let folioActual = localStorage.getItem("ultimoFolio") || 1;
-    folioActual = parseInt(folioActual, 10); // Convertir a número
+        const doc = new jsPDF("landscape", "mm", "letter"); // Orientación horizontal
 
-    // Formatear folio (por ejemplo, 001, 002, etc.)
-    const folioFormateado = String(folioActual).padStart(3, "0");
+        // Obtener el último folio guardado en localStorage
+        let folioActual = localStorage.getItem("ultimoFolio") || 1;
+        folioActual = parseInt(folioActual, 10); // Convertir a número
 
-    // Incrementar el folio para el siguiente uso
-    localStorage.setItem("ultimoFolio", folioActual + 1);
+        // Formatear folio (por ejemplo, 001, 002, etc.)
+        const folioFormateado = String(folioActual).padStart(3, "0");
 
-    // Cargar logo
-    const logo = new Image();
-    logo.src = "./img/logo.jpg"; // Ruta del logo
+        // Incrementar el folio para el siguiente uso
+        localStorage.setItem("ultimoFolio", folioActual + 1);
 
-    logo.onload = function () {
-        const addHeader = () => {
-            // Encabezado con logotipo y datos
-            doc.addImage(logo, "JPEG", 10, 10, 30, 20); // Logotipo
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(14);
-            doc.text("CALIBRACIONES TECNICAS DE MEXICO, S.A. DE C.V.", 45, 15);
-            doc.setFontSize(10);
-            doc.text(
-                "SERVICIO DE MANTENIMIENTO, CALIBRACION Y EVALUACION DE EQUIPOS ANALITICOS.",
-                45,
-                20
-            );
-            doc.text("R.F.C.: CTM-050602-332", 45, 25);
+        // Cargar logo
+        const logo = new Image();
+        logo.src = "./img/logo.jpg"; // Ruta del logo
 
-            // Título del documento
-            doc.setFontSize(14);
-            doc.setTextColor(0, 153, 76); // Verde
-            doc.text("Registro de Cotizaciones ~ 2024", 10, 40);
+        logo.onload = function () {
+            const addHeader = () => {
+                // Encabezado con logotipo y datos
+                doc.addImage(logo, "JPEG", 10, 10, 30, 20); // Logotipo
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(14);
+                doc.text("CALIBRACIONES TECNICAS DE MEXICO, S.A. DE C.V.", 45, 15);
+                doc.setFontSize(10);
+                doc.text(
+                    "SERVICIO DE MANTENIMIENTO, CALIBRACION Y EVALUACION DE EQUIPOS ANALITICOS.",
+                    45,
+                    20
+                );
+                doc.text("R.F.C.: CTM-050602-332", 45, 25);
 
-            // Folio en la esquina superior derecha
-            doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
-            doc.text(`Folio: ${folioFormateado}`, 270, 15, { align: "right" });
-        };
+                // Título del documento
+                doc.setFontSize(14);
+                doc.setTextColor(0, 153, 76); // Verde
+                doc.text("Registro de Cotizaciones ~ 2024", 10, 40);
 
-        const addFooter = (pageNumber) => {
-            // Pie de página
-            const fechaEmision = new Date().toLocaleDateString();
-            doc.setFontSize(10);
-            doc.text(`Emisión: ${fechaEmision}`, 10, 200); // Fecha en la esquina inferior izquierda
-            doc.text(`Página ${pageNumber}`, 140, 200, { align: "center" }); // Número de página al centro
-            doc.text(`Rev. ${revision}`, 270, 200, { align: "right" }); // Revisión en la esquina inferior derecha
-        };
+                // Folio en la esquina superior derecha
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                doc.text(`Folio: ${folioFormateado}`, 270, 15, { align: "right" });
+            };
 
-        // Construcción de la tabla
-        const tabla = [];
-        const filas = tablaRegistros.querySelectorAll("tr");
+            const addFooter = (pageNumber) => {
+                // Pie de página
+                const fechaEmision = new Date().toLocaleDateString();
+                doc.setFontSize(10);
+                doc.text(`Emisión: ${fechaEmision}`, 10, 200); // Fecha en la esquina inferior izquierda
+                doc.text(`Página ${pageNumber}`, 140, 200, { align: "center" }); // Número de página al centro
+                doc.text(`Rev. ${revision}`, 270, 200, { align: "right" }); // Revisión en la esquina inferior derecha
+            };
 
-        filas.forEach((fila) => {
-            if (fila.style.display !== "none") {
-                // Solo incluir filas visibles
-                const datosFila = Array.from(fila.children)
-                    .slice(1, -1) // Omitir las columnas no deseadas
-                    .map((celda) => celda.textContent.trim());
-                tabla.push(datosFila);
-            }
-        });
+            // Construcción de la tabla
+            const tabla = [];
+            const filas = tablaRegistros.querySelectorAll("tr");
 
-        // Configuración de la tabla
-        const tableOptions = {
-            startY: 50, // Posición inicial
-            head: [
-                [
-                    "CLAVE COTIZACION",
-                    "OT",
-                    "EMPRESA (CLIENTE)",
-                    "FECHA DE ENVIO",
-                    "DESCRIPCION",
-                    "CONTACTO",
-                    "IMPORTE COTIZADO",
-                    "RESULTADO",
+            filas.forEach((fila) => {
+                if (fila.style.display !== "none") {
+                    // Solo incluir filas visibles
+                    const datosFila = Array.from(fila.children)
+                        .slice(1, -1) // Omitir las columnas no deseadas
+                        .map((celda) => celda.textContent.trim());
+                    tabla.push(datosFila);
+                }
+            });
+
+            // Configuración de la tabla
+            const tableOptions = {
+                startY: 50, // Posición inicial
+                head: [
+                    [
+                        "CLAVE COTIZACION",
+                        "OT",
+                        "EMPRESA (CLIENTE)",
+                        "FECHA DE ENVIO",
+                        "DESCRIPCION",
+                        "CONTACTO",
+                        "IMPORTE COTIZADO",
+                        "RESULTADO",
+                    ],
                 ],
-            ],
-            body: tabla,
-            theme: "grid",
-            headStyles: {
-                fillColor: [0, 153, 76], // Verde oscuro
-                textColor: [255, 255, 255], // Blanco
-                fontSize: 10,
-                halign: "center",
-            },
-            bodyStyles: {
-                fontSize: 9,
-                halign: "center",
-            },
-            columnStyles: {
-                0: { cellWidth: 30 },
-                1: { cellWidth: 20 },
-                2: { cellWidth: 30 },
-                3: { cellWidth: 30 },
-                4: { cellWidth: 50 },
-                5: { cellWidth: 30 },
-                6: { cellWidth: 30 },
-                7: { cellWidth: 30 },
-            },
-            didDrawPage: function (data) {
-                // Agregar encabezado en cada página
-                addHeader();
-            },
-            margin: { top: 50 }, // Margen superior para el encabezado
+                body: tabla,
+                theme: "grid",
+                headStyles: {
+                    fillColor: [0, 153, 76], // Verde oscuro
+                    textColor: [255, 255, 255], // Blanco
+                    fontSize: 10,
+                    halign: "center",
+                },
+                bodyStyles: {
+                    fontSize: 9,
+                    halign: "center",
+                },
+                columnStyles: {
+                    0: { cellWidth: 30 },
+                    1: { cellWidth: 20 },
+                    2: { cellWidth: 30 },
+                    3: { cellWidth: 30 },
+                    4: { cellWidth: 50 },
+                    5: { cellWidth: 30 },
+                    6: { cellWidth: 30 },
+                    7: { cellWidth: 30 },
+                },
+                didDrawPage: function (data) {
+                    // Agregar encabezado en cada página
+                    addHeader();
+                },
+                margin: { top: 50 }, // Margen superior para el encabezado
+            };
+
+            // Generar la tabla
+            doc.autoTable(tableOptions);
+
+            // Agregar el pie de página en todas las páginas
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i); // Cambiar a la página actual
+                addFooter(i);
+            }
+
+            // Guardar el documento
+            doc.save(`Cotizacion_Folio_${folioFormateado}.pdf`);
         };
 
-        // Generar la tabla
-        doc.autoTable(tableOptions);
+        logo.onerror = function () {
+            alert("Error al cargar el logo. Verifique la ruta y el formato del archivo.");
+        };
+    }
 
-        // Agregar el pie de página en todas las páginas
-        const pageCount = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= pageCount; i++) {
-            doc.setPage(i); // Cambiar a la página actual
-            addFooter(i);
-        }
 
-        // Guardar el documento
-        doc.save(`Cotizacion_Folio_${folioFormateado}.pdf`);
-    };
-
-    logo.onerror = function () {
-        alert("Error al cargar el logo. Verifique la ruta y el formato del archivo.");
-    };
-}
-
-    
     // Restablecer folios (función de ejemplo, adaptarla según tu lógica)
     function restablecerFolios() {
         folio = 1; // Restablecer el contador de folios
