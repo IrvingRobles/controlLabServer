@@ -35,11 +35,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td contenteditable="true">${registro.contacto}</td>
                     <td contenteditable="true">${registro.importe_cotizado}</td>
                     <td contenteditable="true">${registro.resultado}</td>
-                    <td>
-                        <button class="btn btn-primary btn-guardar" data-id="${registro.id}">Guardar</button>
-                        <button class="btn btn-danger btn-eliminar" data-id="${registro.id}">Eliminar</button>
-                          <button class="btn btn-primary btn-detalles" data-id="${registro.id}">Ver Detalles</button>
-                    </td>
+    <td>
+        <button class="btn btn-primary btn-sm btn-guardar" data-id="${registro.id}">Guardar</button>
+        <button class="btn btn-danger btn-sm btn-eliminar" data-id="${registro.id}">Eliminar</button>
+        <button class="btn btn-primary btn-sm btn-detalles" data-id="${registro.id}">Hacer Cotización</button>
+    </td>
                 `;
 
                 tablaRegistros.appendChild(fila);
@@ -50,10 +50,10 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error al cargar registros:", error);
         }
     }
-    
+
     function redirigirADetalles() {
         const botonesDetalles = document.querySelectorAll(".btn-detalles");
-    
+
         botonesDetalles.forEach((boton) => {
             boton.addEventListener("click", (e) => {
                 const id = e.target.dataset.id;
@@ -61,8 +61,8 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
     }
-    
-    
+
+
 
     // Guardar cambios en un registro
     async function guardarRegistro(id, fila) {

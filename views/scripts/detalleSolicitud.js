@@ -1,74 +1,222 @@
-// Función para obtener el parámetro "id" de la URL
-function obtenerParametroURL(nombre) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(nombre);
+document.getElementById("agregarFila").addEventListener("click", agregarFila);
+document.getElementById("cargarDetalles").addEventListener("click", cargarDetalles);
+document.getElementById("generarPDF").addEventListener("click", generarPDF);
+
+function agregarFila() {
+    const tabla = document.querySelector("#tablaMateriales tbody");
+    const fila = document.createElement("tr");
+
+    fila.innerHTML = `
+        <td>${tabla.children.length + 1}</td>
+        <td><input type="number" class="cantidad" value="0"></td>
+        <td><input type="text" class="unidad"></td>
+        <td><input type="text" class="descripcion"></td>
+        <td><input type="number" class="precio" value="0.00"></td>
+        <td><span class="importe">0.00</span></td>
+    `;
+
+    // Añadir eventos para recalcular los totales cuando cambie el valor de cantidad o precio
+    fila.querySelector(".cantidad").addEventListener("input", recalcularTotales);
+    fila.querySelector(".precio").addEventListener("input", recalcularTotales);
+
+    tabla.appendChild(fila);
+    recalcularTotales();
 }
 
-// Función para cargar los detalles del registro
-async function cargarDetalles() {
-    const id = obtenerParametroURL("id"); // Obtener el ID del registro de la URL
-    const detallesRegistro = document.getElementById("detallesRegistro");
+function cargarDetalles() {
+    const detalles = [
+        { cantidad: 2, unidad: "Pieza", descripcion: "Calibración de balanza", precio: 1500 },
+        { cantidad: 1, unidad: "Servicio", descripcion: "Mantenimiento preventivo", precio: 2000 },
+        { cantidad: 5, unidad: "Pieza", descripcion: "Certificado de calibración", precio: 300 },
+    ];
 
-    // Verificar si no se proporcionó un ID válido
-    if (!id) {
-        detallesRegistro.innerHTML = `
-            <div class="alert alert-danger" role="alert">
-                No se proporcionó un ID válido.
-            </div>
+    const tabla = document.querySelector("#tablaMateriales tbody");
+    tabla.innerHTML = ""; // Limpiar tabla
+
+    detalles.forEach((detalle, index) => {
+        const fila = document.createElement("tr");
+
+        fila.innerHTML = `
+            <td>${index + 1}</td>
+            <td><input type="number" class="cantidad" value="${detalle.cantidad}"></td>
+            <td><input type="text" class="unidad" value="${detalle.unidad}"></td>
+            <td><input type="text" class="descripcion" value="${detalle.descripcion}"></td>
+            <td><input type="number" class="precio" value="${detalle.precio.toFixed(2)}"></td>
+            <td><span class="importe">${(detalle.cantidad * detalle.precio).toFixed(2)}</span></td>
         `;
-        return;
-    }
 
-    try {
-        const url = `/api/registro/obtener/${id}`; // URL del endpoint
-        console.log("Solicitando datos desde:", url);
+        // Añadir eventos para recalcular los totales cuando cambien los valores
+        fila.querySelector(".cantidad").addEventListener("input", recalcularTotales);
+        fila.querySelector(".precio").addEventListener("input", recalcularTotales);
 
-        // Solicitar los detalles del registro al servidor
-        const respuesta = await fetch(url);
+        tabla.appendChild(fila);
+    });
 
-        // Verificar el estado de la respuesta
-        console.log("Estado de la respuesta:", respuesta.status);
-        if (!respuesta.ok) throw new Error("Error al cargar los detalles del registro.");
+    recalcularTotales();
+}
 
-        const registro = await respuesta.json(); // Parsear la respuesta a JSON
-        console.log("Estructura del objeto registro:", JSON.stringify(registro, null, 2));
+function recalcularTotales() {
+    const filas = document.querySelectorAll("#tablaMateriales tbody tr");
+    let total = 0;
 
-        // Acceder al objeto anidado bajo "registro"
-        const datos = registro.registro || {}; 
-        console.log("Datos procesados:", datos);
+    filas.forEach(fila => {
+        const cantidad = parseFloat(fila.querySelector(".cantidad").value) || 0;
+        const precio = parseFloat(fila.querySelector(".precio").value) || 0;
+        const importe = cantidad * precio;
 
-        // Validar si los datos existen
-        if (Object.keys(datos).length === 0) {
-            throw new Error("El objeto del registro está vacío o no contiene datos.");
+        fila.querySelector(".importe").innerText = importe.toFixed(2);
+        total += importe;
+    });
+
+    document.getElementById("total").innerText = total.toFixed(2);
+}
+function generarPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Configuración de fuente y márgenes
+    doc.setFont("helvetica", "normal");
+    const marginLeft = 10;
+
+    // Cargar y añadir el logo
+    const logoPath = "../img/logo.jpg"; // Ruta del logo ajustada
+    const img = new Image();
+    img.src = logoPath;
+
+    img.onload = function () {
+        // Añadir el logo al PDF
+        doc.addImage(img, "JPEG", marginLeft, 5, 30, 30);
+
+        // Encabezado
+        doc.setFontSize(12);
+        doc.text("CALIBRACIONES TÉCNICAS DE MÉXICO, S.A. DE C.V.", 105, 15, { align: "center" });
+        doc.setFontSize(9);
+        doc.text("REG. FED. CTES.: CTM-050602-332", 105, 20, { align: "center" });
+        doc.text("Servicios de mantenimiento, calibración y evaluación de equipos analíticos", 105, 25, { align: "center" });
+        doc.text("Calle 18 de Marzo No. 85, Col. Obrera, C.P. 96740, Minatitlán, Ver., México.", 105, 30, { align: "center" });
+        doc.text("Tel. / Fax: (01) 923 223 0870    E-mail: caltecmex@gmail.com", 105, 35, { align: "center" });
+
+        // Línea horizontal
+        doc.line(marginLeft, 40, 200, 40);
+
+        // Información del cliente
+        const cliente = document.getElementById("cliente").value || "-";
+        const referencia = document.getElementById("referencia").value || "-";
+        const direccion = document.getElementById("direccion").value || "-";
+        const cotizacionNo = document.getElementById("cotizacionNo").value || "-";
+        const fecha = document.getElementById("fecha").value || "-";
+        const metodoEmbarque = document.getElementById("metodoEmbarque").value || "-";
+        const personaCotizando = document.getElementById("personaCotizando").value || "-";
+        const fechaExpiracion = document.getElementById("fechaExpiracion").value || "-";
+
+        doc.setFontSize(10);
+        doc.roundedRect(marginLeft, 45, 190, 20, 2, 2);
+        doc.text(`Cliente: ${cliente}`, marginLeft + 5, 50);
+        doc.text(`Dirección: ${direccion}`, marginLeft + 5, 55);
+        doc.text(`Referencia: ${referencia}`, 130, 50);
+        doc.text(`Cotización No: ${cotizacionNo}`, 130, 55);
+        doc.text(`Fecha: ${fecha}`, 130, 60);
+        doc.text(`Método de Embarque: ${metodoEmbarque}`, marginLeft + 5, 60);
+        doc.text(`Realizó la cotización: ${personaCotizando}`, marginLeft + 5, 65);
+
+        // Número de folio (fuera de los márgenes de los datos del cliente, en la parte superior derecha)
+        const folio = prompt("Por favor, ingresa el número de folio:");
+        if (folio) {
+            doc.setFontSize(10);
+            doc.text(`Folio: ${folio}`, 180, 45, { align: "right" });
         }
 
-        // Construir el contenido de los detalles
-        detallesRegistro.innerHTML = `
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Registro ID: ${datos.id || "N/A"}</h5>
-                    <p><strong>Clave:</strong> ${datos.clave || "N/A"}</p>
-                    <p><strong>OT:</strong> ${datos.OT || "N/A"}</p>
-                    <p><strong>Empresa:</strong> ${datos.empresa || "N/A"}</p>
-                    <p><strong>Fecha de Envío:</strong> ${new Date(datos.fecha_envio).toLocaleDateString() || "N/A"}</p>
-                    <p><strong>Descripción:</strong> ${datos.descripcion || "N/A"}</p>
-                    <p><strong>Contacto:</strong> ${datos.contacto || "N/A"}</p>
-                    <p><strong>Importe Cotizado:</strong> ${datos.importe_cotizado || "N/A"}</p>
-                    <p><strong>Resultado:</strong> ${datos.resultado || "N/A"}</p>
-                </div>
-            </div>
-        `;
+        // Número de revisión (fuera de los márgenes de los datos del cliente, en la parte superior derecha, alineado con el folio)
+        const revision = prompt("Por favor, ingresa el número de revisión:");
+        if (revision) {
+            doc.setFontSize(10);
+            doc.text(`Rev: ${revision}`, 180, 38, { align: "right" });
+        }
 
-        console.log("HTML insertado correctamente.");
-    } catch (error) {
-        console.error("Error al cargar los detalles:", error);
-        detallesRegistro.innerHTML = `
-            <div class="alert alert-danger" role="alert">
-                Error al cargar los detalles del registro: ${error.message}
-            </div>
-        `;
-    }
+        // Tabla de materiales y otros datos
+        generarTablaMateriales(doc, marginLeft);
+
+        // Firmado en cuadro con márgenes
+        const cuadroYPos = doc.internal.pageSize.height - 90;
+        doc.setFontSize(8);
+        doc.rect(marginLeft, cuadroYPos, 190, 40); // Cuadro más grande
+        doc.text("AUTORIZÓ:", marginLeft + 5, cuadroYPos + 6);
+        doc.text("Ing. Héctor Manuel Rivera Domínguez", marginLeft + 5, cuadroYPos + 12); // Nombre añadido
+        doc.text("Firma: ____________________________________", marginLeft + 5, cuadroYPos + 18); // Espacio para firma
+
+        // Número de página
+        const pageCount = doc.internal.getNumberOfPages();
+        doc.text(`Página ${doc.internal.getCurrentPageInfo().pageNumber} de ${pageCount}`, 180, doc.internal.pageSize.height - 10, { align: "right" });
+
+        // Canal de denuncias justificado
+        doc.setFontSize(7);
+        const denunciaText = "CALTECMEX pone a su disposición el canal de denuncias: Correo electrónico: denuncia.caltecmex@gmail.com. Se garantiza la confidencialidad de toda persona que proporcione información, o colabore en alguna investigación donde se presuma el incumplimiento a lo establecido a nuestras políticas y procedimientos.";
+        doc.text(denunciaText, marginLeft + 5, doc.internal.pageSize.height - 20, { maxWidth: 190 });
+
+        // Fecha de emisión en la esquina inferior
+        const fechaEmision = new Date().toLocaleDateString();
+        doc.setFontSize(8);
+        doc.text(`Fecha de emisión: ${fechaEmision}`, 180, doc.internal.pageSize.height - 25, { align: "right" });
+
+        // Guardar PDF
+        doc.save("cotizacion.pdf");
+    };
+
+    img.onerror = function () {
+        alert("Error al cargar el logo. Verifica la ruta o el archivo.");
+    };
 }
 
-// Cargar los detalles cuando se cargue la página
-document.addEventListener("DOMContentLoaded", cargarDetalles);
+function generarTablaMateriales(doc, marginLeft) {
+    let startY = 75;
+    const cellHeight = 6;
+
+    // Encabezados de la tabla
+    doc.setFontSize(8);
+    doc.setFillColor(200, 200, 200);
+    doc.roundedRect(marginLeft, startY, 180, cellHeight, 2, 2, "F"); // Redondeo de las esquinas
+    doc.setDrawColor(0, 0, 0);
+    doc.rect(marginLeft, startY, 180, cellHeight, "S"); // Borde de encabezado
+    doc.text("PDA", marginLeft + 5, startY + 4);
+    doc.text("CANT.", marginLeft + 20, startY + 4);
+    doc.text("UNIDAD", marginLeft + 40, startY + 4);
+    doc.text("DESCRIPCIÓN", marginLeft + 80, startY + 4);
+    doc.text("PRECIO UNITARIO", marginLeft + 120, startY + 4);
+    doc.text("IMPORTE TOTAL", marginLeft + 155, startY + 4);
+
+    // Cuerpo de la tabla
+    const filas = document.querySelectorAll("#tablaMateriales tbody tr");
+    startY += cellHeight;
+
+    filas.forEach((fila, index) => {
+        const pda = index + 1;
+        const cantidad = fila.querySelector(".cantidad").value || "0";
+        const unidad = fila.querySelector(".unidad").value || "-";
+        const descripcion = fila.querySelector(".descripcion").value || "-";
+        const precio = parseFloat(fila.querySelector(".precio").value).toFixed(2) || "0.00";
+        const importe = fila.querySelector(".importe").innerText || "0.00";
+
+        doc.rect(marginLeft, startY, 180, cellHeight, "S"); // Borde de fila
+        doc.text(pda.toString(), marginLeft + 5, startY + 4);
+        doc.text(cantidad, marginLeft + 20, startY + 4);
+        doc.text(unidad, marginLeft + 40, startY + 4);
+        doc.text(descripcion, marginLeft + 80, startY + 4);
+        doc.text(precio, marginLeft + 130, startY + 4);
+        doc.text(importe, marginLeft + 160, startY + 4);
+
+        startY += cellHeight;
+    });
+
+    // Total - celda más grande
+    const total = document.getElementById("total").innerText || "0.00";
+    doc.setFontSize(10);
+    doc.text("Total:", marginLeft + 130, startY + 4);
+    doc.rect(marginLeft + 130, startY, 50, cellHeight, "S"); // Borde más grande para el total
+    doc.text(`$${total}`, marginLeft + 160, startY + 4);
+
+    // Línea de total
+    doc.rect(marginLeft, startY, 180, cellHeight, "S");
+}
+
+
+
