@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path'); // Para resolver las rutas de los archivos estáticos
 const rutaRegistro = require('./routes/rutaRegistro');
+const almacenRoutes = require('./routes/almacenRoutes');
 
 const app = express();
 const port = 3000;
@@ -14,6 +15,7 @@ app.use(express.static(path.join(__dirname, 'views'))); // Carpeta 'views' donde
 
 // Usar las rutas de registro
 app.use('/api/registro', rutaRegistro);
+app.use('/api/almacen', almacenRoutes);
 
 // Página principal (formulario)
 app.get('/', (req, res) => {
