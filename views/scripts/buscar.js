@@ -38,6 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td>
                         <button class="btn btn-primary btn-guardar" data-id="${registro.id}">Guardar</button>
                         <button class="btn btn-danger btn-eliminar" data-id="${registro.id}">Eliminar</button>
+                          <button class="btn btn-primary btn-detalles" data-id="${registro.id}">Ver Detalles</button>
                     </td>
                 `;
 
@@ -49,6 +50,19 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error al cargar registros:", error);
         }
     }
+    
+    function redirigirADetalles() {
+        const botonesDetalles = document.querySelectorAll(".btn-detalles");
+    
+        botonesDetalles.forEach((boton) => {
+            boton.addEventListener("click", (e) => {
+                const id = e.target.dataset.id;
+                window.location.href = `/detalle.html?id=${id}`;
+            });
+        });
+    }
+    
+    
 
     // Guardar cambios en un registro
     async function guardarRegistro(id, fila) {
@@ -290,6 +304,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 eliminarRegistro(id);
             });
         });
+
+        redirigirADetalles();
     }
 
     // Eventos de filtro
