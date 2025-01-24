@@ -152,43 +152,62 @@ function generarPDF() {
             doc.text(`Rev: ${revision}`, 180, 38, { align: "right" });
         }
 
-        // Tabla de materiales y otros datos
+        // Generar tabla de materiales y otros datos
         generarTablaMateriales(doc, marginLeft);
 
-        // Firmado en cuadro con márgenes
+        // Firmas y otros datos
         const cuadroYPos = doc.internal.pageSize.height - 90;
         doc.setFontSize(8);
-        doc.rect(marginLeft, cuadroYPos, 190, 40); // Cuadro más grande
+        doc.rect(marginLeft, cuadroYPos, 190, 40);
         doc.text("AUTORIZÓ:", marginLeft + 5, cuadroYPos + 6);
-        doc.text("Ing. Héctor Manuel Rivera Domínguez", marginLeft + 5, cuadroYPos + 12); // Nombre añadido
-        doc.text("Firma: ____________________________________", marginLeft + 5, cuadroYPos + 18); // Espacio para firma
+        doc.text("Ing. Héctor Manuel Rivera Domínguez", marginLeft + 5, cuadroYPos + 12);
+        doc.text("Firma: ____________________________________", marginLeft + 5, cuadroYPos + 18);
 
         // Número de página
         const pageCount = doc.internal.getNumberOfPages();
         doc.text(`Página ${doc.internal.getCurrentPageInfo().pageNumber} de ${pageCount}`, 180, doc.internal.pageSize.height - 10, { align: "right" });
 
-        // Canal de denuncias justificado
+        // Canal de denuncias
         doc.setFontSize(7);
-        const denunciaText = "CALTECMEX pone a su disposición el canal de denuncias: Correo electrónico: denuncia.caltecmex@gmail.com. Se garantiza la confidencialidad de toda persona que proporcione información, o colabore en alguna investigación donde se presuma el incumplimiento a lo establecido a nuestras políticas y procedimientos.";
+        const denunciaText = "CALTECMEX pone a su disposición el canal de denuncias: Correo electrónico: denuncia.caltecmex@gmail.com...";
         doc.text(denunciaText, marginLeft + 5, doc.internal.pageSize.height - 20, { maxWidth: 190 });
 
-        // Fecha de emisión y fecha de expiración
+        // Fechas
         const fechaEmision = new Date().toLocaleDateString().replace(/\//g, "-");
         doc.setFontSize(8);
         doc.text(`Fecha de emisión: ${fechaEmision}`, 180, doc.internal.pageSize.height - 35, { align: "right" });
         doc.text(`Fecha de expiración: ${fechaExpiracion}`, 180, doc.internal.pageSize.height - 30, { align: "right" });
 
-        // Generar nombre del archivo dinámico
-        const nombreArchivo = `cotizacion_${cliente}_${folio || "sin_folio"}_rev${revision || "0"}_${fechaEmision}.pdf`;
+        // Crear Blob del PDF
+        const pdfBlob = doc.output("blob");
 
-        // Guardar PDF
+        // Crear un objeto FormData y añadir el archivo Blob
+        const formData = new FormData();
+        const nombreArchivo = `cotizacion_${cliente}_${folio || "sin_folio"}_rev${revision || "0"}_${fechaEmision}.pdf`;
+        formData.append("pdf", pdfBlob, nombreArchivo);
+         
         doc.save(nombreArchivo);
+
+        // Enviar al servidor
+        fetch("/guardar-pdf", {
+            method: "POST",
+            body: formData,
+        })
+            .then((response) => {
+                if (response.ok) {
+                    alert("PDF guardado con éxito en el servidor.");
+                } else {
+                    alert("Error al guardar el PDF.");
+                }
+            })
+            .catch((error) => console.error("Error:", error));
     };
 
     img.onerror = function () {
         alert("Error al cargar el logo. Verifica la ruta o el archivo.");
     };
 }
+
 
 function generarTablaMateriales(doc, marginLeft) {
     let startY = 75;
