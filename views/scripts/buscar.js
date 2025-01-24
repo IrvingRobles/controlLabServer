@@ -142,8 +142,8 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Folio restablecido a 1.");
     }
 
-
-    function exportarPDF() {
+    document.getElementById("exportPDF").addEventListener("click", exportPDF);
+    function exportPDF() {
         const { jsPDF } = window.jspdf;
 
         // Solicitar número de revisión
