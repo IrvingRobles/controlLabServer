@@ -13,8 +13,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
             <a class="navbar-brand" href="index.html">Menú Principal</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -25,13 +24,17 @@
                     <li class="nav-item">
                         <a class="nav-link" href="buscar.html">Buscar Solicitud</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="busquedaPdf.html">Registro de cotizaciones</a>
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
+    
 
     <div class="container mt-4">
-        <h2>Búsqueda de PDFs</h2>
+        <h2>Registros de cotizaciones</h2>
 
         <div class="row mb-3">
             <div class="col-md-6">
@@ -108,6 +111,8 @@
         // Llamar a la función al cargar la página
         document.addEventListener('DOMContentLoaded', fetchPDFs);
     </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 
 </html>
