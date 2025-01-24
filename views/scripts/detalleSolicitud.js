@@ -13,11 +13,13 @@ function agregarFila() {
         <td><input type="text" class="descripcion"></td>
         <td><input type="number" class="precio" value="0.00"></td>
         <td><span class="importe">0.00</span></td>
+        <td><button class="eliminarFila">Eliminar</button></td>
     `;
 
     // Añadir eventos para recalcular los totales cuando cambie el valor de cantidad o precio
     fila.querySelector(".cantidad").addEventListener("input", recalcularTotales);
     fila.querySelector(".precio").addEventListener("input", recalcularTotales);
+    fila.querySelector(".eliminarFila").addEventListener("click", () => eliminarFila(fila));
 
     tabla.appendChild(fila);
     recalcularTotales();
@@ -43,16 +45,32 @@ function cargarDetalles() {
             <td><input type="text" class="descripcion" value="${detalle.descripcion}"></td>
             <td><input type="number" class="precio" value="${detalle.precio.toFixed(2)}"></td>
             <td><span class="importe">${(detalle.cantidad * detalle.precio).toFixed(2)}</span></td>
+            <td><button class="eliminarFila">Eliminar</button></td>
         `;
 
         // Añadir eventos para recalcular los totales cuando cambien los valores
         fila.querySelector(".cantidad").addEventListener("input", recalcularTotales);
         fila.querySelector(".precio").addEventListener("input", recalcularTotales);
+        fila.querySelector(".eliminarFila").addEventListener("click", () => eliminarFila(fila));
 
         tabla.appendChild(fila);
     });
 
     recalcularTotales();
+}
+
+function eliminarFila(fila) {
+    const tabla = document.querySelector("#tablaMateriales tbody");
+    tabla.removeChild(fila);
+    actualizarNumeracion();
+    recalcularTotales();
+}
+
+function actualizarNumeracion() {
+    const filas = document.querySelectorAll("#tablaMateriales tbody tr");
+    filas.forEach((fila, index) => {
+        fila.children[0].innerText = index + 1; // Actualizar número de fila
+    });
 }
 
 function recalcularTotales() {
@@ -70,6 +88,7 @@ function recalcularTotales() {
 
     document.getElementById("total").innerText = total.toFixed(2);
 }
+
 function generarPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -119,14 +138,14 @@ function generarPDF() {
         doc.text(`Método de Embarque: ${metodoEmbarque}`, marginLeft + 5, 60);
         doc.text(`Realizó la cotización: ${personaCotizando}`, marginLeft + 5, 65);
 
-        // Número de folio (fuera de los márgenes de los datos del cliente, en la parte superior derecha)
+        // Número de folio
         const folio = prompt("Por favor, ingresa el número de folio:");
         if (folio) {
             doc.setFontSize(10);
             doc.text(`Folio: ${folio}`, 180, 45, { align: "right" });
         }
 
-        // Número de revisión (fuera de los márgenes de los datos del cliente, en la parte superior derecha, alineado con el folio)
+        // Número de revisión
         const revision = prompt("Por favor, ingresa el número de revisión:");
         if (revision) {
             doc.setFontSize(10);
@@ -153,13 +172,17 @@ function generarPDF() {
         const denunciaText = "CALTECMEX pone a su disposición el canal de denuncias: Correo electrónico: denuncia.caltecmex@gmail.com. Se garantiza la confidencialidad de toda persona que proporcione información, o colabore en alguna investigación donde se presuma el incumplimiento a lo establecido a nuestras políticas y procedimientos.";
         doc.text(denunciaText, marginLeft + 5, doc.internal.pageSize.height - 20, { maxWidth: 190 });
 
-        // Fecha de emisión en la esquina inferior
-        const fechaEmision = new Date().toLocaleDateString();
+        // Fecha de emisión y fecha de expiración
+        const fechaEmision = new Date().toLocaleDateString().replace(/\//g, "-");
         doc.setFontSize(8);
-        doc.text(`Fecha de emisión: ${fechaEmision}`, 180, doc.internal.pageSize.height - 25, { align: "right" });
+        doc.text(`Fecha de emisión: ${fechaEmision}`, 180, doc.internal.pageSize.height - 35, { align: "right" });
+        doc.text(`Fecha de expiración: ${fechaExpiracion}`, 180, doc.internal.pageSize.height - 30, { align: "right" });
+
+        // Generar nombre del archivo dinámico
+        const nombreArchivo = `cotizacion_${cliente}_${folio || "sin_folio"}_rev${revision || "0"}_${fechaEmision}.pdf`;
 
         // Guardar PDF
-        doc.save("cotizacion.pdf");
+        doc.save(nombreArchivo);
     };
 
     img.onerror = function () {
@@ -217,6 +240,3 @@ function generarTablaMateriales(doc, marginLeft) {
     // Línea de total
     doc.rect(marginLeft, startY, 180, cellHeight, "S");
 }
-
-
-
