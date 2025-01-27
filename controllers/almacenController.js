@@ -111,7 +111,7 @@ exports.obtenerRegistroPorId = async (req, res) => {
 
 // Registrar datos de salida para un registro de almacén
 exports.registrarSalida = async (req, res) => {
-    const { idMov } = req.params; // ID Mov asociado
+    const { idMov } = req.params; // ID del registro a actualizar
     const {
         folio_vale_salida,
         ctd_salidas,
@@ -134,23 +134,56 @@ exports.registrarSalida = async (req, res) => {
             return res.status(404).json({ mensaje: 'El registro con el ID proporcionado no existe' });
         }
 
-        // Insertar los datos de salida
-        const querySalida = `
-            INSERT INTO salidas (
-                idAlmacen, folio_vale_salida, ctd_salidas, precio_salidas, solicito, cliente, servicio, aplicacion, uso_en, recibio, condiciones_entrega
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        // Actualizar los datos de salida
+        const queryActualizar = `
+            UPDATE almacen
+            SET 
+                folio_vale_salida = ?,
+                ctd_salidas = ?,
+                precio_salidas = ?,
+                solicito = ?,
+                cliente = ?,
+                servicio = ?,
+                aplicacion = ?,
+                uso_en = ?,
+                recibio = ?,
+                condiciones_entrega = ?
+            WHERE idAlmacen = ?
         `;
         const values = [
-            idMov, folio_vale_salida, ctd_salidas, precio_salidas, solicito, cliente, servicio, aplicacion, uso_en, recibio, condiciones_entrega
+            folio_vale_salida, ctd_salidas, precio_salidas, solicito, cliente, servicio,
+            aplicacion, uso_en, recibio, condiciones_entrega, idMov
         ];
 
-        await db.execute(querySalida, values);
+        const [result] = await db.execute(queryActualizar, values);
 
-        res.status(201).json({ mensaje: 'Datos de salida registrados con éxito' });
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ mensaje: 'No se pudo actualizar el registro' });
+        }
+
+        res.status(200).json({ mensaje: 'Datos de salida actualizados con éxito' });
     } catch (error) {
         res.status(500).json({ mensaje: 'Error al registrar los datos de salida', error });
     }
 };
+
+exports.registrarMoneda = async (req, res) => {
+    const { nombreMoneda, codigoMoneda } = req.body;
+
+    if (!nombreMoneda || !codigoMoneda) {
+        return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
+    }
+
+    try {
+        const query = 'INSERT INTO moneda (nombre, codigo) VALUES (?, ?)';
+        await db.query(query, [nombreMoneda, codigoMoneda]);
+        res.status(201).json({ message: 'Moneda registrada correctamente.' });
+    } catch (error) {
+        console.error('Error al registrar moneda:', error);
+        res.status(500).json({ message: 'Error al registrar la moneda.' });
+    }
+};
+
 
 
 /*

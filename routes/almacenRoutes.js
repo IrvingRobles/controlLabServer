@@ -16,4 +16,6 @@ router.get('/:idMov', almacenController.obtenerRegistroPorId);
 // Ruta para registrar salidas vinculadas a un ID Mov
 router.post('/:idMov/salida', almacenController.registrarSalida);
 
+router.post('/monedas', almacenController.registrarMoneda);
+
 module.exports = router;
