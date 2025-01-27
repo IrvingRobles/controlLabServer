@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú Principal</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        .menu-container {
+            margin-top: 20px;
+        }
+        .submenu-item {
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="menuPrincipal" class="menu-container">
+            <h3>Menú Principal</h3>
+            <ul class="list-group" id="menuList">
+                <!-- Los módulos y submódulos se generarán dinámicamente -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- JavaScript para generar menú -->
+    <script>
+        // Estructura de módulos y submódulos con rutas
+        const menuData = [
+            {
+                name: "Solicitud",
+                submodules: [
+                    { name: "Crear", link: "registro.html" },
+                    { name: "Buscar", link: "buscar.html" },
+                    { name: "Registro de cotizaciones", link: "busquedaPdf.html" },
+                ]
+            }
+        ];
+
+        // Función para generar el menú
+        function generateMenu() {
+            const menuList = document.getElementById("menuList");
+
+            if (!menuData.length) {
+                const emptyMessage = document.createElement("li");
+                emptyMessage.className = "list-group-item text-center";
+                emptyMessage.textContent = "No hay módulos disponibles.";
+                menuList.appendChild(emptyMessage);
+                return;
+            }
+
+            menuData.forEach((module, index) => {
+                const moduleItem = document.createElement("li");
+                moduleItem.className = "list-group-item list-group-item-primary";
+
+                // Botón para el módulo
+                moduleItem.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>${module.name}</span>
+                        <button class="btn btn-sm btn-secondary" data-bs-toggle="collapse" data-bs-target="#subMenu${index}" aria-expanded="false" aria-controls="subMenu${index}">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </div>
+                `;
+
+                // Submódulos (colapsables)
+                const subMenu = document.createElement("ul");
+                subMenu.id = `subMenu${index}`;
+                subMenu.className = "collapse list-group list-group-flush";
+
+                if (module.submodules && module.submodules.length) {
+                    module.submodules.forEach(submodule => {
+                        const submoduleItem = document.createElement("li");
+                        submoduleItem.className = "list-group-item submenu-item";
+                        submoduleItem.innerHTML = `
+                            <a href="${submodule.link}" class="btn btn-link p-0 text-decoration-none">
+                                ${submodule.name}
+                            </a>
+                        `;
+                        subMenu.appendChild(submoduleItem);
+                    });
+                } else {
+                    const emptySubmodule = document.createElement("li");
+                    emptySubmodule.className = "list-group-item text-muted submenu-item";
+                    emptySubmodule.textContent = "No hay submódulos disponibles.";
+                    subMenu.appendChild(emptySubmodule);
+                }
+
+                moduleItem.appendChild(subMenu);
+                menuList.appendChild(moduleItem);
+            });
+        }
+
+        // Generar el menú al cargar la página
+        document.addEventListener("DOMContentLoaded", generateMenu);
+    </script>
+</body>
+</html>
