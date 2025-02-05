@@ -41,6 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
 document.getElementById("crearRegistroForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
+<<<<<<< HEAD
     // Obtener valores del formulario y convertirlos a mayúsculas
     const getValue = (id) => document.getElementById(id)?.value.trim().toUpperCase() || "";
 
@@ -74,6 +75,22 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
         lugar,
         cliente,
         creadoPor
+=======
+    // Obtener el usuario desde localStorage
+    const usuario = JSON.parse(localStorage.getItem("user"));
+    const creadoPor = usuario ? usuario.username : "Desconocido"; // Nombre del usuario o "Desconocido"
+
+    const data = {
+        clave: document.getElementById("clave").value,
+        OT: document.getElementById("ordenTrabajo").value,
+        empresa: document.getElementById("empresa").value,
+        fechaEnvio: document.getElementById("fechaEnvio").value,
+        descripcion: document.getElementById("descripcion").value,
+        contacto: document.getElementById("contacto").value,
+        importeCotizado: document.getElementById("importeCotizado").value,
+        resultado: document.getElementById("resultado").value,
+        creadoPor: creadoPor // Agregar el usuario que creó la solicitud
+>>>>>>> def00b5 (commit perfiles)
     };
 
     try {

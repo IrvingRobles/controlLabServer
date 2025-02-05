@@ -159,6 +159,7 @@ exports.validarCuenta = async (req, res) => {
       res.status(500).json({ message: 'Error al validar la cuenta' });
   }
 };
+<<<<<<< HEAD
 
 exports.listaEmpleados = async (req, res) => {
   try {
@@ -175,3 +176,5 @@ exports.listaEmpleados = async (req, res) => {
       res.status(500).json({ success: false, message: 'Error en el servidor' });
   }
 };
+=======
+>>>>>>> def00b5 (commit perfiles)

@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
               const data = await response.json();
 
               if (response.ok) {
+<<<<<<< HEAD
                   localStorage.setItem('user', JSON.stringify(data.user)); // Guardar usuario en localStorage
                   
                   // **Verificar el rol del usuario**
@@ -34,6 +35,10 @@ document.addEventListener('DOMContentLoaded', () => {
                   } else {
                       window.location.href = 'index1.html'; // Redirigir a la página principal
                   }
+=======
+                  localStorage.setItem('user', JSON.stringify(data.user)); // Guardar usuario
+                  window.location.href = 'index1.html'; // Redirigir a la página principal
+>>>>>>> def00b5 (commit perfiles)
               } else {
                   alert(data.message || 'Error al iniciar sesión');
               }
@@ -82,7 +87,11 @@ document.addEventListener('DOMContentLoaded', () => {
           }
 
           try {
+<<<<<<< HEAD
               const response = await fetch('/api/login/registroUsuario', { // Ruta corregida
+=======
+              const response = await fetch('/api/login/registroUsusario', { // Ruta corregida
+>>>>>>> def00b5 (commit perfiles)
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(formData),

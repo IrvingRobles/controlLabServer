@@ -8,7 +8,10 @@ const multer = require('multer'); // Para manejar uploads de archivos
 const fs = require('fs'); // Para manejar archivos y directorios
 
 const rutaRegistro = require('./routes/rutaRegistro');
+<<<<<<< HEAD
 const almacenRoutes = require('./routes/almacenRoutes');
+=======
+>>>>>>> def00b5 (commit perfiles)
 const rutaLogin = require('./routes/rutaLogin'); // Nueva ruta para login
 
 const app = express();
@@ -32,6 +35,7 @@ function verificarSesion(req, res, next) {
 }
 
 // Proteger todas las páginas HTML
+<<<<<<< HEAD
 app.get(['/',
         '/index1.html',
         '/registro.html',
@@ -45,6 +49,9 @@ app.get(['/',
         '/adminBusquedaPdf.html',
         '/adminRegistro.html',
         ], verificarSesion, (req, res) => {
+=======
+app.get(['/', '/index1.html', '/registro.html', '/detalle.html','/buscar.html','/busquedaPdf.html'], verificarSesion, (req, res) => {
+>>>>>>> def00b5 (commit perfiles)
     res.sendFile(path.join(__dirname, 'views', req.path));
 });
 
@@ -137,12 +144,15 @@ app.use('/api/login', rutaLogin); // Rutas del login
 // Página principal (login)
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'login.html'));
+<<<<<<< HEAD
 });
 
 app._router.stack.forEach((r) => {
     if (r.route && r.route.path) {
         console.log(`Ruta activa: ${r.route.path}`);
     }
+=======
+>>>>>>> def00b5 (commit perfiles)
 });
 
 app.listen(port, () => {

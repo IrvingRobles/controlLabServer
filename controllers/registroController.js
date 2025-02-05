@@ -2,6 +2,7 @@ const db = require('../model/db'); // Configuración de la base de datos
 const { format } = require('date-fns');
 
 // Función para crear un nuevo registro
+<<<<<<< HEAD
 // Controlador para crear un nuevo registro
 exports.crearRegistro = async (req, res) => {
     try {
@@ -25,6 +26,20 @@ exports.crearRegistro = async (req, res) => {
         );
 
         res.status(201).json({ mensaje: "Registro creado exitosamente", id: result.insertId, clave: claveGenerada });
+=======
+exports.crearRegistro = async (req, res) => {
+    const { clave, OT, empresa, fechaEnvio, descripcion, contacto, importeCotizado, resultado, creadoPor } = req.body;
+
+    try {
+        // Insertar en la base de datos
+        const [result] = await db.query(
+            `INSERT INTO registros (clave, OT, empresa, fecha_envio, descripcion, contacto, importe_cotizado, resultado, creadoPor) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [clave, OT, empresa, fechaEnvio, descripcion, contacto, importeCotizado, resultado, creadoPor]
+        );
+
+        res.status(201).json({ mensaje: "Registro creado exitosamente", id: result.insertId });
+>>>>>>> def00b5 (commit perfiles)
     } catch (error) {
         console.error("Error al crear el registro:", error);
         res.status(500).json({ mensaje: "Error en el servidor" });
