@@ -2,15 +2,20 @@
 document.getElementById("crearRegistroForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
+    // Obtener el usuario desde localStorage
+    const usuario = JSON.parse(localStorage.getItem("user"));
+    const creadoPor = usuario ? usuario.username : "Desconocido"; // Nombre del usuario o "Desconocido"
+
     const data = {
         clave: document.getElementById("clave").value,
-        OT: document.getElementById("ordenTrabajo").value, // Campo añadido
+        OT: document.getElementById("ordenTrabajo").value,
         empresa: document.getElementById("empresa").value,
         fechaEnvio: document.getElementById("fechaEnvio").value,
         descripcion: document.getElementById("descripcion").value,
         contacto: document.getElementById("contacto").value,
         importeCotizado: document.getElementById("importeCotizado").value,
-        resultado: document.getElementById("resultado").value
+        resultado: document.getElementById("resultado").value,
+        creadoPor: creadoPor // Agregar el usuario que creó la solicitud
     };
 
     try {
