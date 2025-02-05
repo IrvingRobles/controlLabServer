@@ -1,24 +1,21 @@
 const db = require('../model/db'); // Configuración de la base de datos
 
-// Crear un nuevo registro
+// Función para crear un nuevo registro
 exports.crearRegistro = async (req, res) => {
-    const { clave, OT, empresa, fechaEnvio, descripcion, contacto, importeCotizado, resultado } = req.body;
+    const { clave, OT, empresa, fechaEnvio, descripcion, contacto, importeCotizado, resultado, creadoPor } = req.body;
 
     try {
-        const query = `
-            INSERT INTO registros (clave, OT, empresa, fecha_envio, descripcion, contacto, importe_cotizado, resultado)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `;
-        const values = [clave, OT, empresa, fechaEnvio, descripcion, contacto, importeCotizado, resultado];
+        // Insertar en la base de datos
+        const [result] = await db.query(
+            `INSERT INTO registros (clave, OT, empresa, fecha_envio, descripcion, contacto, importe_cotizado, resultado, creadoPor) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [clave, OT, empresa, fechaEnvio, descripcion, contacto, importeCotizado, resultado, creadoPor]
+        );
 
-        const [result] = await db.execute(query, values);
-
-        res.status(201).json({
-            mensaje: 'Registro creado con éxito',
-            registroId: result.insertId,
-        });
+        res.status(201).json({ mensaje: "Registro creado exitosamente", id: result.insertId });
     } catch (error) {
-        res.status(500).json({ mensaje: 'Error al crear el registro', error });
+        console.error("Error al crear el registro:", error);
+        res.status(500).json({ mensaje: "Error en el servidor" });
     }
 };
 
