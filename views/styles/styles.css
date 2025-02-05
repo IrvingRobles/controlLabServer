@@ -119,3 +119,29 @@ textarea {
     margin-right: 10px; /* Espacio entre botones */
     margin-bottom: 10px;
 }
+.perfil-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    background: #f8f8f8;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+#perfil-icono {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    border: 2px solid #ddd;
+}
+
+#perfil-nombre {
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+}

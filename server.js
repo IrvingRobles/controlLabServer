@@ -1,14 +1,49 @@
+require('dotenv').config(); // Cargar variables de entorno
 const express = require('express');
+const session = require('express-session');
 const bodyParser = require('body-parser');
 const path = require('path'); // Para resolver las rutas de los archivos estáticos
 const cors = require('cors'); // Importar cors
 const multer = require('multer'); // Para manejar uploads de archivos
 const fs = require('fs'); // Para manejar archivos y directorios
+
 const rutaRegistro = require('./routes/rutaRegistro');
+<<<<<<< HEAD
 const almacenRoutes = require('./routes/almacenRoutes');
+=======
+const rutaLogin = require('./routes/rutaLogin'); // Nueva ruta para login
+>>>>>>> def00b5 (commit perfiles)
 
 const app = express();
 const port = 3000;
+
+console.log('Email configurado:', process.env.EMAIL_USER);
+
+app.use(session({
+    secret: '1234', // Cambia esto por una clave segura
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false } // Pon `true` si usas HTTPS
+}));
+
+function verificarSesion(req, res, next) {
+    if (req.session.user) {
+        next(); // Si la sesión existe, permite el acceso
+    } else {
+        res.redirect('/login.html'); // Si no hay sesión, redirige al login
+    }
+}
+
+// Proteger todas las páginas HTML
+app.get(['/', '/index1.html', '/registro.html', '/detalle.html','/buscar.html','/busquedaPdf.html'], verificarSesion, (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', req.path));
+});
+
+app.get('/logout', (req, res) => {
+    req.session.destroy(() => {
+        res.redirect('/login.html');
+    });
+});
 
 // Configuración de CORS
 const corsOptions = {
@@ -74,24 +109,24 @@ app.delete('/PDFCotizacion/:fileName', (req, res) => {
   
     // Validar si el archivo existe
     if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ message: 'Archivo no encontrado.' });
+        return res.status(404).json({ message: 'Archivo no encontrado.' });
     }
   
     fs.unlink(filePath, (err) => {
-      if (err) {
-        return res.status(500).json({ message: 'Error al eliminar el archivo.' });
-      }
-      res.status(200).json({ message: 'Archivo eliminado correctamente.' });
+        if (err) {
+            return res.status(500).json({ message: 'Error al eliminar el archivo.' });
+        }
+        res.status(200).json({ message: 'Archivo eliminado correctamente.' });
     });
-  });
-  
+});
 
-// Usar las rutas de registro
-app.use('/api/registro', rutaRegistro);
+// Usar las rutas de registro y login
+app.use('/api/registro', rutaRegistro); // Rutas del registro
+app.use('/api/login', rutaLogin); // Rutas del login
 
-// Página principal (formulario)
+// Página principal (login)
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'index.html'));
+    res.sendFile(path.join(__dirname, 'views', 'login.html'));
 });
 
 app._router.stack.forEach((r) => {
