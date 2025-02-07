@@ -1,29 +1,29 @@
-document.getElementById('formRegistroMoneda').addEventListener('submit', async (e) => {
+document.getElementById('formRegistroMovimiento').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const nombreMoneda = document.getElementById('nombreMoneda').value.trim();
-    const codigoMoneda = document.getElementById('codigoMoneda').value.trim();
+    const movimiento = document.getElementById('movimiento').value.trim();
+    const descripcion = document.getElementById('descripcion').value.trim();
 
-    if (!nombreMoneda || !codigoMoneda) {
+    if (!movimiento || !descripcion) {
         showModal('Todos los campos son obligatorios.', false);
         return;
     }
 
     try {
-        const response = await fetch('/api/almacen/monedas', {
+        const response = await fetch('/api/almacen/movimiento', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ nombreMoneda, codigoMoneda }),
+            body: JSON.stringify({ movimiento, descripcion }),
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.message || 'Error al registrar la moneda.');
+            throw new Error(errorData.message || 'Error al registrar el movimiento.');
         }
 
-        showModal('¡Moneda registrada correctamente!', true);
+        showModal('¡Movimiento registrado correctamente!', true);
     } catch (error) {
         showModal(`Error: ${error.message}`, false);
     }

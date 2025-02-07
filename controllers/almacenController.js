@@ -20,6 +20,41 @@ exports.obtenerSiguienteIdAlmacen = async (req, res) => {
     }
 };
 
+// Ruta para obtener las monedas
+exports.obtenerMonedas = async (req, res) => {
+    try {
+        // Consulta para obtener las monedas
+        const query = 'SELECT codigo FROM moneda'; // Cambia 'codigo' por el campo adecuado
+        const [rows] = await db.execute(query);
+
+        res.status(200).json(rows); // Enviar la lista de monedas como respuesta
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al obtener las monedas', error });
+    }
+};
+
+// Controlador para registrar una empresa
+exports.registrarEmpresa = async (req, res) => {
+    try {
+        const { codigo, nombre, rfc, direccion } = req.body;
+
+        // Validación básica
+        if (!codigo || !nombre || !rfc || !direccion) {
+            return res.status(400).json({ message: "Todos los campos son obligatorios." });
+        }
+
+        // Insertar en la base de datos
+        const query = `INSERT INTO empresa (codigo, nombre, rfc, direccion) VALUES (?, ?, ?, ?)`;
+        const values = [codigo, nombre, rfc, direccion];
+
+        await db.query(query, values);
+        res.status(201).json({ message: "¡Empresa registrada correctamente!" });
+    } catch (error) {
+        console.error('Error al registrar empresa:', error);
+        res.status(500).json({ message: "Error en el servidor. Inténtelo de nuevo más tarde." });
+    }
+};
+
 // Crear un nuevo registro en almacén
 exports.crearRegistroAlmacen = async (req, res) => {
     const {
@@ -181,6 +216,36 @@ exports.registrarMoneda = async (req, res) => {
     } catch (error) {
         console.error('Error al registrar moneda:', error);
         res.status(500).json({ message: 'Error al registrar la moneda.' });
+    }
+};
+
+exports.registrarMovimiento = async (req, res) => {
+    const { movimiento, descripcion } = req.body;
+
+    if (!movimiento || !descripcion) {
+        return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
+    }
+
+    try {
+        const query = 'INSERT INTO movimiento (movimiento, descripcion) VALUES (?, ?)';
+        await db.query(query, [movimiento, descripcion]);
+        res.status(201).json({ message: 'Movimiento registrado correctamente.' });
+    } catch (error) {
+        console.error('Error al registrar movimiento:', error);
+        res.status(500).json({ message: 'Error al registrar el movimiento.' });
+    }
+};
+
+// Ruta para obtener las movimientos
+exports.obtenerMovimientos = async (req, res) => {
+    try {
+        // Consulta para obtener las movimiento
+        const query = 'SELECT movimiento FROM movimiento'; // Cambia 'codigo' por el campo adecuado
+        const [rows] = await db.execute(query);
+
+        res.status(200).json(rows); // Enviar la lista de monedas como respuesta
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al obtener los movimientos', error });
     }
 };
 

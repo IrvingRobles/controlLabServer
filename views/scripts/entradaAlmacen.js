@@ -1,7 +1,55 @@
 document.addEventListener("DOMContentLoaded", function () {
+    // Rellenar el campo de movimiento al cargar la página
+    const movimientoSelect = document.getElementById('tipo_movimiento');
+    if (movimientoSelect) {
+        fetch('/api/almacen/movimientos')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                movimientoSelect.innerHTML = '<option value="" selected disabled>Seleccione un movimiento</option>';
+                data.forEach(movimiento => {
+                    const option = document.createElement('option');
+                    option.value = movimiento.movimiento;
+                    option.textContent = movimiento.movimiento;
+                    movimientoSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error al obtener los movimientos:', error);
+            });
+    }
+
+    // Rellenar el campo de monedas al cargar la página
+    const monedaSelect = document.getElementById('moneda');
+    if (monedaSelect) {
+        fetch('/api/almacen/moneda')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                monedaSelect.innerHTML = '<option value="" selected disabled>Seleccione una moneda</option>';
+                data.forEach(moneda => {
+                    const option = document.createElement('option');
+                    option.value = moneda.codigo;
+                    option.textContent = moneda.codigo;
+                    monedaSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error al obtener las monedas:', error);
+            });
+    }
+
+    // Obtener el siguiente ID del almacén
     const idAlmacenField = document.getElementById('idAlmacen');
     if (idAlmacenField) {
-        // Solicita el siguiente ID al servidor
         fetch('/api/almacen/siguiente-id', { method: 'GET' })
             .then(response => {
                 if (!response.ok) {
@@ -12,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(data => {
                 console.log('Datos recibidos del servidor:', data);
                 if (data.siguiente_id) {
-                    idAlmacenField.value = data.siguiente_id; // Rellena el campo
+                    idAlmacenField.value = data.siguiente_id;
                 } else {
                     console.error('No se recibió un siguiente_id válido.');
                 }
@@ -22,10 +70,10 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
+    // Manejar el envío del formulario
     document.getElementById('formRegistroAlmacen').addEventListener('submit', async function (event) {
         event.preventDefault();
 
-        // Verifica si el formulario es válido
         if (!this.checkValidity()) {
             event.stopPropagation();
             this.classList.add('was-validated');
@@ -34,8 +82,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const data = {
             idUsuario: document.getElementById("idUsuario").value,
-            empresa: document.getElementById("empresa").value,
-            tipo_movimiento: document.getElementById("tipo_movimiento").value,
+            codigo: document.getElementById("codigo").value,
+            movimiento: document.getElementById("tipo_movimiento").value,
             fecha: document.getElementById("fecha").value,
             pedido: document.getElementById("pedido").value,
             producto: document.getElementById("producto").value,
@@ -92,13 +140,9 @@ function showModal(message, success) {
     modalButton.textContent = success ? "Ir al Almacén General" : "Cerrar";
     modalButton.classList = success ? "btn btn-primary" : "btn btn-secondary";
 
-    if (success) {
-        modalButton.onclick = () => {
-            window.location.href = '/vistaAlmacen.html';
-        };
-    } else {
-        modalButton.onclick = null; // Solo cierra el modal
-    }
+    modalButton.onclick = success
+        ? () => { window.location.href = '/vistaAlmacen.html'; }
+        : null;
 
     const modal = new bootstrap.Modal(document.getElementById('customModal'));
     modal.show();

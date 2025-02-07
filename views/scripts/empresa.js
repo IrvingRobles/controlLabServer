@@ -1,29 +1,31 @@
-document.getElementById('formRegistroMoneda').addEventListener('submit', async (e) => {
+document.getElementById('formRegistroEmpresa').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const nombreMoneda = document.getElementById('nombreMoneda').value.trim();
-    const codigoMoneda = document.getElementById('codigoMoneda').value.trim();
+    const codigo = document.getElementById('codigo').value.trim();
+    const nombre = document.getElementById('nombre').value.trim();
+    const rfc = document.getElementById('rfc').value.trim();
+    const direccion = document.getElementById('direccion').value.trim();
 
-    if (!nombreMoneda || !codigoMoneda) {
+    if (!codigo || !nombre || !rfc || !direccion) {
         showModal('Todos los campos son obligatorios.', false);
         return;
     }
 
     try {
-        const response = await fetch('/api/almacen/monedas', {
+        const response = await fetch('/api/almacen/empresa', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ nombreMoneda, codigoMoneda }),
+            body: JSON.stringify({ codigo, nombre, rfc, direccion }),
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.message || 'Error al registrar la moneda.');
+            throw new Error(errorData.message || 'Error al registrar la empresa.');
         }
 
-        showModal('¡Moneda registrada correctamente!', true);
+        showModal('¡Empresa registrada correctamente!', true);
     } catch (error) {
         showModal(`Error: ${error.message}`, false);
     }

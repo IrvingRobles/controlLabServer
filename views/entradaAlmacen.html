@@ -36,19 +36,17 @@
                     <input type="text" class="form-control" id="idUsuario" placeholder="Ingrese el usuario" required>
                 </div>
                 <div class="col-md-3">
-                    <label for="empresa" class="form-label">Empresa:</label>
-                    <select class="form-select" id="empresa" required>
+                    <label for="codigo" class="form-label">Empresa:</label>
+                    <select class="form-select" id="codigo" required>
                         <option value="" selected disabled>Seleccione una empresa</option>
-                        <option>IDEAL</option>
-                        <option>Otra Empresa</option>
+                        <!-- Las opciones se cargarán dinámicamente aquí -->
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label for="tipo_mov" class="form-label">Tipo de Movimiento:</label>
+                    <label for="tipo_movimiento" class="form-label">Tipo de Movimiento:</label>
                     <select class="form-select" id="tipo_movimiento" required>
-                        <option value="" selected disabled>Seleccione el tipo</option>
-                        <option>Compra</option>
-                        <option>Venta</option>
+                        <option value="" selected disabled>Seleccione un movimiento</option>
+                        <!-- Las opciones se cargarán dinámicamente aquí -->
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -120,9 +118,7 @@
                             <label for="moneda" class="form-label">Moneda:</label>
                             <select class="form-select" id="moneda" required>
                                 <option value="" selected disabled>Seleccione una moneda</option>
-                                <option>MXN</option>
-                                <option>USD</option>
-                                <option>EUR</option>
+                                <!-- Las opciones de monedas se agregarán dinámicamente aquí -->
                             </select>
                         </div>
                         <div class="col-md-3">
