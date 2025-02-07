@@ -160,6 +160,9 @@ exports.validarCuenta = async (req, res) => {
   }
 };
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
 
 exports.listaEmpleados = async (req, res) => {
   try {
@@ -176,5 +179,8 @@ exports.listaEmpleados = async (req, res) => {
       res.status(500).json({ success: false, message: 'Error en el servidor' });
   }
 };
+<<<<<<< HEAD
 =======
 >>>>>>> def00b5 (commit perfiles)
+=======
+>>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)

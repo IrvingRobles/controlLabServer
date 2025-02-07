@@ -195,7 +195,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     filtroClave.addEventListener("input", filtrarSolicitudes);
+<<<<<<< HEAD
    
+=======
+>>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
     exportPDFBtn.addEventListener("click", exportPDF);
     cargarRegistros();
 

@@ -27,6 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
               if (response.ok) {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
                   localStorage.setItem('user', JSON.stringify(data.user)); // Guardar usuario en localStorage
                   
                   // **Verificar el rol del usuario**
@@ -35,10 +38,13 @@ document.addEventListener('DOMContentLoaded', () => {
                   } else {
                       window.location.href = 'index1.html'; // Redirigir a la página principal
                   }
+<<<<<<< HEAD
 =======
                   localStorage.setItem('user', JSON.stringify(data.user)); // Guardar usuario
                   window.location.href = 'index1.html'; // Redirigir a la página principal
 >>>>>>> def00b5 (commit perfiles)
+=======
+>>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
               } else {
                   alert(data.message || 'Error al iniciar sesión');
               }
@@ -88,10 +94,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
           try {
 <<<<<<< HEAD
+<<<<<<< HEAD
               const response = await fetch('/api/login/registroUsuario', { // Ruta corregida
 =======
               const response = await fetch('/api/login/registroUsusario', { // Ruta corregida
 >>>>>>> def00b5 (commit perfiles)
+=======
+              const response = await fetch('/api/login/registroUsuario', { // Ruta corregida
+>>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(formData),

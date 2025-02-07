@@ -53,6 +53,7 @@
             <button id="exportPDF" class="btn btn-success">Exportar a PDF</button>
         </div>
 
+<<<<<<< HEAD
         <!-- Tabla con scroll -->
         <div class="table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 5px;">
             <table class="table table-striped mt-3 mb-3" id="tablaSolicitudes">
@@ -78,6 +79,30 @@
                 </tbody>
             </table>
         </div>
+=======
+        <table class="table table-striped mt-3 mb-3" id="tablaSolicitudes">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Clave</th>
+                    <th>OT</th>
+                    <th>Empresa</th>
+                    <th>Fecha Envío</th>
+                    <th>Descripción</th>
+                    <th>Contacto</th>
+                    <th>Importe Cotizado</th>
+                    <th>Resultado</th>
+                    <th>Personal Asignado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="noResults" style="display: none;">
+                    <td colspan="11" class="text-center text-muted">No se encontraron registros.</td>
+                </tr>
+            </tbody>
+        </table>
+>>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
@@ -85,6 +110,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+<<<<<<< HEAD
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const buscarInput = document.getElementById('buscarInput');
@@ -132,5 +158,8 @@
             });
         });
     </script>
+=======
+    
+>>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
 </body>
 </html>

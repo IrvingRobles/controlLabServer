@@ -28,6 +28,7 @@ router.get('/empleados', registroController.obtenerEmpleados);
 
 router.get('/obtenerAsignados', registroController.obtenerRegistroAsignado);
 
+<<<<<<< HEAD
 console.log(registroController); // <-- Agrega esto para verificar en la consola
 
 // Definir rutas
@@ -44,4 +45,6 @@ router.delete('/material/:id', otcController.eliminarMaterial);
 // Ruta para actualizar la Orden de Trabajo y sus cotizaciones
 //router.put('/otc', otcController.guardarOTC);  // Usamos PUT ya que la lógica maneja tanto creación como actualización
 
+=======
+>>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
 module.exports = router;

@@ -146,6 +146,12 @@ exports.obtenerRegistroAsignado = async (req, res) => {
     }
 };
 
+<<<<<<< HEAD
+=======
+
+
+
+>>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
 exports.obtenerEmpleados = async (req, res) => {
     try {
         const query = `SELECT id, nombre FROM users`; 
@@ -198,6 +204,7 @@ exports.asignarPersonal = async (req, res) => {
     } catch (error) {
         console.error("Error al asignar personal:", error);
         res.status(500).json({ mensaje: "Error en el servidor" });
+<<<<<<< HEAD
     }   
 
 };
@@ -299,3 +306,10 @@ exports.actualizarOT = async (req, res) => {
         res.status(500).json({ mensaje: "Error en el servidor", error: error.message });
     }
 };
+=======
+    }
+};
+
+
+
+>>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
