@@ -159,3 +159,19 @@ exports.validarCuenta = async (req, res) => {
       res.status(500).json({ message: 'Error al validar la cuenta' });
   }
 };
+
+exports.listaEmpleados = async (req, res) => {
+  try {
+      // Consultar empleados excluyendo los administradores y solo los verificados
+      const [empleados] = await db.query(
+          `SELECT id, empresa, nombre, username, rfc, curp, departamento, puesto, contrato, 
+          jornada, domicilio, nss, ingreso, telefono, correo, role, created_at, updated_at 
+          FROM users WHERE role != 'admin' AND verificado = 1`
+      );
+
+      res.status(200).json({ success: true, empleados });
+  } catch (error) {
+      console.error('Error al obtener la lista de empleados:', error);
+      res.status(500).json({ success: false, message: 'Error en el servidor' });
+  }
+};

@@ -13,7 +13,22 @@ document.addEventListener("DOMContentLoaded", () => {
     // Cargar registros al iniciar
     async function cargarRegistros() {
         try {
-            const respuesta = await fetch("/api/registro/obtener");
+            const usuario = JSON.parse(localStorage.getItem("user")); // Obtener el objeto user
+            const usuarioActual = usuario?.username; // Obtener el username
+
+            if (!usuarioActual) {
+                console.error("Usuario no autenticado");
+                return;
+            }
+
+            const respuesta = await fetch("/api/registro/obtenerAsignados", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "usuario": usuarioActual // Enviar username al backend
+                }
+            });
+
             if (!respuesta.ok) throw new Error("Error al cargar los registros");
 
             const data = await respuesta.json();
@@ -26,21 +41,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 const fila = document.createElement("tr");
 
                 fila.innerHTML = `
-                    <td>${registro.id}</td>
-                    <td contenteditable="true">${registro.clave}</td>
-                    <td contenteditable="true">${registro.OT}</td>
-                    <td contenteditable="true">${registro.empresa}</td>
-                    <td contenteditable="true">${registro.fecha_envio}</td>
-                    <td contenteditable="true">${registro.descripcion}</td>
-                    <td contenteditable="true">${registro.contacto}</td>
-                    <td contenteditable="true">${registro.importe_cotizado}</td>
-                    <td contenteditable="true">${registro.resultado}</td>
-    <td>
-        <button class="btn btn-primary btn-sm btn-guardar" data-id="${registro.id}">Guardar</button>
-        <button class="btn btn-danger btn-sm btn-eliminar" data-id="${registro.id}">Eliminar</button>
-        <button class="btn btn-primary btn-sm btn-detalles" data-id="${registro.id}">Hacer Cotización</button>
-    </td>
-                `;
+                <td>${registro.id}</td>
+                <td contenteditable="true">${registro.clave}</td>
+                <td contenteditable="true">${registro.OT}</td>
+                <td contenteditable="true">${registro.empresa}</td>
+                <td contenteditable="true">${registro.fecha_envio}</td>
+                <td contenteditable="true">${registro.descripcion}</td>
+                <td contenteditable="true">${registro.contacto}</td>
+                <td contenteditable="true">${registro.importe_cotizado}</td>
+                <td contenteditable="true">${registro.resultado}</td>
+                <td>${registro.empleado_asignado || "No asignado"}</td>
+                <button class="btn btn-primary btn-sm btn-guardar" data-id="${registro.id}">Guardar</button>
+                <button class="btn btn-danger btn-sm btn-eliminar" data-id="${registro.id}">Eliminar</button>
+                <button class="btn btn-primary btn-sm btn-detalles" data-id="${registro.id}">Hacer Cotización</button>
+            `;
 
                 tablaRegistros.appendChild(fila);
             });
@@ -50,6 +64,8 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error al cargar registros:", error);
         }
     }
+
+
 
     function redirigirADetalles() {
         const botonesDetalles = document.querySelectorAll(".btn-detalles");
@@ -64,35 +80,74 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-    // Guardar cambios en un registro
-    async function guardarRegistro(id, fila) {
-        const datosActualizados = {
-            clave: fila.children[1].textContent.trim(),
-            OT: fila.children[2].textContent.trim(),
-            empresa: fila.children[3].textContent.trim(),
-            fechaEnvio: fila.children[4].textContent.trim(),
-            descripcion: fila.children[5].textContent.trim(),
-            contacto: fila.children[6].textContent.trim(),
-            importeCotizado: fila.children[7].textContent.trim(),
-            resultado: fila.children[8].textContent.trim(),
-        };
+// Función para actualizar un registro
+async function guardarRegistro(id, fila) {
+    const datosActualizados = {
+        clave: fila.children[1]?.textContent?.trim(),
+        OT: fila.children[2]?.textContent?.trim(),
+        empresa: fila.children[3]?.textContent?.trim(),
+        fechaEnvio: fila.children[4]?.textContent?.trim(),
+        descripcion: fila.children[5]?.textContent?.trim(),
+        contacto: fila.children[6]?.textContent?.trim(),
+        importeCotizado: fila.children[7]?.textContent?.trim(),
+        resultado: fila.children[8]?.textContent?.trim()
+    };
 
-        try {
-            const respuesta = await fetch(`/api/registro/actualizar/${id}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(datosActualizados),
-            });
+    console.log("Datos enviados al backend:", datosActualizados); // Verificar datos antes de enviarlos
 
-            if (!respuesta.ok) throw new Error("Error al guardar los cambios");
+    try {
+        const respuesta = await fetch(`/api/registro/actualizar/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(datosActualizados),
+        });
 
-            alert("Registro actualizado con éxito.");
-        } catch (error) {
-            console.error("Error al guardar los cambios:", error);
+        if (!respuesta.ok) {
+            const errorData = await respuesta.json();
+            throw new Error(errorData.mensaje || "Error al guardar los cambios");
         }
+
+        alert("Registro actualizado con éxito.");
+    } catch (error) {
+        console.error("Error al guardar los cambios:", error);
+        alert("Error al guardar los cambios: " + error.message);
     }
+}
+
+// Asignar evento de guardado a los botones
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".btn-guardar").forEach(boton => {
+        boton.addEventListener("click", () => {
+            const fila = boton.closest("tr"); // Encuentra la fila de la tabla
+            const id = fila.dataset.id; // Asegurar que cada fila tenga un `data-id`
+
+            if (!id) {
+                alert("No se pudo obtener el ID del registro.");
+                return;
+            }
+
+            guardarRegistro(id, fila);
+        });
+    });
+});
+
+    // Función para asignar el evento de guardar en los botones
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll(".btn-guardar").forEach(boton => {
+            boton.addEventListener("click", () => {
+                const fila = boton.closest("tr"); // Encuentra la fila de la tabla
+                const id = fila.dataset.id; // Asegúrate de que cada fila tiene un `data-id`
+
+                if (!id) {
+                    alert("No se pudo obtener el ID del registro.");
+                    return;
+                }
+
+                guardarRegistro(id, fila);
+            });
+        });
+    });
+
 
     // Eliminar un registro
     async function eliminarRegistro(id) {

@@ -31,7 +31,7 @@ function verificarSesion(req, res, next) {
 }
 
 // Proteger todas las páginas HTML
-app.get(['/', '/index1.html', '/registro.html', '/detalle.html','/buscar.html','/busquedaPdf.html'], verificarSesion, (req, res) => {
+app.get(['/', '/index1.html', '/registro.html', '/detalle.html','/buscar.html','/busquedaPdf.html','/adminPersonal.html','/inicioAdmin.html','/adminBuscar.html'], verificarSesion, (req, res) => {
     res.sendFile(path.join(__dirname, 'views', req.path));
 });
 
@@ -52,6 +52,7 @@ app.use(cors(corsOptions)); // Aplicar configuración de CORS
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(express.json()); 
 
 // Servir archivos estáticos (CSS y JS)
 app.use(express.static(path.join(__dirname, 'views'))); // Carpeta 'views' donde están HTML, CSS, JS
