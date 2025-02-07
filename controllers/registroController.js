@@ -118,9 +118,6 @@ exports.obtenerRegistroAsignado = async (req, res) => {
     }
 };
 
-
-
-
 exports.obtenerEmpleados = async (req, res) => {
     try {
         const query = `SELECT id, nombre FROM users`; 
@@ -173,8 +170,46 @@ exports.asignarPersonal = async (req, res) => {
     } catch (error) {
         console.error("Error al asignar personal:", error);
         res.status(500).json({ mensaje: "Error en el servidor" });
+    }   
+
+};
+
+exports.cargarDatosOT = async (req, res) => {
+    const { id } = req.query; // Cambié 'clave' por 'id'
+    try {
+        const [result] = await db.execute("SELECT * FROM registros WHERE id = ?", [id]); // Usamos 'id' en lugar de 'clave'
+        if (result.length === 0) {
+            return res.status(404).json({ mensaje: "Orden de trabajo no encontrada" });
+        }
+        res.json(result[0]);
+    } catch (error) {
+        console.error("Error al obtener la OT:", error);
+        res.status(500).json({ mensaje: "Error en el servidor" });
     }
 };
 
+exports.guardarOT = async (req, res) => {
+    const { id, fecha_inicio, fecha_termino, empresa, contrato_pedido, lugar, descripcion, empleado_asignado, observaciones, facturas } = req.body; // Cambié 'clave' por 'id'
+    try {
+        const query = `
+            INSERT INTO registros (id, fecha_inicio, fecha_termino, empresa, contrato_pedido, lugar, descripcion, empleado_asignado, observaciones, facturas) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE 
+                fecha_inicio = VALUES(fecha_inicio), 
+                fecha_termino = VALUES(fecha_termino), 
+                empresa = VALUES(empresa), 
+                contrato_pedido = VALUES(contrato_pedido), 
+                lugar = VALUES(lugar), 
+                descripcion = VALUES(descripcion), 
+                empleado_asignado = VALUES(empleado_asignado), 
+                observaciones = VALUES(observaciones), 
+                facturas = VALUES(facturas);`;
 
+        await db.execute(query, [id, fecha_inicio, fecha_termino, empresa, contrato_pedido, lugar, descripcion, empleado_asignado, observaciones, facturas]);
 
+        res.json({ mensaje: "Orden de Trabajo guardada correctamente" });
+    } catch (error) {
+        console.error("Error al guardar la OT:", error);
+        res.status(500).json({ mensaje: "Error en el servidor" });
+    }
+};

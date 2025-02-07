@@ -26,4 +26,10 @@ router.get('/empleados', registroController.obtenerEmpleados);
 
 router.get('/obtenerAsignados', registroController.obtenerRegistroAsignado);
 
+console.log(registroController); // <-- Agrega esto para verificar en la consola
+
+// Definir rutas
+router.get('/obtenerOT', registroController.cargarDatosOT);
+router.post('/guardarOT', registroController.guardarOT);
+
 module.exports = router;
