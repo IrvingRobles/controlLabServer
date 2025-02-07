@@ -126,5 +126,26 @@
     <!-- Bootstrap JS -->
      
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Script para manejar sesión y perfil -->
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const perfilNombre = document.getElementById('perfil-nombre');
+                const usuario = JSON.parse(localStorage.getItem('user'));
+    
+                if (usuario) {
+                    perfilNombre.textContent = usuario.username || 'Usuario';
+                } else {
+                    perfilNombre.textContent = 'Invitado';
+                    setTimeout(() => {
+                        window.location.href = "login.html"; // Redirigir al login si no hay usuario
+                    }, 2000);
+                }
+            });
+    
+            function cerrarSesion() {
+                localStorage.removeItem('user'); // Borrar datos del usuario
+                window.location.href = "login.html"; // Redirigir al login
+            }
+        </script>
 </body>
 </html>

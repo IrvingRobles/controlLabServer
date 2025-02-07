@@ -18,4 +18,12 @@ router.put('/actualizar/:id', registroController.actualizarRegistro);
 // Ruta para eliminar un registro por ID
 router.delete('/eliminar/:id', registroController.eliminarRegistro);
 
+// Ruta para asignar personal a un registro
+router.put('/asignar/:id', registroController.asignarPersonal);
+
+// Ruta para obtener la lista de empleados
+router.get('/empleados', registroController.obtenerEmpleados);
+
+router.get('/obtenerAsignados', registroController.obtenerRegistroAsignado);
+
 module.exports = router;

@@ -26,8 +26,14 @@ document.addEventListener('DOMContentLoaded', () => {
               const data = await response.json();
 
               if (response.ok) {
-                  localStorage.setItem('user', JSON.stringify(data.user)); // Guardar usuario
-                  window.location.href = 'index1.html'; // Redirigir a la página principal
+                  localStorage.setItem('user', JSON.stringify(data.user)); // Guardar usuario en localStorage
+                  
+                  // **Verificar el rol del usuario**
+                  if (data.user && data.user.role === 'admin') {
+                      window.location.href = 'inicioAdmin.html'; // Redirigir a la página de administrador
+                  } else {
+                      window.location.href = 'index1.html'; // Redirigir a la página principal
+                  }
               } else {
                   alert(data.message || 'Error al iniciar sesión');
               }
@@ -76,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
 
           try {
-              const response = await fetch('/api/login/registroUsusario', { // Ruta corregida
+              const response = await fetch('/api/login/registroUsuario', { // Ruta corregida
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(formData),
