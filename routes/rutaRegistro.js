@@ -29,11 +29,15 @@ router.get('/empleados', registroController.obtenerEmpleados);
 router.get('/obtenerAsignados', registroController.obtenerRegistroAsignado);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8810c29 (commit campos OT)
 console.log(registroController); // <-- Agrega esto para verificar en la consola
 
 // Definir rutas
 router.get('/obtenerOT', registroController.cargarDatosOT);
 router.post('/guardarOT', registroController.guardarOT);
+<<<<<<< HEAD
 router.put('/actualizarOT', registroController.actualizarOT);
 
 // Ruta para obtener la Orden de Trabajo y sus cotizaciones
@@ -47,4 +51,7 @@ router.delete('/material/:id', otcController.eliminarMaterial);
 
 =======
 >>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
+=======
+
+>>>>>>> 8810c29 (commit campos OT)
 module.exports = router;
