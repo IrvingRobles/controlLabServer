@@ -38,7 +38,12 @@ console.log(registroController); // <-- Agrega esto para verificar en la consola
 router.get('/obtenerOT', registroController.cargarDatosOT);
 router.post('/guardarOT', registroController.guardarOT);
 <<<<<<< HEAD
+<<<<<<< HEAD
 router.put('/actualizarOT', registroController.actualizarOT);
+=======
+router.put('/actualizarOT', registroController.actualizarOT);
+
+>>>>>>> 434725f (FORMULARIO OT)
 
 // Ruta para obtener la Orden de Trabajo y sus cotizaciones
 router.get('/otc/:id', otcController.obtenerOTC);

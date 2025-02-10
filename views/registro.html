@@ -110,9 +110,16 @@
         }
     </script>
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> def00b5 (commit perfiles)
 =======
             const perfilNombre = document.getElementById('perfil-nombre');
+=======
+        <!-- Script para manejar sesión y perfil -->
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const perfilNombre = document.getElementById('perfil-nombre');
+>>>>>>> 434725f (FORMULARIO OT)
                 const usuario = JSON.parse(localStorage.getItem('user'));
     
                 if (usuario) {
@@ -128,10 +135,7 @@
             function cerrarSesion() {
                 localStorage.removeItem('user'); // Borrar datos del usuario
                 window.location.href = "login.html"; // Redirigir al login
-            }<!-- Script para manejar sesión y perfil -->
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-            
+            }
         </script>
 >>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
     <script src="/scripts/registro.js"></script>
