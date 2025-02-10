@@ -37,6 +37,7 @@ function verificarSesion(req, res, next) {
 // Proteger todas las páginas HTML
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 app.get(['/',
         '/index1.html',
         '/registro.html',
@@ -56,6 +57,9 @@ app.get(['/', '/index1.html', '/registro.html', '/detalle.html','/buscar.html','
 =======
 app.get(['/', '/index1.html', '/registro.html', '/detalle.html','/buscar.html','/busquedaPdf.html','/adminPersonal.html','/inicioAdmin.html','/adminBuscar.html'], verificarSesion, (req, res) => {
 >>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
+=======
+app.get(['/', '/index1.html', '/registro.html', '/detalle.html','/buscar.html','/busquedaPdf.html','/adminPersonal.html','/inicioAdmin.html','/adminBuscar.html','/OT.html'], verificarSesion, (req, res) => {
+>>>>>>> 45673cd (commit OT)
     res.sendFile(path.join(__dirname, 'views', req.path));
 });
 
