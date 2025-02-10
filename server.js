@@ -31,7 +31,7 @@ function verificarSesion(req, res, next) {
 }
 
 // Proteger todas las páginas HTML
-app.get(['/', '/index1.html', '/registro.html', '/detalle.html','/buscar.html','/busquedaPdf.html','/adminPersonal.html','/inicioAdmin.html','/adminBuscar.html'], verificarSesion, (req, res) => {
+app.get(['/', '/index1.html', '/registro.html', '/detalle.html','/buscar.html','/busquedaPdf.html','/adminPersonal.html','/inicioAdmin.html','/adminBuscar.html','/OT.html'], verificarSesion, (req, res) => {
     res.sendFile(path.join(__dirname, 'views', req.path));
 });
 
