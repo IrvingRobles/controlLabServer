@@ -14,6 +14,11 @@
                 window.location.href = "login.html"; // Redirigir si no hay usuario logueado
             }
         });
+
+        function cerrarSesion() {
+            localStorage.removeItem('user');
+            window.location.href = "login.html";
+        }
     </script>
 </head>
 
@@ -37,64 +42,77 @@
     </nav>
 
     <div class="container mt-4">
-        <h2>Generar Orden de Trabajo (OT)</h2>
+        <h2 class="text-center">Generar Orden de Trabajo (OT)</h2>
         <form id="ordenTrabajoForm">
-            <div class="mb-3">
-                <label class="form-label">Clave:</label>
-                <input type="text" id="clave" name="clave" class="form-control" readonly>
+            <input type="hidden" id="id" name="id">
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Clave:</label>
+                    <input type="text" id="clave" name="clave" class="form-control">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Cliente:</label>
+                    <input type="text" id="cliente" name="cliente" class="form-control">
+                </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Fecha de Inicio:</label>
-                    <input type="date" id="fecha_inicio" name="fecha_inicio" class="form-control" required>
+                    <input type="date" id="fecha_inicio" name="fecha_inicio" class="form-control">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Fecha de Término:</label>
-                    <input type="date" id="fecha_termino" name="fecha_termino" class="form-control" required>
+                    <input type="date" id="fecha_termino" name="fecha_termino" class="form-control">
                 </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Nombre del Cliente:</label>
-                <input type="text" id="empresa" name="empresa" class="form-control" readonly>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Nombre del Cliente:</label>
+                    <input type="text" id="empresa" name="empresa" class="form-control">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">No. Contrato / No. Pedido:</label>
+                    <input type="text" id="contrato_pedido" name="contrato_pedido" class="form-control">
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">No. Contrato / No. Pedido:</label>
-                <input type="text" id="contrato_pedido" name="contrato_pedido" class="form-control" required>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Lugar:</label>
-                <input type="text" id="lugar" name="lugar" class="form-control" required>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Lugar:</label>
+                    <input type="text" id="lugar" name="lugar" class="form-control">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Responsable:</label>
+                    <input type="text" id="empleado_asignado" name="empleado_asignado" class="form-control">
+                </div>
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Descripción del Servicio:</label>
-                <textarea id="descripcion" name="descripcion" class="form-control" readonly></textarea>
+                <textarea id="descripcion" name="descripcion" class="form-control"></textarea>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Responsable:</label>
-                <input type="text" id="empleado_asignado" name="empleado_asignado" class="form-control" readonly>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Observaciones / Montos:</label>
+                    <textarea id="observaciones" name="observaciones" class="form-control"></textarea>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Facturas:</label>
+                    <input type="text" id="facturas" name="facturas" class="form-control">
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Observaciones / Montos:</label>
-                <textarea id="observaciones" name="observaciones" class="form-control"></textarea>
+            <div class="text-center mt-4">
+                <button type="button" id="guardarOT" class="btn btn-primary">Guardar OT</button>
+                <button type="button" id="actualizarOT" class="btn btn-warning">Actualizar OT</button>
             </div>
-
-            <div class="mb-3">
-                <label class="form-label">Facturas:</label>
-                <input type="text" id="facturas" name="facturas" class="form-control" required>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Generar OT</button>
         </form>
     </div>
 
     <script src="/scripts/OT.js"></script>
 </body>
-
 </html>
