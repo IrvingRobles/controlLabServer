@@ -173,28 +173,37 @@ exports.asignarPersonal = async (req, res) => {
     }   
 
 };
-
 exports.cargarDatosOT = async (req, res) => {
-    const { id } = req.query; // Cambié 'clave' por 'id'
+    const { id } = req.query;
     try {
-        const [result] = await db.execute("SELECT * FROM registros WHERE id = ?", [id]); // Usamos 'id' en lugar de 'clave'
+        const [result] = await db.execute(`
+            SELECT id, clave, fecha_inicio, fecha_termino, empresa, contrato_pedido, lugar, descripcion, empleado_asignado, observaciones, facturas, fecha_envio, cliente 
+            FROM registros WHERE id = ?`, 
+            [id]
+        ); 
+
         if (result.length === 0) {
             return res.status(404).json({ mensaje: "Orden de trabajo no encontrada" });
         }
-        res.json(result[0]);
+
+        res.json(result[0]); 
     } catch (error) {
         console.error("Error al obtener la OT:", error);
         res.status(500).json({ mensaje: "Error en el servidor" });
     }
 };
+;
 
+// Guardar una nueva OT o actualizar si existe
 exports.guardarOT = async (req, res) => {
-    const { id, fecha_inicio, fecha_termino, empresa, contrato_pedido, lugar, descripcion, empleado_asignado, observaciones, facturas } = req.body; // Cambié 'clave' por 'id'
+    const { id, clave, fecha_inicio, fecha_termino, empresa, contrato_pedido, lugar, descripcion, empleado_asignado, observaciones, facturas, fecha_envio, cliente } = req.body;
+
     try {
         const query = `
-            INSERT INTO registros (id, fecha_inicio, fecha_termino, empresa, contrato_pedido, lugar, descripcion, empleado_asignado, observaciones, facturas) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO registros (id, clave, fecha_inicio, fecha_termino, empresa, contrato_pedido, lugar, descripcion, empleado_asignado, observaciones, facturas, fecha_envio, cliente) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE 
+                clave = VALUES(clave),
                 fecha_inicio = VALUES(fecha_inicio), 
                 fecha_termino = VALUES(fecha_termino), 
                 empresa = VALUES(empresa), 
@@ -203,13 +212,40 @@ exports.guardarOT = async (req, res) => {
                 descripcion = VALUES(descripcion), 
                 empleado_asignado = VALUES(empleado_asignado), 
                 observaciones = VALUES(observaciones), 
-                facturas = VALUES(facturas);`;
+                facturas = VALUES(facturas),
+                fecha_envio = VALUES(fecha_envio),
+                cliente = VALUES(cliente);`; // ✅ Se agrega cliente en la actualización
 
-        await db.execute(query, [id, fecha_inicio, fecha_termino, empresa, contrato_pedido, lugar, descripcion, empleado_asignado, observaciones, facturas]);
+        await db.execute(query, [id, clave, fecha_inicio, fecha_termino, empresa, contrato_pedido, lugar, descripcion, empleado_asignado, observaciones, facturas, fecha_envio, cliente]);
 
         res.json({ mensaje: "Orden de Trabajo guardada correctamente" });
     } catch (error) {
         console.error("Error al guardar la OT:", error);
+        res.status(500).json({ mensaje: "Error en el servidor" });
+    }
+};
+
+
+// Actualizar una Orden de Trabajo existente
+exports.actualizarOT = async (req, res) => {
+    const { id, clave, fecha_inicio, fecha_termino, empresa, contrato_pedido, lugar, descripcion, empleado_asignado, observaciones, facturas, cliente } = req.body;
+
+    try {
+        const query = `
+            UPDATE registros 
+            SET clave = ?, fecha_inicio = ?, fecha_termino = ?, empresa = ?, contrato_pedido = ?, lugar = ?, descripcion = ?, empleado_asignado = ?, observaciones = ?, facturas = ?, cliente = ?
+            WHERE id = ?;
+        `;
+
+        const [result] = await db.execute(query, [clave, fecha_inicio, fecha_termino, empresa, contrato_pedido, lugar, descripcion, empleado_asignado, observaciones, facturas, cliente, id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ mensaje: "Orden de Trabajo no encontrada" });
+        }
+
+        res.json({ mensaje: "Orden de Trabajo actualizada correctamente" });
+    } catch (error) {
+        console.error("Error al actualizar la OT:", error);
         res.status(500).json({ mensaje: "Error en el servidor" });
     }
 };
