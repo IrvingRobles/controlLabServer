@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // Función para generar la clave automáticamente con un folio continuo
 function generarClave(cliente, fecha) {
     if (!cliente || !fecha) return "";
@@ -51,6 +52,20 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
     let descripcion = getValue("descripcion");
     let contacto = getValue("contacto");
     let lugar = getValue("lugar");
+=======
+document.getElementById("crearRegistroForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    // Obtener valores del formulario con una función auxiliar
+    const getValue = (id) => document.getElementById(id)?.value.trim() || "";
+
+    const cliente = getValue("cliente");
+    const fechaEnvio = getValue("fechaEnvio");
+    const empresa = getValue("empresa");
+    const descripcion = getValue("descripcion"); // Cambiado de 'resultado' a 'descripcion'
+    const contacto = getValue("contacto");
+    const lugar = getValue("lugar");
+>>>>>>> 8171355 (commit FRegistro)
 
     // Validar los campos obligatorios
     if (!cliente || !fechaEnvio || !empresa) {
@@ -58,6 +73,7 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
         return;
     }
 
+<<<<<<< HEAD
     // La clave se genera con el formato DDMMYYYY
     const claveGenerada = generarClave(cliente, formatearFechaParaClave(fechaEnvio));
 
@@ -76,11 +92,18 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
         cliente,
         creadoPor
 =======
+=======
+    // Generar la clave automáticamente
+    const claveGenerada = generarClave(cliente, fechaEnvio);
+
+>>>>>>> 8171355 (commit FRegistro)
     // Obtener el usuario desde localStorage
     const usuario = JSON.parse(localStorage.getItem("user"));
-    const creadoPor = usuario ? usuario.username : "Desconocido"; // Nombre del usuario o "Desconocido"
+    const creadoPor = usuario ? usuario.username : "Desconocido";
 
+    // Crear objeto con los datos del formulario (sin OT ni importeCotizado)
     const data = {
+<<<<<<< HEAD
         clave: document.getElementById("clave").value,
         OT: document.getElementById("ordenTrabajo").value,
         empresa: document.getElementById("empresa").value,
@@ -91,6 +114,16 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
         resultado: document.getElementById("resultado").value,
         creadoPor: creadoPor // Agregar el usuario que creó la solicitud
 >>>>>>> def00b5 (commit perfiles)
+=======
+        clave: claveGenerada,
+        empresa,
+        fechaEnvio,
+        descripcion, // Usando 'descripcion' en lugar de 'resultado'
+        contacto,
+        lugar,
+        cliente,
+        creadoPor
+>>>>>>> 8171355 (commit FRegistro)
     };
 
     try {
@@ -110,12 +143,37 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
         } else {
             const result = await response.json();
             alert(result.mensaje);
+<<<<<<< HEAD
             // Limpiar el formulario
             document.getElementById("crearRegistroForm").reset();
             document.getElementById("fechaEnvio").value = fechaISO; // Restaurar la fecha actual
+=======
+            // Opcional: Redirigir o limpiar el formulario
+            document.getElementById("crearRegistroForm").reset();
+>>>>>>> 8171355 (commit FRegistro)
         }
     } catch (error) {
         alert("Error de red o del servidor.");
         console.error(error);
     }
 });
+
+// Función para generar la clave automáticamente
+function generarClave(cliente, fecha) {
+    if (!cliente || !fecha) return "";
+
+    // Extraer las iniciales del nombre del cliente
+    const iniciales = cliente
+        .split(" ")
+        .map(word => word[0])
+        .join("")
+        .toUpperCase();
+
+    // Generar un número aleatorio de 4 dígitos
+    const folio = Math.floor(1000 + Math.random() * 9000);
+
+    // Formatear la fecha como YYYYMMDD
+    const fechaFormateada = fecha.replace(/-/g, "");
+
+    return `${iniciales}${folio}${fechaFormateada}`;
+}

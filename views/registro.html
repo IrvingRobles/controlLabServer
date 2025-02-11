@@ -11,18 +11,24 @@
     
             if (!user) {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
                 // Si no hay usuario en localStorage, redirige al login
 >>>>>>> def00b5 (commit perfiles)
+=======
+>>>>>>> 8171355 (commit FRegistro)
                 window.location.href = "login.html";
             }
         });
     </script>
 <<<<<<< HEAD
+<<<<<<< HEAD
     <link rel="stylesheet" href="styles/styles.css">
 =======
     
 >>>>>>> def00b5 (commit perfiles)
+=======
+>>>>>>> 8171355 (commit FRegistro)
 </head>
 <body>
 
@@ -45,9 +51,12 @@
                     </li>
                     <button onclick="cerrarSesion()" class="btn btn-danger btn-sm">Cerrar Sesión</button>
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> def00b5 (commit perfiles)
+=======
+>>>>>>> 8171355 (commit FRegistro)
                 </ul>
             </div>
         </div>
@@ -87,6 +96,7 @@
     <script>
         function cerrarSesion() {
 <<<<<<< HEAD
+<<<<<<< HEAD
             localStorage.removeItem('user');
             window.location.href = "login.html";
         }
@@ -121,23 +131,30 @@
                 const perfilNombre = document.getElementById('perfil-nombre');
 >>>>>>> 434725f (FORMULARIO OT)
                 const usuario = JSON.parse(localStorage.getItem('user'));
+=======
+            localStorage.removeItem('user');
+            window.location.href = "login.html";
+        }
+    </script>
+>>>>>>> 8171355 (commit FRegistro)
     
-                if (usuario) {
-                    perfilNombre.textContent = usuario.username || 'Usuario';
-                } else {
-                    perfilNombre.textContent = 'Invitado';
-                    setTimeout(() => {
-                        window.location.href = "login.html"; // Redirigir al login si no hay usuario
-                    }, 2000);
-                }
-            });
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const usuario = JSON.parse(localStorage.getItem('user'));
     
-            function cerrarSesion() {
-                localStorage.removeItem('user'); // Borrar datos del usuario
-                window.location.href = "login.html"; // Redirigir al login
+            if (!usuario) {
+                setTimeout(() => {
+                    window.location.href = "login.html";
+                }, 2000);
             }
+<<<<<<< HEAD
         </script>
 >>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
+=======
+        });
+    </script>
+
+>>>>>>> 8171355 (commit FRegistro)
     <script src="/scripts/registro.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 

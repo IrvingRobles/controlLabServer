@@ -43,10 +43,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 fila.innerHTML = `
                 <td>${registro.id}</td>
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8171355 (commit FRegistro)
                 <td contenteditable="false">${registro.clave}</td>
                 <td contenteditable="false">${registro.OT}</td>
                 <td contenteditable="false">${registro.empresa}</td>
                 <td contenteditable="false">${registro.fecha_envio}</td>
+<<<<<<< HEAD
                 <td contenteditable="true">${registro.descripcion}</td>
                 <td contenteditable="true">${registro.contacto}</td>
                 <td contenteditable="false">${registro.importe_cotizado}</td>
@@ -61,13 +65,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td contenteditable="true">${registro.OT}</td>
                 <td contenteditable="true">${registro.empresa}</td>
                 <td contenteditable="true">${registro.fecha_envio}</td>
+=======
+>>>>>>> 8171355 (commit FRegistro)
                 <td contenteditable="true">${registro.descripcion}</td>
-                <td contenteditable="true">${registro.contacto}</td>
-                <td contenteditable="true">${registro.importe_cotizado}</td>
-                <td contenteditable="true">${registro.resultado}</td>
+                <td contenteditable="false">${registro.contacto}</td>
+                <td contenteditable="false">${registro.importe_cotizado}</td>
+                <td contenteditable="false">${registro.resultado}</td>
                 <td>${registro.empleado_asignado || "No asignado"}</td>
                 <button class="btn btn-primary btn-sm btn-guardar" data-id="${registro.id}">Guardar</button>
-                <button class="btn btn-danger btn-sm btn-eliminar" data-id="${registro.id}">Eliminar</button>
                 <button class="btn btn-primary btn-sm btn-detalles" data-id="${registro.id}">Hacer Cotización</button>
 <<<<<<< HEAD
 >>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
@@ -87,9 +92,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
    // <button class="btn btn-danger btn-sm btn-eliminar" data-id="${registro.id}">Eliminar</button>
 =======
 >>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
+=======
+   // <button class="btn btn-danger btn-sm btn-eliminar" data-id="${registro.id}">Eliminar</button>
+>>>>>>> 8171355 (commit FRegistro)
 
 
     function redirigirADetalles() {
