@@ -10,12 +10,10 @@
             const user = localStorage.getItem('user');
     
             if (!user) {
-                // Si no hay usuario en localStorage, redirige al login
                 window.location.href = "login.html";
             }
         });
     </script>
-    
 </head>
 <body>
 
@@ -37,51 +35,37 @@
                         <a class="nav-link" href="busquedaPdf.html">Registro de cotizaciones</a>
                     </li>
                     <button onclick="cerrarSesion()" class="btn btn-danger btn-sm">Cerrar Sesión</button>
-
                 </ul>
             </div>
         </div>
     </nav>
-    
 
     <div class="container mt-5">
         <h2>Formulario de Registro</h2>
         <form id="crearRegistroForm">
             <div class="mb-3">
-                <label for="clave" class="form-label">Clave:</label>
-                <input type="text" class="form-control" id="clave" required>
-            </div>
-            <div class="mb-3">
-                <label for="ordenTrabajo" class="form-label">Orden de Trabajo (OT):</label>
-                <input type="text" class="form-control" id="ordenTrabajo" required>
+                <label for="cliente" class="form-label">Cliente:</label>
+                <input type="text" class="form-control" id="cliente" required>
             </div>
             <div class="mb-3">
                 <label for="empresa" class="form-label">Empresa:</label>
                 <input type="text" class="form-control" id="empresa" required>
             </div>
             <div class="mb-3">
-                <label for="fechaEnvio" class="form-label">Fecha de Envío:</label>
+                <label for="fechaEnvio" class="form-label">Fecha de la Solicitud:</label>
                 <input type="date" class="form-control" id="fechaEnvio" required>
             </div>
             <div class="mb-3">
-                <label for="descripcion" class="form-label">Descripción:</label>
-                <textarea class="form-control" id="descripcion"></textarea>
+                <label for="contacto" class="form-label">Contacto (Teléfono o Correo):</label>
+                <input type="text" class="form-control" id="contacto" required>
             </div>
             <div class="mb-3">
-                <label for="contacto" class="form-label">Contacto:</label>
-                <input type="email" class="form-control" id="contacto" required>
+                <label for="descripcion" class="form-label">Descripción del Servicio:</label>
+                <textarea class="form-control" id="descripcion" required></textarea>
             </div>
             <div class="mb-3">
-                <label for="importeCotizado" class="form-label">Importe Cotizado:</label>
-                <input type="number" class="form-control" id="importeCotizado" step="0.01" required>
-            </div>
-            <div class="mb-3">
-                <label for="resultado" class="form-label">Resultado:</label>
-                <select class="form-control" id="resultado" required>
-                    <option value="Aprobado">Aprobado</option>
-                    <option value="Pendiente">Pendiente</option>
-                    <option value="Rechazado">Rechazado</option>
-                </select>
+                <label for="lugar" class="form-label">Dirección:</label>
+                <input type="text" class="form-control" id="lugar" required>
             </div>
             <button type="submit" class="btn btn-primary">Registrar</button>
         </form>
@@ -89,32 +73,25 @@
 
     <script>
         function cerrarSesion() {
-            localStorage.removeItem('user'); // Borrar datos del usuario
-            window.location.href = "/logout"; // Cerrar sesión en el backend
+            localStorage.removeItem('user');
+            window.location.href = "login.html";
         }
     </script>
-        <!-- Script para manejar sesión y perfil -->
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const perfilNombre = document.getElementById('perfil-nombre');
-                const usuario = JSON.parse(localStorage.getItem('user'));
     
-                if (usuario) {
-                    perfilNombre.textContent = usuario.username || 'Usuario';
-                } else {
-                    perfilNombre.textContent = 'Invitado';
-                    setTimeout(() => {
-                        window.location.href = "login.html"; // Redirigir al login si no hay usuario
-                    }, 2000);
-                }
-            });
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const usuario = JSON.parse(localStorage.getItem('user'));
     
-            function cerrarSesion() {
-                localStorage.removeItem('user'); // Borrar datos del usuario
-                window.location.href = "login.html"; // Redirigir al login
+            if (!usuario) {
+                setTimeout(() => {
+                    window.location.href = "login.html";
+                }, 2000);
             }
-        </script>
+        });
+    </script>
+
     <script src="/scripts/registro.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
