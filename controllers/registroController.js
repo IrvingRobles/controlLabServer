@@ -2,23 +2,36 @@ const db = require('../model/db'); // Configuración de la base de datos
 const { format } = require('date-fns');
 
 // Función para crear un nuevo registro
+// Controlador para crear un nuevo registro
 exports.crearRegistro = async (req, res) => {
-    const { clave, OT, empresa, fechaEnvio, descripcion, contacto, importeCotizado, resultado, creadoPor } = req.body;
-
     try {
-        // Insertar en la base de datos
+        const { clave, empresa, fechaEnvio, descripcion, contacto, lugar, cliente, creadoPor } = req.body;
+
+        if (!empresa || !fechaEnvio) {
+            return res.status(400).json({ mensaje: "Empresa y fecha de envío son obligatorios" });
+        }
+
+        // Generar la clave automáticamente si no está presente en la solicitud
+        const claveGenerada = clave || generarClave(empresa, fechaEnvio);
+
+        // Asignar un valor por defecto para 'resultado' si no se pasa en la solicitud
+        const resultado = descripcion || "Sin descripción"; // Aquí se usa "Sin descripción" por defecto si no se pasa 'descripcion'
+
+        // Insertar en la base de datos (sin OT y sin importe_cotizado)
         const [result] = await db.query(
-            `INSERT INTO registros (clave, OT, empresa, fecha_envio, descripcion, contacto, importe_cotizado, resultado, creadoPor) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [clave, OT, empresa, fechaEnvio, descripcion, contacto, importeCotizado, resultado, creadoPor]
+            `INSERT INTO registros (clave, empresa, fecha_envio, descripcion, resultado, contacto, lugar, cliente, creadoPor) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [claveGenerada, empresa, fechaEnvio, descripcion, resultado, contacto, lugar, cliente, creadoPor]
         );
 
-        res.status(201).json({ mensaje: "Registro creado exitosamente", id: result.insertId });
+        res.status(201).json({ mensaje: "Registro creado exitosamente", id: result.insertId, clave: claveGenerada });
     } catch (error) {
         console.error("Error al crear el registro:", error);
         res.status(500).json({ mensaje: "Error en el servidor" });
     }
 };
+
+
 
 // Obtener todos los registros
 exports.obtenerRegistros = async (req, res) => {
