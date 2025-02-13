@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Rellenar el campo de tipo de movimiento al cargar la página
     const movimientoSelect = document.getElementById('tipo_movimiento');
     if (movimientoSelect) {
-        fetch('/api/almacen/movimientos') // Asegúrate de que esta ruta es la correcta
+        fetch('/api/almacen/id/movimientos') // Asegúrate de que esta ruta es la correcta
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -10,22 +10,53 @@ document.addEventListener("DOMContentLoaded", function () {
                 return response.json();
             })
             .then(data => {
-                movimientoSelect.innerHTML = '<option value="" selected disabled>Seleccione un movimiento</option>';
-                data.forEach(movimiento => {
-                    const option = document.createElement('option');
-                    option.value = movimiento.idMovimiento; // Guardamos el idMovimiento
-                    option.textContent = movimiento.nombre; // Mostramos el nombre del movimiento
-                    movimientoSelect.appendChild(option);
-                });
+                if (Array.isArray(data) && data.length > 0) {
+                    movimientoSelect.innerHTML = '<option value="" selected disabled>Seleccione un movimiento</option>';
+                    data.forEach(movimiento => {
+                        const option = document.createElement('option');
+                        option.value = movimiento.idMovimiento; 
+                        option.textContent = movimiento.nombre; 
+                        movimientoSelect.appendChild(option);
+                    });
+                } else {
+                    console.error("No se recibieron movimientos válidos");
+                }
             })
             .catch(error => {
                 console.error('Error al obtener los movimientos:', error);
             });
     }
 
+    const proveedorSelect = document.getElementById('proveedor');
+    if (proveedorSelect) {
+        fetch('/api/almacen/id/proveedorselect') // Asegúrate de que esta ruta es la correcta
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (Array.isArray(data) && data.length > 0) {
+                    proveedorSelect.innerHTML = '<option value="" selected disabled>Seleccione un proveedor</option>';
+                    data.forEach(proveedor => {
+                        const option = document.createElement('option');
+                        option.value = proveedor.idProveedor; 
+                        option.textContent = proveedor.nombre; 
+                        proveedorSelect.appendChild(option);
+                    });
+                } else {
+                    console.error("No se recibieron proveedores válidos");
+                }
+            })
+            .catch(error => {
+                console.error('Error al obtener los proveedores:', error);
+            });
+    }
+
     const empresaSelect = document.getElementById('empresa');
     if (empresaSelect) {
-        fetch('/api/almacen/empresa') // Ajusta la ruta si es diferente
+        fetch('/api/almacen/id/empresa') // Ajusta la ruta si es diferente
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);

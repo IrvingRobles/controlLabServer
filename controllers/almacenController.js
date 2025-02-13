@@ -1,6 +1,5 @@
 const db = require('../model/db');
 
-
 // Obtener el siguiente ID para un registro de almacén
 exports.obtenerSiguienteIdAlmacen = async (req, res) => {
     try {
@@ -37,26 +36,20 @@ exports.obtenerMonedas = async (req, res) => {
 exports.registrarEmpresa = async (req, res) => {
     try {
         const { codigo, nombre, rfc, direccion } = req.body;
-
         // Validación básica
         if (!codigo || !nombre || !rfc || !direccion) {
             return res.status(400).json({ message: "Todos los campos son obligatorios." });
         }
-
         // 1️⃣ Verificar si el código o RFC ya existe
         const queryCheck = `SELECT * FROM empresa WHERE codigo = ? OR rfc = ?`;
         const [rows] = await db.query(queryCheck, [codigo, rfc]);
-
         if (rows.length > 0) {
             return res.status(400).json({ message: "Empresa o RFC ya está registrado. Intenta con otro." });
         }
-
         // 2️⃣ Insertar la nueva empresa si no existe
         const queryInsert = `INSERT INTO empresa (codigo, nombre, rfc, direccion) VALUES (?, ?, ?, ?)`;
         await db.query(queryInsert, [codigo, nombre, rfc, direccion]);
-
         res.status(201).json({ message: "¡Empresa registrada correctamente!" });
-
     } catch (error) {
         console.error('Error al registrar empresa:', error);
         res.status(500).json({ message: "Error en el servidor. Inténtelo de nuevo más tarde." });
@@ -212,26 +205,20 @@ exports.registrarSalida = async (req, res) => {
 
 exports.registrarMoneda = async (req, res) => {
     const { nombreMoneda, codigoMoneda } = req.body;
-
     if (!nombreMoneda || !codigoMoneda) {
         return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
     }
-
     try {
         // 1️⃣ Verificar si el código de la moneda ya existe
         const queryCheck = 'SELECT * FROM moneda WHERE codigo = ?';
         const [rows] = await db.query(queryCheck, [codigoMoneda]);
-
         if (rows.length > 0) {
             return res.status(400).json({ message: 'El código de la moneda ya está registrado. Intenta con otro.' });
         }
-
         // 2️⃣ Insertar la nueva moneda si no existe
         const queryInsert = 'INSERT INTO moneda (nombre, codigo) VALUES (?, ?)';
         await db.query(queryInsert, [nombreMoneda, codigoMoneda]);
-
         res.status(201).json({ message: 'Moneda registrada correctamente.' });
-
     } catch (error) {
         console.error('Error al registrar moneda:', error);
         res.status(500).json({ message: 'Error al registrar la moneda.' });
@@ -240,26 +227,20 @@ exports.registrarMoneda = async (req, res) => {
 
 exports.registrarCondicion = async (req, res) => {
     const { condiciones } = req.body;
-
     if (!condiciones) {
         return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
     }
-
     try {
         // 1️⃣ Verificar si el código de la moneda ya existe
         const queryCheck = 'SELECT * FROM condicion WHERE condiciones = ?';
         const [rows] = await db.query(queryCheck, [condiciones]);
-
         if (rows.length > 0) {
             return res.status(400).json({ message: 'La condición ya está registrada. Intenta con otro.' });
         }
-
         // 2️⃣ Insertar la nueva moneda si no existe
         const queryInsert = 'INSERT INTO condicion (condiciones) VALUES (?)';
         await db.query(queryInsert, [condiciones]);
-
         res.status(201).json({ message: 'Condición registrada correctamente.' });
-
     } catch (error) {
         console.error('Error al registrar la condición:', error);
         res.status(500).json({ message: 'Error al registrar la condición.' });
@@ -268,26 +249,20 @@ exports.registrarCondicion = async (req, res) => {
 
 exports.registrarMovimiento = async (req, res) => {
     const { nombre, descripcion } = req.body;
-
     if (!nombre || !descripcion) {
         return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
     }
-
     try {
         // 1️⃣ Verificar si el movimiento ya existe en la base de datos
         const queryCheck = 'SELECT * FROM movimiento WHERE nombre = ?';
         const [rows] = await db.query(queryCheck, [nombre]);
-
         if (rows.length > 0) {
             return res.status(400).json({ message: 'El movimiento ya está registrado. Intenta con otro nombre.' });
         }
-
         // 2️⃣ Insertar el movimiento si no existe
         const queryInsert = 'INSERT INTO movimiento (nombre, descripcion) VALUES (?, ?)';
         await db.query(queryInsert, [nombre, descripcion]);
-
         res.status(201).json({ message: 'Movimiento registrado correctamente.' });
-
     } catch (error) {
         console.error('Error al registrar movimiento:', error);
         res.status(500).json({ message: 'Error al registrar el movimiento.' });
@@ -295,22 +270,14 @@ exports.registrarMovimiento = async (req, res) => {
 };
 
 exports.obtenerMovimientos = async (req, res) => {
-    console.log("Se llamó a obtenerMovimientos"); // <-- Agrega este log
     try {
         const query = 'SELECT idMovimiento, nombre FROM movimiento';
         const [rows] = await db.query(query); // En vez de db.execute()
-
-
-        console.log("Resultados de la consulta:", rows); // <-- Verifica si hay datos
-
         if (rows.length === 0) {
-            console.log("No hay registros en la tabla movimiento");
             return res.status(404).json({ mensaje: 'Registro no encontrado' });
         }
-
         res.status(200).json(rows);
     } catch (error) {
-        console.error('Error al obtener los movimientos:', error);
         res.status(500).json({ mensaje: 'Error en el servidor', error });
     }
 };
@@ -320,7 +287,6 @@ exports.obtenerEmpresas = async (req, res) => {
     try {
         const query = 'SELECT idEmpresa, codigo FROM empresa'; // Ajusta según tu base de datos
         const [rows] = await db.execute(query);
-
         res.status(200).json(rows); // Enviar la lista de empresas como respuesta
     } catch (error) {
         res.status(500).json({ mensaje: 'Error al obtener las empresas', error });
@@ -376,15 +342,19 @@ exports.obtenerProveedorPorId = async (req, res) => {
 // Obtener todos los proveedores
 exports.obtenerProveedores = async (req, res) => {
     try {
-        const proveedores = await db.query('SELECT * FROM proveedor');
+        const [proveedores] = await db.query('SELECT * FROM proveedor');
+        // Si no se encuentran proveedores, devuelve un error 404
         if (proveedores.length === 0) {
             return res.status(404).json({ mensaje: "No se encontraron proveedores" });
         }
-        res.status(200).json(proveedores); // Añadí el código 200 explícitamente
+        // Devuelve los proveedores encontrados con el código de estado 200
+        res.status(200).json(proveedores); 
     } catch (error) {
+        console.error("Error al obtener los proveedores:", error);
         res.status(500).json({ mensaje: "Error en el servidor", error });
     }
 };
+
 
 exports.eliminarProveedor = async (req, res) => {
     const { id } = req.params; // Obtener el ID del proveedor desde la URL
@@ -403,108 +373,13 @@ exports.eliminarProveedor = async (req, res) => {
     }
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-// Actualizar un registro de almacen por ID
-exports.actualizarRegistroAlmacen = async (req, res) => {
-    const { id } = req.params;
-    const {
-        idUsuario,
-        tipo_movimiento,
-        folio_vale_salida,
-        fecha,
-        empresa,
-        pedido,
-        solicito,
-        producto,
-        marca,
-        no_serie,
-        modelo,
-        proveedor,
-        cliente,
-        inicial,
-        precio_inicial,
-        ctd_entradas,
-        pu_entrada,
-        ctd_salidas,
-        precio_salidas,
-        anaquel,
-        seccion,
-        caja,
-        aplicacion,
-        observaciones,
-        concepto,
-        recibio,
-        servicio,
-        factura,
-        moneda,
-        uso_en,
-        condiciones_entrega,
-        equipo,
-        campo1,
-        campo2,
-        campo3
-    } = req.body;
-
+// Ruta para obtener los proveedores
+exports.seleccionarProveedor = async (req, res) => {
     try {
-        const query = `
-            UPDATE almacen
-            SET
-                idUsuario = ?, tipo_movimiento = ?, folio_vale_salida = ?, fecha = ?, empresa = ?, pedido = ?, 
-                solicito = ?, producto = ?, marca = ?, no_serie = ?, modelo = ?, proveedor = ?, cliente = ?, 
-                inicial = ?, precio_inicial = ?, ctd_entradas = ?, pu_entrada = ?, ctd_salidas = ?, 
-                precio_salidas = ?, anaquel = ?, seccion = ?, caja = ?, aplicacion = ?, observaciones = ?, 
-                concepto = ?, recibio = ?, servicio = ?, factura = ?, moneda = ?, uso_en = ?, 
-                condiciones_entrega = ?, equipo = ?, campo1 = ?, campo2 = ?, campo3 = ?
-            WHERE idAlmacen = ?
-        `;
-        const values = [
-            idUsuario, tipo_movimiento, folio_vale_salida, fecha, empresa, pedido, solicito, producto, marca,
-            no_serie, modelo, proveedor, cliente, inicial, precio_inicial, ctd_entradas, pu_entrada,
-            ctd_salidas, precio_salidas, anaquel, seccion, caja, aplicacion, observaciones, concepto,
-            recibio, servicio, factura, moneda, uso_en, condiciones_entrega, equipo, campo1, campo2, campo3,
-            id
-        ];
-
-        const [result] = await db.execute(query, values);
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ mensaje: 'Registro de almacén no encontrado' });
-        }
-
-        res.json({ mensaje: 'Registro de almacén actualizado con éxito' });
+        const query = 'SELECT idProveedor, nombre FROM proveedor'; // Ajusta según tu base de datos
+        const [rows] = await db.execute(query);
+        res.status(200).json(rows); // Enviar la lista de proveedor como respuesta
     } catch (error) {
-        res.status(500).json({ mensaje: 'Error al actualizar el registro de almacén', error });
+        res.status(500).json({ mensaje: 'Error al obtener los proveedores', error });
     }
 };
-
-// Eliminar un registro de almacen por ID
-exports.eliminarRegistroAlmacen = async (req, res) => {
-    const { id } = req.params;
-
-    try {
-        const query = 'DELETE FROM almacen WHERE idAlmacen = ?';
-        const [result] = await db.execute(query, [id]);
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ mensaje: 'Registro de almacén no encontrado' });
-        }
-
-        res.json({ mensaje: 'Registro de almacén eliminado con éxito' });
-    } catch (error) {
-        res.status(500).json({ mensaje: 'Error al eliminar el registro de almacén', error });
-    }
-};*/
