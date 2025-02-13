@@ -1,8 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // Rellenar el campo de movimiento al cargar la página
+    // Rellenar el campo de tipo de movimiento al cargar la página
     const movimientoSelect = document.getElementById('tipo_movimiento');
     if (movimientoSelect) {
-        fetch('/api/almacen/movimientos')
+        fetch('/api/almacen/movimientos') // Asegúrate de que esta ruta es la correcta
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -13,13 +13,36 @@ document.addEventListener("DOMContentLoaded", function () {
                 movimientoSelect.innerHTML = '<option value="" selected disabled>Seleccione un movimiento</option>';
                 data.forEach(movimiento => {
                     const option = document.createElement('option');
-                    option.value = movimiento.movimiento;
-                    option.textContent = movimiento.movimiento;
+                    option.value = movimiento.idMovimiento; // Guardamos el idMovimiento
+                    option.textContent = movimiento.nombre; // Mostramos el nombre del movimiento
                     movimientoSelect.appendChild(option);
                 });
             })
             .catch(error => {
                 console.error('Error al obtener los movimientos:', error);
+            });
+    }
+
+    const empresaSelect = document.getElementById('empresa');
+    if (empresaSelect) {
+        fetch('/api/almacen/empresa') // Ajusta la ruta si es diferente
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                empresaSelect.innerHTML = '<option value="" selected disabled>Seleccione una empresa</option>';
+                data.forEach(empresa => {
+                    const option = document.createElement('option');
+                    option.value = empresa.idEmpresa; // Se guarda el ID
+                    option.textContent = empresa.codigo; // Se muestra el código
+                    empresaSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error al obtener las empresas:', error);
             });
     }
 
@@ -37,8 +60,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 monedaSelect.innerHTML = '<option value="" selected disabled>Seleccione una moneda</option>';
                 data.forEach(moneda => {
                     const option = document.createElement('option');
-                    option.value = moneda.codigo;
-                    option.textContent = moneda.codigo;
+                    option.value = moneda.idMoneda; // Guardamos el idMoneda como valor
+                    option.textContent = moneda.codigo; // Mostramos el nombre de la moneda
                     monedaSelect.appendChild(option);
                 });
             })
@@ -46,6 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.error('Error al obtener las monedas:', error);
             });
     }
+
 
     // Obtener el siguiente ID del almacén
     const idAlmacenField = document.getElementById('idAlmacen');
@@ -82,8 +106,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const data = {
             idUsuario: document.getElementById("idUsuario").value,
-            codigo: document.getElementById("codigo").value,
-            movimiento: document.getElementById("tipo_movimiento").value,
+            empresa: document.getElementById("empresa").value,
+            tipo_movimiento: document.getElementById("tipo_movimiento").value,
             fecha: document.getElementById("fecha").value,
             pedido: document.getElementById("pedido").value,
             producto: document.getElementById("producto").value,

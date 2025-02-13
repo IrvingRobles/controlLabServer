@@ -1,10 +1,10 @@
 document.getElementById('formRegistroMovimiento').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const movimiento = document.getElementById('movimiento').value.trim();
+    const nombre = document.getElementById('nombre').value.trim();
     const descripcion = document.getElementById('descripcion').value.trim();
 
-    if (!movimiento || !descripcion) {
+    if (!nombre || !descripcion) {
         showModal('Todos los campos son obligatorios.', false);
         return;
     }
@@ -15,7 +15,7 @@ document.getElementById('formRegistroMovimiento').addEventListener('submit', asy
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ movimiento, descripcion }),
+            body: JSON.stringify({ nombre, descripcion }),
         });
 
         if (!response.ok) {

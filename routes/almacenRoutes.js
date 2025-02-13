@@ -21,12 +21,23 @@ router.post('/:idMov/salida', almacenController.registrarSalida);
 router.post('/monedas', almacenController.registrarMoneda);
 
 // Ruta para registrar una empresa
-router.post('/empresa', almacenController.registrarEmpresa);
+router.post('/empresas', almacenController.registrarEmpresa);
 
 //Registrar Movimiento
 router.post('/movimiento', almacenController.registrarMovimiento);
 
-//Obtener movimientos
-router.get('/movimientos', almacenController.obtenerMovimientos)
+// Obtener movimientos
+router.get('/movimientos', almacenController.obtenerMovimientos);
 
+router.get('/empresa', almacenController.obtenerEmpresas);
+
+router.post('/condicion', almacenController.registrarCondicion);
+
+router.post('/proveedor', almacenController.registrarProveedor);
+
+router.get('/proveedor/id/:idProveedor', almacenController.obtenerProveedorPorId);
+
+router.get('/id/proveedores', almacenController.obtenerProveedores); // Nueva ruta para listar todos
+// Ruta para eliminar proveedor por ID
+router.delete('/proveedor/:id', almacenController.eliminarProveedor);
 module.exports = router;

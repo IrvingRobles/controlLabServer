@@ -1,31 +1,28 @@
-document.getElementById('formRegistroEmpresa').addEventListener('submit', async (e) => {
+document.getElementById('formRegistroCondicion').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const codigo = document.getElementById('codigo').value.trim();
-    const nombre = document.getElementById('nombre').value.trim();
-    const rfc = document.getElementById('rfc').value.trim();
-    const direccion = document.getElementById('direccion').value.trim();
+    const condiciones = document.getElementById('condiciones').value.trim();
 
-    if (!codigo || !nombre || !rfc || !direccion) {
+    if (!condiciones) {
         showModal('Todos los campos son obligatorios.', false);
         return;
     }
 
     try {
-        const response = await fetch('/api/almacen/empresas', {
+        const response = await fetch('/api/almacen/condicion', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ codigo, nombre, rfc, direccion }),
+            body: JSON.stringify({ condiciones }),
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.message || 'Error al registrar la empresa.');
+            throw new Error(errorData.message || 'Error al registrar la condición.');
         }
 
-        showModal('¡Empresa registrada correctamente!', true);
+        showModal('¡Condición registrada correctamente!', true);
     } catch (error) {
         showModal(`Error: ${error.message}`, false);
     }
