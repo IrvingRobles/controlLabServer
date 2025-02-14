@@ -188,12 +188,16 @@ exports.asignarPersonal = async (req, res) => {
 };
 exports.cargarDatosOT = async (req, res) => {
     const { id } = req.query;
+    if (!id) {
+        return res.status(400).json({ mensaje: "El parámetro 'id' es requerido" });
+    }
+
     try {
         const [result] = await db.execute(`
-            SELECT id, clave, fecha_inicio, fecha_termino, empresa, contrato_pedido, lugar, descripcion, empleado_asignado, observaciones, facturas, fecha_envio, cliente 
+            SELECT id, clave, OT, empresa, fecha_envio, descripcion, contacto, importe_cotizado, resultado, creadoPor, empleado_asignado, fecha_inicio, fecha_termino, contrato_pedido, lugar, observaciones, facturas, cliente, tipo_servicio
             FROM registros WHERE id = ?`, 
             [id]
-        ); 
+        );
 
         if (result.length === 0) {
             return res.status(404).json({ mensaje: "Orden de trabajo no encontrada" });
@@ -205,52 +209,70 @@ exports.cargarDatosOT = async (req, res) => {
         res.status(500).json({ mensaje: "Error en el servidor" });
     }
 };
-;
-
 // Guardar una nueva OT o actualizar si existe
 exports.guardarOT = async (req, res) => {
-    const { id, clave, fecha_inicio, fecha_termino, empresa, contrato_pedido, lugar, descripcion, empleado_asignado, observaciones, facturas, fecha_envio, cliente } = req.body;
-
     try {
+        const { id, clave, OT, empresa, fecha_envio, descripcion, contacto, importe_cotizado, resultado, creadoPor, empleado_asignado, fecha_inicio, fecha_termino, contrato_pedido, lugar, observaciones, facturas, cliente, tipo_servicio } = req.body;
+
+        // Validar datos obligatorios
+        if (!clave || !empresa || !contacto || !resultado || !creadoPor || !cliente || !tipo_servicio) {
+            return res.status(400).json({ mensaje: "Faltan datos obligatorios (clave, empresa, contacto, resultado, creadoPor, cliente, tipo_servicio)" });
+        }
+
+        console.log("Datos recibidos en guardarOT:", req.body);
+
         const query = `
-            INSERT INTO registros (id, clave, fecha_inicio, fecha_termino, empresa, contrato_pedido, lugar, descripcion, empleado_asignado, observaciones, facturas, fecha_envio, cliente) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO registros (id, clave, OT, empresa, fecha_envio, descripcion, contacto, importe_cotizado, resultado, creadoPor, empleado_asignado, fecha_inicio, fecha_termino, contrato_pedido, lugar, observaciones, facturas, cliente, tipo_servicio)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE 
                 clave = VALUES(clave),
-                fecha_inicio = VALUES(fecha_inicio), 
-                fecha_termino = VALUES(fecha_termino), 
-                empresa = VALUES(empresa), 
-                contrato_pedido = VALUES(contrato_pedido), 
-                lugar = VALUES(lugar), 
-                descripcion = VALUES(descripcion), 
-                empleado_asignado = VALUES(empleado_asignado), 
-                observaciones = VALUES(observaciones), 
-                facturas = VALUES(facturas),
+                OT = VALUES(OT),
+                empresa = VALUES(empresa),
                 fecha_envio = VALUES(fecha_envio),
-                cliente = VALUES(cliente);`; // ✅ Se agrega cliente en la actualización
+                descripcion = VALUES(descripcion),
+                contacto = VALUES(contacto),
+                importe_cotizado = VALUES(importe_cotizado),
+                resultado = VALUES(resultado),
+                creadoPor = VALUES(creadoPor),
+                empleado_asignado = VALUES(empleado_asignado),
+                fecha_inicio = VALUES(fecha_inicio),
+                fecha_termino = VALUES(fecha_termino),
+                contrato_pedido = VALUES(contrato_pedido),
+                lugar = VALUES(lugar),
+                observaciones = VALUES(observaciones),
+                facturas = VALUES(facturas),
+                cliente = VALUES(cliente),
+                tipo_servicio = VALUES(tipo_servicio);
+        `;
 
-        await db.execute(query, [id, clave, fecha_inicio, fecha_termino, empresa, contrato_pedido, lugar, descripcion, empleado_asignado, observaciones, facturas, fecha_envio, cliente]);
+        await db.execute(query, [id || null, clave, OT || null, empresa, fecha_envio || null, descripcion || null, contacto, importe_cotizado || null, resultado, creadoPor, empleado_asignado || null, fecha_inicio || null, fecha_termino || null, contrato_pedido || null, lugar || null, observaciones || null, facturas || null, cliente, tipo_servicio]);
 
         res.json({ mensaje: "Orden de Trabajo guardada correctamente" });
     } catch (error) {
         console.error("Error al guardar la OT:", error);
-        res.status(500).json({ mensaje: "Error en el servidor" });
+        res.status(500).json({ mensaje: "Error en el servidor", error: error.message });
     }
 };
 
-
 // Actualizar una Orden de Trabajo existente
 exports.actualizarOT = async (req, res) => {
-    const { id, clave, fecha_inicio, fecha_termino, empresa, contrato_pedido, lugar, descripcion, empleado_asignado, observaciones, facturas, cliente } = req.body;
-
     try {
+        const { id, clave, OT, empresa, fecha_envio, descripcion, contacto, importe_cotizado, resultado, creadoPor, empleado_asignado, fecha_inicio, fecha_termino, contrato_pedido, lugar, observaciones, facturas, cliente, tipo_servicio } = req.body;
+
+        // Validar datos obligatorios
+        if (!id || !clave || !empresa || !contacto || !resultado || !creadoPor || !cliente || !tipo_servicio) {
+            return res.status(400).json({ mensaje: "Faltan datos obligatorios (id, clave, empresa, contacto, resultado, creadoPor, cliente, tipo_servicio)" });
+        }
+
+        console.log("Datos recibidos en actualizarOT:", req.body);
+
         const query = `
             UPDATE registros 
-            SET clave = ?, fecha_inicio = ?, fecha_termino = ?, empresa = ?, contrato_pedido = ?, lugar = ?, descripcion = ?, empleado_asignado = ?, observaciones = ?, facturas = ?, cliente = ?
+            SET clave = ?, OT = ?, empresa = ?, fecha_envio = ?, descripcion = ?, contacto = ?, importe_cotizado = ?, resultado = ?, creadoPor = ?, empleado_asignado = ?, fecha_inicio = ?, fecha_termino = ?, contrato_pedido = ?, lugar = ?, observaciones = ?, facturas = ?, cliente = ?, tipo_servicio = ?
             WHERE id = ?;
         `;
 
-        const [result] = await db.execute(query, [clave, fecha_inicio, fecha_termino, empresa, contrato_pedido, lugar, descripcion, empleado_asignado, observaciones, facturas, cliente, id]);
+        const [result] = await db.execute(query, [clave, OT || null, empresa, fecha_envio || null, descripcion || null, contacto, importe_cotizado || null, resultado, creadoPor, empleado_asignado || null, fecha_inicio || null, fecha_termino || null, contrato_pedido || null, lugar || null, observaciones || null, facturas || null, cliente, tipo_servicio, id]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ mensaje: "Orden de Trabajo no encontrada" });
@@ -259,6 +281,6 @@ exports.actualizarOT = async (req, res) => {
         res.json({ mensaje: "Orden de Trabajo actualizada correctamente" });
     } catch (error) {
         console.error("Error al actualizar la OT:", error);
-        res.status(500).json({ mensaje: "Error en el servidor" });
+        res.status(500).json({ mensaje: "Error en el servidor", error: error.message });
     }
 };

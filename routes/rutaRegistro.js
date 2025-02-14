@@ -3,6 +3,8 @@ const express = require('express');
 const router = express.Router();
 const registroController = require('../controllers/registroController');
 
+const registroCotizaciones = require('../controllers/cotizacionesController');
+
 // Ruta para crear un nuevo registro
 router.post('/crear', registroController.crearRegistro);
 
@@ -33,5 +35,8 @@ router.get('/obtenerOT', registroController.cargarDatosOT);
 router.post('/guardarOT', registroController.guardarOT);
 router.put('/actualizarOT', registroController.actualizarOT);
 
+router.get("/obtenerOTC/:id", registroCotizaciones.obtenerOTC);
+router.post("/guardarOTC", registroCotizaciones.guardarOTC);
+router.put("/guardarOTC", registroCotizaciones.guardarOTC);
 
 module.exports = router;
