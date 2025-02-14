@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const registroController = require('../controllers/registroController');
 
-const registroCotizaciones = require('../controllers/cotizacionesController');
+const otcController = require('../controllers/cotizacionesController');
 
 // Ruta para crear un nuevo registro
 router.post('/crear', registroController.crearRegistro);
@@ -35,8 +35,10 @@ router.get('/obtenerOT', registroController.cargarDatosOT);
 router.post('/guardarOT', registroController.guardarOT);
 router.put('/actualizarOT', registroController.actualizarOT);
 
-router.get("/obtenerOTC/:id", registroCotizaciones.obtenerOTC);
-router.post("/guardarOTC", registroCotizaciones.guardarOTC);
-router.put("/guardarOTC", registroCotizaciones.guardarOTC);
+// Ruta para obtener la Orden de Trabajo y sus cotizaciones
+router.get('/otc/:id', otcController.obtenerOTC);
+
+// Ruta para actualizar la Orden de Trabajo y sus cotizaciones
+router.put('/otc', otcController.guardarOTC);  // Usamos PUT ya que la lógica maneja tanto creación como actualización
 
 module.exports = router;
