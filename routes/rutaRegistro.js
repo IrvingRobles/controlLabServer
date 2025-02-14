@@ -3,7 +3,11 @@ const express = require('express');
 const router = express.Router();
 const registroController = require('../controllers/registroController');
 
+<<<<<<< HEAD
 const otcController = require('../controllers/cotizacionesController');
+=======
+const registroCotizaciones = require('../controllers/cotizacionesController');
+>>>>>>> f516e26 (commit pdf OT)
 
 // Ruta para crear un nuevo registro
 router.post('/crear', registroController.crearRegistro);
@@ -43,7 +47,13 @@ router.put('/actualizarOT', registroController.actualizarOT);
 =======
 router.put('/actualizarOT', registroController.actualizarOT);
 
+<<<<<<< HEAD
 >>>>>>> 434725f (FORMULARIO OT)
+=======
+router.get("/obtenerOTC/:id", registroCotizaciones.obtenerOTC);
+router.post("/guardarOTC", registroCotizaciones.guardarOTC);
+router.put("/guardarOTC", registroCotizaciones.guardarOTC);
+>>>>>>> f516e26 (commit pdf OT)
 
 // Ruta para obtener la Orden de Trabajo y sus cotizaciones
 router.get('/otc/:id', otcController.obtenerOTC);
