@@ -47,9 +47,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td contenteditable="false">${registro.empresa}</td>
                 <td contenteditable="false">${registro.fecha_envio}</td>
                 <td contenteditable="true">${registro.descripcion}</td>
-                <td contenteditable="false">${registro.contacto}</td>
+                <td contenteditable="true">${registro.contacto}</td>
                 <td contenteditable="false">${registro.importe_cotizado}</td>
-                <td contenteditable="false">${registro.resultado}</td>
+                <td contenteditable="true">${registro.resultado}</td>
                 <td>${registro.empleado_asignado || "No asignado"}</td>
                 <button class="btn btn-primary btn-sm btn-guardar" data-id="${registro.id}">Guardar</button>
                 <button class="btn btn-primary btn-sm btn-detalles" data-id="${registro.id}">Hacer Cotización</button>
