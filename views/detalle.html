@@ -72,8 +72,8 @@
                         <input type="text" id="metodoEmbarque" class="form-control" placeholder="Método de embarque">
                     </div>
                     <div class="col-md-6">
-                        <label for="personaCotizando" class="form-label">Realizó la cotización:</label>
-                        <input type="text" id="personaCotizando" class="form-control" placeholder="Nombre del responsable">
+                        <label for="empleado_asignado" class="form-label">Realizó la cotización:</label>
+                        <input type="text" id="empleado_asignado" class="form-control" placeholder="Nombre del responsable">
                     </div>
                 </div>
             </form>
@@ -117,6 +117,8 @@
         <!-- Botón para generar PDF -->
         <section class="text-center">
             <button id="generarPDF" class="btn btn-success">Generar PDF</button>
+            <button type="button" class="btn btn-primary" onclick="guardarDatos()">Guardar</button>
+
         </section>
 
         <section class="text-center mt-4">
