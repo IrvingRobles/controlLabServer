@@ -63,9 +63,16 @@ router.put("/guardarOTC", registroCotizaciones.guardarOTC);
 // Ruta para obtener la Orden de Trabajo y sus cotizaciones
 router.get('/otc/:id', otcController.obtenerOTC);
 
+router.post('/cotizacion', otcController.guardarCotizacion);
+router.delete('/material/:id', otcController.eliminarMaterial);
+
 // Ruta para actualizar la Orden de Trabajo y sus cotizaciones
+<<<<<<< HEAD
 router.put('/otc', otcController.guardarOTC);  // Usamos PUT ya que la lógica maneja tanto creación como actualización
 >>>>>>> 259ac88 (COMMIT AUTORELLENO DE DATOS COTIZACION)
+=======
+//router.put('/otc', otcController.guardarOTC);  // Usamos PUT ya que la lógica maneja tanto creación como actualización
+>>>>>>> 8c02b60 (commit cotizacion)
 
 // Ruta para obtener la Orden de Trabajo y sus cotizaciones
 router.get('/otc/:id', otcController.obtenerOTC);
