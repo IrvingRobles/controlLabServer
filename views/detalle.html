@@ -8,12 +8,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="../styles/styles.css">
+    
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const user = localStorage.getItem('user');
-    
             if (!user) {
-                // Si no hay usuario en localStorage, redirige al login
                 window.location.href = "login.html";
             }
         });
@@ -22,23 +21,20 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script defer src="../scripts/detalleSolicitud.js"></script>
     <script defer src="../scripts/cotizaciones.js"></script>
-
 </head>
 <body>
     <div class="container py-4">
-        <!-- Cabecera -->
         <header class="d-flex align-items-center border-bottom pb-3 mb-4">
             <div class="me-3">
                 <img src="../img/logo.jpg" alt="Logo de CALTECMEX" class="img-fluid" style="max-width: 100px;">
             </div>
             <div>
                 <h1 class="h4 text-uppercase mb-1">Calibraciones Técnicas de México, S.A. de C.V.</h1>
-                <p class="mb-0">Servicios de mantenimiento, calibración y evaluación de equipos analíticos, materiales de referencia y asesoría metrológica</p>
+                <p class="mb-0">Servicios de mantenimiento, calibración y evaluación de equipos analíticos.</p>
                 <p class="mb-0">Tel. / Fax: (01) 923 223 0870 | caltecmex@gmail.com</p>
             </div>
         </header>
 
-        <!-- Información de la Cotización -->
         <section class="mb-4">
             <h2 class="h5 mb-3">Información de la Cotización</h2>
             <form>
@@ -79,46 +75,40 @@
             </form>
         </section>
 
-        <!-- Tabla de Materiales -->
         <section class="mb-4">
             <h2 class="h5 mb-3">Materiales</h2>
             <table class="table table-bordered table-striped" id="tablaMateriales">
                 <thead class="table-dark">
                     <tr>
-                        <th scope="col">PDA</th>
-                        <th scope="col">Cant.</th>
-                        <th scope="col">Unidad</th>
-                        <th scope="col">Descripción</th>
-                        <th scope="col">Precio Unitario</th>
-                        <th scope="col">Importe Total</th>
+                        <th>PDA</th>
+                        <th>Cant.</th>
+                        <th>Unidad</th>
+                        <th>Descripción</th>
+                        <th>Precio Unitario</th>
+                        <th>Importe Total</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Filas dinámicas -->
                 </tbody>
             </table>
+            <section class="mb-4">
+                <h3>Total: $<span id="totalGeneral">0.00</span></h3>
+            </section>
+            
             <div class="d-flex gap-2">
-                <button id="agregarFila" class="btn btn-primary">Agregar Fila</button>
+                <button id="btnAgregarFila" class="btn btn-primary">Agregar Fila</button>
                 <button id="cargarDetalles" class="btn btn-secondary">Cargar Detalles</button>
             </div>
         </section>
-
-        <!-- Total -->
-        <section class="mb-4">
-            <h3>Total: $<span id="total">0.00</span></h3>
-        </section>
-
-        <!-- Observaciones -->
         <section class="mb-4">
             <h2 class="h5 mb-3">Observaciones</h2>
             <textarea id="observaciones" class="form-control" rows="4" placeholder="Escriba aquí las observaciones"></textarea>
         </section>
 
-        <!-- Botón para generar PDF -->
         <section class="text-center">
             <button id="generarPDF" class="btn btn-success">Generar PDF</button>
-            <button type="button" class="btn btn-primary" onclick="guardarDatos()">Guardar</button>
-
+            <button type="button" class="btn btn-primary" onclick="guardarCotizacion()">Guardar</button>
         </section>
 
         <section class="text-center mt-4">
@@ -126,33 +116,22 @@
         </section>
     </div>
 
-    <!-- Bootstrap JS -->
-     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-        <!-- Script para manejar sesión y perfil -->
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const perfilNombre = document.getElementById('perfil-nombre');
-                const usuario = JSON.parse(localStorage.getItem('user'));
-    
-                if (usuario) {
-                    perfilNombre.textContent = usuario.username || 'Usuario';
-                } else {
-                    perfilNombre.textContent = 'Invitado';
-                    setTimeout(() => {
-                        window.location.href = "login.html"; // Redirigir al login si no hay usuario
-                    }, 2000);
-                }
-            });
-    
-            function cerrarSesion() {
-                localStorage.removeItem('user'); // Borrar datos del usuario
-                window.location.href = "login.html"; // Redirigir al login
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const usuario = JSON.parse(localStorage.getItem('user'));
+            if (!usuario) {
+                setTimeout(() => {
+                    window.location.href = "login.html";
+                }, 2000);
             }
-        </script>
+        });
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-
+        function cerrarSesion() {
+            localStorage.removeItem('user');
+            window.location.href = "login.html";
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 </body>
 </html>
