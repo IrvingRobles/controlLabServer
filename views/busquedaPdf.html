@@ -11,20 +11,27 @@
         document.addEventListener('DOMContentLoaded', () => {
             const user = localStorage.getItem('user');
 <<<<<<< HEAD
+<<<<<<< HEAD
             if (!user) {
 =======
     
             if (!user) {
                 // Si no hay usuario en localStorage, redirige al login
 >>>>>>> def00b5 (commit perfiles)
+=======
+            if (!user) {
+>>>>>>> 80c9a81 (commit retoques)
                 window.location.href = "login.html";
             }
         });
     </script>
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     
 >>>>>>> def00b5 (commit perfiles)
+=======
+>>>>>>> 80c9a81 (commit retoques)
 </head>
 
 <body>
@@ -32,11 +39,16 @@
         <div class="container-fluid">
             <a class="navbar-brand" href="index1.html">Menú Principal</a>
 <<<<<<< HEAD
+<<<<<<< HEAD
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
 =======
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
 >>>>>>> def00b5 (commit perfiles)
+=======
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+>>>>>>> 80c9a81 (commit retoques)
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -167,6 +179,7 @@
             while (i < nombreArchivo.length && j < filtro.length) {
                 if (nombreArchivo[i] === filtro[j]) {
                     j++;
+<<<<<<< HEAD
                 }
                 i++;
             }
@@ -234,6 +247,44 @@
                 }
             </script>
 >>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
+=======
+                }
+                i++;
+            }
+            return j === filtro.length;
+        }
+
+        // Función de debounce para optimizar la ejecución del filtro
+        function debounceFiltrarArchivos() {
+            clearTimeout(debounceTimer); // Limpiar el temporizador anterior
+            debounceTimer = setTimeout(filtrarArchivos, 300); // Esperar 300 ms antes de filtrar
+        }
+
+        // Mostrar el nombre del usuario en el perfil
+        function mostrarUsuario() {
+            const perfilNombre = document.getElementById('perfil-nombre');
+            const usuario = JSON.parse(localStorage.getItem('user'));
+
+            if (perfilNombre) { // Comprobar si el elemento existe
+                if (usuario) {
+                    perfilNombre.textContent = usuario.username || 'Usuario';
+                } else {
+                    perfilNombre.textContent = 'Invitado';
+                    setTimeout(() => window.location.href = "login.html", 2000);
+                }
+            } else {
+                console.warn('El elemento con ID "perfil-nombre" no existe.');
+            }
+        }
+
+        // Cerrar sesión
+        function cerrarSesion() {
+            localStorage.removeItem('user');
+            window.location.href = "login.html";
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+>>>>>>> 80c9a81 (commit retoques)
 </body>
 
 </html>

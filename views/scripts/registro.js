@@ -1,4 +1,7 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 80c9a81 (commit retoques)
 // Función para generar la clave automáticamente con un folio continuo
 function generarClave(cliente, fecha) {
     if (!cliente || !fecha) return "";
@@ -39,6 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("fechaEnvio").value = fechaISO;
 });
 
+<<<<<<< HEAD
 document.getElementById("crearRegistroForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
@@ -53,12 +57,15 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
     let contacto = getValue("contacto");
     let lugar = getValue("lugar");
 =======
+=======
+>>>>>>> 80c9a81 (commit retoques)
 document.getElementById("crearRegistroForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    // Obtener valores del formulario con una función auxiliar
-    const getValue = (id) => document.getElementById(id)?.value.trim() || "";
+    // Obtener valores del formulario y convertirlos a mayúsculas
+    const getValue = (id) => document.getElementById(id)?.value.trim().toUpperCase() || "";
 
+<<<<<<< HEAD
     const cliente = getValue("cliente");
     const fechaEnvio = getValue("fechaEnvio");
     const empresa = getValue("empresa");
@@ -66,6 +73,14 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
     const contacto = getValue("contacto");
     const lugar = getValue("lugar");
 >>>>>>> 8171355 (commit FRegistro)
+=======
+    let cliente = getValue("cliente");
+    let fechaEnvio = document.getElementById("fechaEnvio").value; // La fecha ya está en YYYY-MM-DD
+    let empresa = getValue("empresa");
+    let descripcion = getValue("descripcion");
+    let contacto = getValue("contacto");
+    let lugar = getValue("lugar");
+>>>>>>> 80c9a81 (commit retoques)
 
     // Validar los campos obligatorios
     if (!cliente || !fechaEnvio || !empresa) {
@@ -73,6 +88,7 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
         return;
     }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
     // La clave se genera con el formato DDMMYYYY
     const claveGenerada = generarClave(cliente, formatearFechaParaClave(fechaEnvio));
@@ -95,13 +111,17 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
 =======
     // Generar la clave automáticamente
     const claveGenerada = generarClave(cliente, fechaEnvio);
+=======
+    // La clave se genera con el formato DDMMYYYY
+    const claveGenerada = generarClave(cliente, formatearFechaParaClave(fechaEnvio));
+>>>>>>> 80c9a81 (commit retoques)
 
 >>>>>>> 8171355 (commit FRegistro)
     // Obtener el usuario desde localStorage
     const usuario = JSON.parse(localStorage.getItem("user"));
-    const creadoPor = usuario ? usuario.username : "Desconocido";
+    const creadoPor = usuario ? usuario.username.toUpperCase() : "DESCONOCIDO";
 
-    // Crear objeto con los datos del formulario (sin OT ni importeCotizado)
+    // Crear objeto con los datos del formulario
     const data = {
 <<<<<<< HEAD
         clave: document.getElementById("clave").value,
@@ -117,8 +137,8 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
 =======
         clave: claveGenerada,
         empresa,
-        fechaEnvio,
-        descripcion, // Usando 'descripcion' en lugar de 'resultado'
+        fechaEnvio, // Enviar en formato YYYY-MM-DD (correcto para MySQL)
+        descripcion,
         contacto,
         lugar,
         cliente,
@@ -144,6 +164,7 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
             const result = await response.json();
             alert(result.mensaje);
 <<<<<<< HEAD
+<<<<<<< HEAD
             // Limpiar el formulario
             document.getElementById("crearRegistroForm").reset();
             document.getElementById("fechaEnvio").value = fechaISO; // Restaurar la fecha actual
@@ -151,29 +172,14 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
             // Opcional: Redirigir o limpiar el formulario
             document.getElementById("crearRegistroForm").reset();
 >>>>>>> 8171355 (commit FRegistro)
+=======
+            // Limpiar el formulario
+            document.getElementById("crearRegistroForm").reset();
+            document.getElementById("fechaEnvio").value = fechaISO; // Restaurar la fecha actual
+>>>>>>> 80c9a81 (commit retoques)
         }
     } catch (error) {
         alert("Error de red o del servidor.");
         console.error(error);
     }
 });
-
-// Función para generar la clave automáticamente
-function generarClave(cliente, fecha) {
-    if (!cliente || !fecha) return "";
-
-    // Extraer las iniciales del nombre del cliente
-    const iniciales = cliente
-        .split(" ")
-        .map(word => word[0])
-        .join("")
-        .toUpperCase();
-
-    // Generar un número aleatorio de 4 dígitos
-    const folio = Math.floor(1000 + Math.random() * 9000);
-
-    // Formatear la fecha como YYYYMMDD
-    const fechaFormateada = fecha.replace(/-/g, "");
-
-    return `${iniciales}${folio}${fechaFormateada}`;
-}

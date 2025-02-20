@@ -196,9 +196,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     filtroClave.addEventListener("input", filtrarSolicitudes);
 <<<<<<< HEAD
+<<<<<<< HEAD
    
 =======
 >>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
+=======
+   
+>>>>>>> 80c9a81 (commit retoques)
     exportPDFBtn.addEventListener("click", exportPDF);
     cargarRegistros();
 

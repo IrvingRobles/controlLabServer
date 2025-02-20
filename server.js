@@ -38,6 +38,9 @@ function verificarSesion(req, res, next) {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 80c9a81 (commit retoques)
 app.get(['/',
         '/index1.html',
         '/registro.html',
@@ -51,6 +54,7 @@ app.get(['/',
         '/adminBusquedaPdf.html',
         '/adminRegistro.html',
         ], verificarSesion, (req, res) => {
+<<<<<<< HEAD
 =======
 app.get(['/', '/index1.html', '/registro.html', '/detalle.html','/buscar.html','/busquedaPdf.html'], verificarSesion, (req, res) => {
 >>>>>>> def00b5 (commit perfiles)
@@ -60,6 +64,8 @@ app.get(['/', '/index1.html', '/registro.html', '/detalle.html','/buscar.html','
 =======
 app.get(['/', '/index1.html', '/registro.html', '/detalle.html','/buscar.html','/busquedaPdf.html','/adminPersonal.html','/inicioAdmin.html','/adminBuscar.html','/OT.html'], verificarSesion, (req, res) => {
 >>>>>>> 45673cd (commit OT)
+=======
+>>>>>>> 80c9a81 (commit retoques)
     res.sendFile(path.join(__dirname, 'views', req.path));
 });
 
