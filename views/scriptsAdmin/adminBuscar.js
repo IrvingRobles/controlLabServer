@@ -195,6 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     filtroClave.addEventListener("input", filtrarSolicitudes);
+   
     exportPDFBtn.addEventListener("click", exportPDF);
     cargarRegistros();
 
