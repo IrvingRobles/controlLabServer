@@ -1,0 +1,61 @@
+/* Fondo y tarjeta principal */
+body {
+    background-color: #f7f7f7;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+  
+  .card {
+    background-color: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 50rem;
+  }
+  
+  /* Encabezado */
+  .card h1 {
+    font-size: 2rem;
+    color: #007bff;
+    font-weight: 700;
+  }
+  
+  /* Estilo de los Inputs */
+  .form-control {
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    padding: 1rem;
+  }
+  
+  .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0px 0px 5px rgba(0, 123, 255, 0.5);
+  }
+  
+  /* Botón de Enviar */
+  .btn-success {
+    background-color: #28a745;
+    border: none;
+    border-radius: 10px;
+    padding: 1rem;
+    transition: background 0.3s ease, transform 0.3s ease;
+  }
+  
+  .btn-success:hover {
+    background-color: #218838;
+    transform: scale(1.05);
+  }
+  
+  /* Enlace de volver al inicio de sesión */
+  .text-decoration-none {
+    color: #007bff;
+  }
+  
+  .text-decoration-none:hover {
+    text-decoration: underline;
+  }
+  
