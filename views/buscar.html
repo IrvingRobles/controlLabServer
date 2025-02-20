@@ -67,26 +67,29 @@
             <button id="exportPDF" class="btn btn-danger">Exportar a PDF</button>
         </div>
 
-        <table class="table table-striped" id="tablaRegistros">
-            <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>Clave</th>
-                    <th>Orden de Trabajo (OT)</th>
-                    <th>Empresa</th>
-                    <th>Fecha de Envío</th>
-                    <th>Descripción</th>
-                    <th>Contacto</th>
-                    <th>Importe Cotizado</th>
-                    <th>Resultado</th>
-                    <th>Persona asignada</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="listadoRegistros">
-                <!-- Los registros serán insertados dinámicamente -->
-            </tbody>
-        </table>
+        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+            <table class="table table-striped" id="tablaRegistros">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Clave</th>
+                        <th>Orden de Trabajo (OT)</th>
+                        <th>Empresa</th>
+                        <th>Fecha de Envío</th>
+                        <th>Descripción</th>
+                        <th>Contacto</th>
+                        <th>Importe Cotizado</th>
+                        <th>Resultado</th>
+                        <th>Persona asignada</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="listadoRegistros">
+                    <!-- Los registros serán insertados dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+        
     </div>
 
     <script>
