@@ -1,15 +1,55 @@
+// Función para generar la clave automáticamente con un folio continuo
+function generarClave(cliente, fecha) {
+    if (!cliente || !fecha) return "";
+
+    // Extraer las iniciales del nombre del cliente
+    const iniciales = cliente
+        .split(" ")
+        .map(word => word[0])
+        .join("")
+        .toUpperCase();
+
+    // Obtener el último folio de localStorage (o iniciar en 1000 si no existe)
+    let folio = parseInt(localStorage.getItem("ultimoFolio")) || 1000;
+
+    // Incrementar el folio
+    folio++;
+
+    // Guardar el nuevo folio en localStorage para la siguiente vez
+    localStorage.setItem("ultimoFolio", folio.toString());
+
+    // Retornar la clave generada con el folio continuo
+    return `${iniciales}${folio}${fecha}`;
+}
+
+// Función para convertir la fecha de YYYY-MM-DD a DDMMYYYY solo para la clave
+function formatearFechaParaClave(fecha) {
+    const partes = fecha.split("-");
+    if (partes.length !== 3) return fecha; // Si el formato es incorrecto, devolver la original
+    return `${partes[2]}${partes[1]}${partes[0]}`; // Convertir YYYY-MM-DD a DDMMYYYY
+}
+
+// Capturar la fecha actual en formato YYYY-MM-DD para MySQL
+let fechaISO;
+
+document.addEventListener("DOMContentLoaded", function () {
+    const hoy = new Date();
+    fechaISO = hoy.toISOString().split("T")[0]; // YYYY-MM-DD
+    document.getElementById("fechaEnvio").value = fechaISO;
+});
+
 document.getElementById("crearRegistroForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    // Obtener valores del formulario con una función auxiliar
-    const getValue = (id) => document.getElementById(id)?.value.trim() || "";
+    // Obtener valores del formulario y convertirlos a mayúsculas
+    const getValue = (id) => document.getElementById(id)?.value.trim().toUpperCase() || "";
 
-    const cliente = getValue("cliente");
-    const fechaEnvio = getValue("fechaEnvio");
-    const empresa = getValue("empresa");
-    const descripcion = getValue("descripcion"); // Cambiado de 'resultado' a 'descripcion'
-    const contacto = getValue("contacto");
-    const lugar = getValue("lugar");
+    let cliente = getValue("cliente");
+    let fechaEnvio = document.getElementById("fechaEnvio").value; // La fecha ya está en YYYY-MM-DD
+    let empresa = getValue("empresa");
+    let descripcion = getValue("descripcion");
+    let contacto = getValue("contacto");
+    let lugar = getValue("lugar");
 
     // Validar los campos obligatorios
     if (!cliente || !fechaEnvio || !empresa) {
@@ -17,19 +57,19 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
         return;
     }
 
-    // Generar la clave automáticamente
-    const claveGenerada = generarClave(cliente, fechaEnvio);
+    // La clave se genera con el formato DDMMYYYY
+    const claveGenerada = generarClave(cliente, formatearFechaParaClave(fechaEnvio));
 
     // Obtener el usuario desde localStorage
     const usuario = JSON.parse(localStorage.getItem("user"));
-    const creadoPor = usuario ? usuario.username : "Desconocido";
+    const creadoPor = usuario ? usuario.username.toUpperCase() : "DESCONOCIDO";
 
-    // Crear objeto con los datos del formulario (sin OT ni importeCotizado)
+    // Crear objeto con los datos del formulario
     const data = {
         clave: claveGenerada,
         empresa,
-        fechaEnvio,
-        descripcion, // Usando 'descripcion' en lugar de 'resultado'
+        fechaEnvio, // Enviar en formato YYYY-MM-DD (correcto para MySQL)
+        descripcion,
         contacto,
         lugar,
         cliente,
@@ -53,31 +93,12 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
         } else {
             const result = await response.json();
             alert(result.mensaje);
-            // Opcional: Redirigir o limpiar el formulario
+            // Limpiar el formulario
             document.getElementById("crearRegistroForm").reset();
+            document.getElementById("fechaEnvio").value = fechaISO; // Restaurar la fecha actual
         }
     } catch (error) {
         alert("Error de red o del servidor.");
         console.error(error);
     }
 });
-
-// Función para generar la clave automáticamente
-function generarClave(cliente, fecha) {
-    if (!cliente || !fecha) return "";
-
-    // Extraer las iniciales del nombre del cliente
-    const iniciales = cliente
-        .split(" ")
-        .map(word => word[0])
-        .join("")
-        .toUpperCase();
-
-    // Generar un número aleatorio de 4 dígitos
-    const folio = Math.floor(1000 + Math.random() * 9000);
-
-    // Formatear la fecha como YYYYMMDD
-    const fechaFormateada = fecha.replace(/-/g, "");
-
-    return `${iniciales}${folio}${fechaFormateada}`;
-}

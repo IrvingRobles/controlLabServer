@@ -10,60 +10,10 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     
-    <!-- Custom CSS -->
-    <style>
-        /* Contenedor del perfil */
-        .perfil-container {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            background: #f8f9fa;
-            padding: 10px 20px;
-            border-bottom: 2px solid #ddd;
-            position: fixed;
-            top: 0;
-            right: 0;
-            left: 0;
-            z-index: 1000;
-        }
-
-        .perfil-container i {
-            font-size: 24px;
-            margin-right: 10px;
-            color: #007bff;
-        }
-
-        .perfil-container span {
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .btn-logout {
-            margin-left: 10px;
-            background: none;
-            border: none;
-            color: red;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        .btn-logout:hover {
-            text-decoration: underline;
-        }
-
-        /* Estilo del menú */
-        .menu-container {
-            margin-top: 70px;
-        }
-        
-        .submenu-item {
-            margin-left: 20px;
-        }
-    </style>
+   <link rel="stylesheet" href="styles/styles.css">
 </head>
 <body>
-
+    
     <!-- Barra de Perfil -->
     <header>
         <div class="perfil-container">
@@ -72,6 +22,8 @@
             <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
         </div>
     </header>
+    
+
     
     <!-- Contenedor del Menú -->
     <div class="container">
