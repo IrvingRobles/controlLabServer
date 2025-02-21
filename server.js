@@ -8,7 +8,10 @@ const multer = require('multer'); // Para manejar uploads de archivos
 const fs = require('fs'); // Para manejar archivos y directorios
 
 const rutaRegistro = require('./routes/rutaRegistro');
+<<<<<<< HEAD
 const almacenRoutes = require('./routes/almacenRoutes');
+=======
+>>>>>>> 8b7ad7d290be74f49fcae061a43b8e962032a8de
 const rutaLogin = require('./routes/rutaLogin'); // Nueva ruta para login
 
 const app = express();
@@ -137,12 +140,15 @@ app.use('/api/login', rutaLogin); // Rutas del login
 // Página principal (login)
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'login.html'));
+<<<<<<< HEAD
 });
 
 app._router.stack.forEach((r) => {
     if (r.route && r.route.path) {
         console.log(`Ruta activa: ${r.route.path}`);
     }
+=======
+>>>>>>> 8b7ad7d290be74f49fcae061a43b8e962032a8de
 });
 
 app.listen(port, () => {
