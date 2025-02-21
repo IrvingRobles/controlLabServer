@@ -8,11 +8,8 @@ const multer = require('multer'); // Para manejar uploads de archivos
 const fs = require('fs'); // Para manejar archivos y directorios
 
 const rutaRegistro = require('./routes/rutaRegistro');
-<<<<<<< HEAD
 const almacenRoutes = require('./routes/almacenRoutes');
-=======
 const rutaLogin = require('./routes/rutaLogin'); // Nueva ruta para login
->>>>>>> def00b5 (commit perfiles)
 
 const app = express();
 const port = 3000;
