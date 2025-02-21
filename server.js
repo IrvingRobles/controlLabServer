@@ -9,6 +9,7 @@ const fs = require('fs'); // Para manejar archivos y directorios
 
 const rutaRegistro = require('./routes/rutaRegistro');
 const rutaLogin = require('./routes/rutaLogin'); // Nueva ruta para login
+const almacenRoutes = require('./routes/almacenRoutes');
 
 const app = express();
 const port = 3000;
@@ -60,6 +61,10 @@ const corsOptions = {
     allowedHeaders: ['Content-Type', 'Authorization'], // Encabezados permitidos
 };
 
+const listEndpoints = require('express-list-endpoints');
+console.log(listEndpoints(app));
+
+
 app.use(cors(corsOptions)); // Aplicar configuración de CORS
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -84,6 +89,8 @@ const storage = multer.diskStorage({
     },
 });
 const upload = multer({ storage });
+
+app.use('/api/almacen', almacenRoutes);
 
 // Ruta para manejar la subida del PDF
 app.post('/guardar-pdf', upload.single('pdf'), (req, res) => {
@@ -130,6 +137,12 @@ app.use('/api/login', rutaLogin); // Rutas del login
 // Página principal (login)
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'login.html'));
+});
+
+app._router.stack.forEach((r) => {
+    if (r.route && r.route.path) {
+        console.log(`Ruta activa: ${r.route.path}`);
+    }
 });
 
 app.listen(port, () => {

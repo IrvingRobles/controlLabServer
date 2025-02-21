@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Almacén General</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+    <div class="container mt-5">
+        <!-- Título -->
+        <div class="text-center mb-4">
+            <h1 class="text-primary fw-bold">Almacén General</h1>
+        </div>
+
+        <!-- Botones superiores -->
+        <div class="d-flex flex-wrap justify-content-center gap-3 mb-4">
+            <button class="btn btn-primary btn-sm" onclick="window.location.href='/entradaAlmacen.html';">
+                <i class="bi bi-plus-circle"></i> Registrar en Almacen
+            </button>
+            <button class="btn btn-success btn-sm" onclick="window.location.href='/salidaAlmacen.html';">
+                <i class="bi bi-save"></i> Registrar Salida
+            </button>
+            <button class="btn btn-success btn-sm" onclick="window.location.href='/moneda.html';">
+                <i class="bi bi-save"></i> Registrar Moneda
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="window.location.href='/empresa.html';">
+                <i class="bi bi-trash"></i> Registrar Empresa
+            </button>
+            <button class="btn btn-info btn-sm text-white" onclick="window.location.href='/movimiento.html';">
+                <i class="bi bi-printer"></i> Registrar Movimiento
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="window.location.href='/proveedor.html';">
+                <i class="bi bi-person-plus"></i> Registrar Proveedor
+            </button>
+            <button class="btn btn-warning btn-sm text-dark" onclick="window.location.href='/producto.html';">
+                <i class="bi bi-box-seam"></i> Registrar Producto
+            </button>
+            <button class="btn btn-info btn-sm text-white" onclick="window.location.href='/condicion.html';">
+                <i class="bi bi-printer"></i> Registrar Condiciones
+            </button>
+        </div>
+
+        <!-- Filtros -->
+        <div class="row gy-3 mb-4">
+            <div class="col-md-2">
+                <input type="text" id="filtroIdMov" class="form-control" placeholder="Buscar por ID Mov" oninput="filtrarRegistros()">
+            </div>
+            <div class="col-md-2">
+                <input type="text" id="filtroUsuario" class="form-control" placeholder="Buscar por Usuario" oninput="filtrarRegistros()">
+            </div>
+            <div class="col-md-2">
+                <input type="text" id="filtroEmpresa" class="form-control" placeholder="Buscar por Empresa" oninput="filtrarRegistros()">
+            </div>
+            <div class="col-md-2">
+                <input type="text" id="filtroTipoMov" class="form-control" placeholder="Buscar por Tipo" oninput="filtrarRegistros()">
+            </div>
+            <div class="col-md-2">
+                <input type="date" id="filtroFecha" class="form-control" oninput="filtrarRegistros()">
+            </div>
+        </div>
+
+        <!-- Tabla -->
+        <h2 class="text-center mb-4 text-secondary">Registros de Inventario</h2>
+        <div class="card shadow-lg p-4">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped table-bordered">
+                        <thead class="table-dark text-center">
+                            <tr>
+                                <th>ID Mov</th>
+                                <th>Usuario</th>
+                                <th>Empresa</th>
+                                <th>Tipo de Movimiento</th>
+                                <th>Fecha</th>
+                                <th>Pedido</th>
+                                <th>Producto</th>
+                                <th>Marca</th>
+                                <th>Proveedor</th>
+                                <th>No. de Parte</th>
+                                <th>No. de Serie</th>
+                                <th>Modelo</th>
+                                <th>Equipo</th>
+                                <th>Factura</th>
+                                <th>Moneda</th>
+                                <th>Cantidad Inicial</th>
+                                <th>Precio Inicial</th>
+                                <th>Cantidad de Entrada</th>
+                                <th>Precio Entrada</th>
+                                <th>Concepto</th>
+                                <th>Anaquel</th>
+                                <th>Sección</th>
+                                <th>Caja</th>
+                                <th>Observaciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listadoRegistros">
+                            <!-- Aquí se mostrarán los registros -->
+                        </tbody>
+                    </table>
+                    <!-- Controles de paginación -->
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <button id="btnAnterior" class="btn btn-primary btn-sm" disabled>Anterior</button>
+                        <span id="paginaActual" class="fw-bold">Página 1</span>
+                        <button id="btnSiguiente" class="btn btn-primary btn-sm">Siguiente</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/scripts/vistaAlmacen.js"></script>
+</body>
+
+</html>
