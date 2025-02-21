@@ -207,8 +207,11 @@ textarea {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 80c9a81 (commit retoques)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 
 /* Contenedor del menú */
 .menu-container {
@@ -227,6 +230,9 @@ textarea {
 #tablaSolicitudes th.asc::after {
     content: '▲';
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
     position: absolute;
     right: 10px;
 }
@@ -244,6 +250,7 @@ textarea {
 .text-highlight {
     color: green;
     font-weight: bold;
+<<<<<<< HEAD
 }
 =======
 .perfil-container {
@@ -277,3 +284,6 @@ textarea {
 =======
 }
 >>>>>>> 80c9a81 (commit retoques)
+=======
+}
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47

@@ -50,6 +50,7 @@ const enviarCorreoValidacion = async (correo, nombre, username, rfc, curp, depar
                     <p style="margin-top: 20px; font-size: 16px; color: #666;">Para verificar tu cuenta, haz clic en el siguiente botón:</p>
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
                     <a href="http://localhost:3000/api/login/validar/${token}" style="display: inline-block; padding: 10px 20px; background-color: #28a745; color: #fff; text-decoration: none; font-weight: bold; border-radius: 5px;">Verificar cuenta</a>
 =======
                     <a href="https://controllabserver.onrender.com/api/login/validar/${token}" style="display: inline-block; padding: 10px 20px; background-color: #28a745; color: #fff; text-decoration: none; font-weight: bold; border-radius: 5px;">Verificar cuenta</a>
@@ -57,6 +58,9 @@ const enviarCorreoValidacion = async (correo, nombre, username, rfc, curp, depar
 =======
                     <a href="http://localhost:3000/api/login/validar/${token}" style="display: inline-block; padding: 10px 20px; background-color: #28a745; color: #fff; text-decoration: none; font-weight: bold; border-radius: 5px;">Verificar cuenta</a>
 >>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
+=======
+                    <a href="http://localhost:3000/api/login/validar/${token}" style="display: inline-block; padding: 10px 20px; background-color: #28a745; color: #fff; text-decoration: none; font-weight: bold; border-radius: 5px;">Verificar cuenta</a>
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
                     
                     <p style="margin-top: 20px; font-size: 14px; color: #999;">Si no solicitaste este registro, ignora este correo.</p>
                 </div>

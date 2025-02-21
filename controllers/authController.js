@@ -161,8 +161,11 @@ exports.validarCuenta = async (req, res) => {
 };
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 
 exports.listaEmpleados = async (req, res) => {
   try {
@@ -180,7 +183,10 @@ exports.listaEmpleados = async (req, res) => {
   }
 };
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> def00b5 (commit perfiles)
 =======
 >>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47

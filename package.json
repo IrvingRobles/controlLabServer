@@ -19,7 +19,11 @@
 <<<<<<< HEAD
     "express-list-endpoints": "^7.1.1",
 =======
+<<<<<<< HEAD
 >>>>>>> def00b5 (commit perfiles)
+=======
+>>>>>>> 8b7ad7d290be74f49fcae061a43b8e962032a8de
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
     "express-session": "^1.18.1",
     "multer": "^1.4.5-lts.1",
     "mysql": "^2.18.1",

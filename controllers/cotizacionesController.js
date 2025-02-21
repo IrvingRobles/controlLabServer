@@ -4,6 +4,7 @@ const db = require('../model/db'); // Configuración de la base de datos
 exports.obtenerOTC = async (req, res) => {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     const { id } = req.params; // Obtener el ID de la OT
 =======
     const { id } = req.params; // Obtener el ID de los parámetros de la ruta
@@ -11,6 +12,9 @@ exports.obtenerOTC = async (req, res) => {
 =======
     const { id } = req.params; // Obtener el ID de la OT
 >>>>>>> 8c02b60 (commit cotizacion)
+=======
+    const { id } = req.params; // Obtener el ID de la OT
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
     if (!id) {
         return res.status(400).json({ mensaje: "El parámetro 'id' es requerido" });
     }
@@ -24,6 +28,7 @@ exports.obtenerOTC = async (req, res) => {
             FROM registros WHERE id = ?`, [id]);
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
         
@@ -31,10 +36,14 @@ exports.obtenerOTC = async (req, res) => {
 =======
 
 >>>>>>> 8c02b60 (commit cotizacion)
+=======
+
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
         if (ordenTrabajo.length === 0) {
             return res.status(404).json({ mensaje: "Orden de trabajo no encontrada" });
         }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
         // Obtener las cotizaciones relacionadas con la OT
@@ -44,14 +53,20 @@ exports.obtenerOTC = async (req, res) => {
 =======
         // Obtener las cotizaciones relacionadas con la OT
 >>>>>>> 8c02b60 (commit cotizacion)
+=======
+        // Obtener las cotizaciones relacionadas con la OT
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
         const [cotizaciones] = await db.query(`
             SELECT id, referencia, num_cotizacion, fecha_expiracion, metodo_embarque, realizado_por
             FROM cotizaciones WHERE id_ot = ?`, [id]);
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 8c02b60 (commit cotizacion)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
         let materiales = [];
         if (cotizaciones.length > 0) {
             const cotizacionIds = cotizaciones.map(cot => cot.id);
@@ -61,6 +76,9 @@ exports.obtenerOTC = async (req, res) => {
         }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
         res.json({
             ordenTrabajo: ordenTrabajo[0],
             cotizaciones: cotizaciones,
@@ -69,6 +87,7 @@ exports.obtenerOTC = async (req, res) => {
 
     } catch (error) {
         console.error("Error al obtener la OT, cotizaciones y materiales:", error);
+<<<<<<< HEAD
 =======
         // Enviar la respuesta consolidada
 =======
@@ -86,19 +105,27 @@ exports.obtenerOTC = async (req, res) => {
 =======
         console.error("Error al obtener la OT, cotizaciones y materiales:", error);
 >>>>>>> 8c02b60 (commit cotizacion)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
         res.status(500).json({ mensaje: "Error en el servidor" });
     }
 };
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 8c02b60 (commit cotizacion)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 // Eliminar un material por ID
 // Eliminar un material por ID
 exports.eliminarMaterial = async (req, res) => {
     const { id } = req.params;
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 
     if (!id) {
         return res.status(400).json({ mensaje: "El parámetro 'id' es requerido" });
@@ -219,6 +246,7 @@ exports.guardarCotizacion = async (req, res) => {
         res.status(500).json({ mensaje: `Error en el servidor: ${error.message}` });
     } finally {
         connection.release();
+<<<<<<< HEAD
 =======
 // Guardar o actualizar datos en las tablas `registros` y `cotizaciones`
 exports.guardarOTC = async (req, res) => {
@@ -356,5 +384,7 @@ exports.guardarCotizacion = async (req, res) => {
 =======
         connection.release();
 >>>>>>> 8c02b60 (commit cotizacion)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
     }
 };

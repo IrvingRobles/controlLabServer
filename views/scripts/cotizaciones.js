@@ -1,5 +1,8 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 let datosCargados = false; // 🔥 Variable de control para evitar duplicados 
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -8,6 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get('id');
 
+<<<<<<< HEAD
 =======
 =======
 let datosCargados = false; // 🔥 Variable de control para evitar duplicados 
@@ -24,6 +28,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const id = urlParams.get('id');
 
 >>>>>>> 8c02b60 (commit cotizacion)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
     if (!id) {
         alert('No se ha proporcionado un ID.');
         return;
@@ -32,6 +38,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
         const response = await fetch(`/api/registro/otc/${id}`);
         if (!response.ok) throw new Error('Error al obtener los datos');
 
@@ -43,6 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         function formatDate(isoDate) {
             const date = new Date(isoDate);
             return date.toISOString().split('T')[0];
+<<<<<<< HEAD
 =======
         // Hacer una solicitud GET al servidor para obtener la orden de trabajo y las cotizaciones
 =======
@@ -66,6 +76,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 =======
             return date.toISOString().split('T')[0];
 >>>>>>> 8c02b60 (commit cotizacion)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
         }
 
         // Rellenar los campos del formulario con la información obtenida
@@ -78,10 +90,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('metodoEmbarque').value = cotizaciones.length > 0 ? cotizaciones[0].metodo_embarque : '';
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
         document.getElementById('empleado_asignado').value = ordenTrabajo.empleado_asignado || '';
 
         rellenarTablaMateriales(materiales);
         datosCargados = true; // 🔥 Marcar que ya se cargaron los datos
+<<<<<<< HEAD
 =======
         document.getElementById('empleado_asignado').value = ordenTrabajo.length > 0 ? ordenTrabajo[0].empleado_asignado : '';
 
@@ -103,6 +119,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         rellenarTablaMateriales(materiales);
         datosCargados = true; // 🔥 Marcar que ya se cargaron los datos
 >>>>>>> 8c02b60 (commit cotizacion)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 
     } catch (error) {
         console.error(error);
@@ -110,14 +128,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 8c02b60 (commit cotizacion)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 
     // Asociar el evento click al botón para agregar filas
     document.getElementById('btnAgregarFila').addEventListener('click', () => {
         agregarFila(); // Llama a la función para agregar una fila vacía
     });
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 });
 
 function rellenarTablaMateriales(materiales) {
@@ -507,6 +531,7 @@ function generarTablaMateriales(doc, marginLeft) {
     // Dibujar el borde exterior de la tabla
     doc.rect(margenLateral, margenSuperior + 5, anchoTabla, y - margenSuperior - 5);
 }
+<<<<<<< HEAD
 =======
 =======
 >>>>>>> 8c02b60 (commit cotizacion)
@@ -903,3 +928,5 @@ function generarTablaMateriales(doc, marginLeft) {
     doc.rect(margenLateral, margenSuperior + 5, anchoTabla, y - margenSuperior - 5);
 }
 >>>>>>> 8c02b60 (commit cotizacion)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47

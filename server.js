@@ -11,7 +11,11 @@ const rutaRegistro = require('./routes/rutaRegistro');
 <<<<<<< HEAD
 const almacenRoutes = require('./routes/almacenRoutes');
 =======
+<<<<<<< HEAD
 >>>>>>> def00b5 (commit perfiles)
+=======
+>>>>>>> 8b7ad7d290be74f49fcae061a43b8e962032a8de
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 const rutaLogin = require('./routes/rutaLogin'); // Nueva ruta para login
 
 const app = express();
@@ -39,8 +43,11 @@ function verificarSesion(req, res, next) {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 80c9a81 (commit retoques)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 app.get(['/',
         '/index1.html',
         '/registro.html',
@@ -55,6 +62,7 @@ app.get(['/',
         '/adminRegistro.html',
         ], verificarSesion, (req, res) => {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 app.get(['/', '/index1.html', '/registro.html', '/detalle.html','/buscar.html','/busquedaPdf.html'], verificarSesion, (req, res) => {
 >>>>>>> def00b5 (commit perfiles)
@@ -66,6 +74,8 @@ app.get(['/', '/index1.html', '/registro.html', '/detalle.html','/buscar.html','
 >>>>>>> 45673cd (commit OT)
 =======
 >>>>>>> 80c9a81 (commit retoques)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
     res.sendFile(path.join(__dirname, 'views', req.path));
 });
 
@@ -166,7 +176,11 @@ app._router.stack.forEach((r) => {
         console.log(`Ruta activa: ${r.route.path}`);
     }
 =======
+<<<<<<< HEAD
 >>>>>>> def00b5 (commit perfiles)
+=======
+>>>>>>> 8b7ad7d290be74f49fcae061a43b8e962032a8de
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 });
 
 app.listen(port, () => {

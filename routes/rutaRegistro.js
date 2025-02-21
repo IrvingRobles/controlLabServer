@@ -5,6 +5,7 @@ const registroController = require('../controllers/registroController');
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 const otcController = require('../controllers/cotizacionesController');
 =======
 const registroCotizaciones = require('../controllers/cotizacionesController');
@@ -12,6 +13,9 @@ const registroCotizaciones = require('../controllers/cotizacionesController');
 =======
 const otcController = require('../controllers/cotizacionesController');
 >>>>>>> 259ac88 (COMMIT AUTORELLENO DE DATOS COTIZACION)
+=======
+const otcController = require('../controllers/cotizacionesController');
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 
 // Ruta para crear un nuevo registro
 router.post('/crear', registroController.crearRegistro);
@@ -38,13 +42,17 @@ router.get('/obtenerAsignados', registroController.obtenerRegistroAsignado);
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 8810c29 (commit campos OT)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 console.log(registroController); // <-- Agrega esto para verificar en la consola
 
 // Definir rutas
 router.get('/obtenerOT', registroController.cargarDatosOT);
 router.post('/guardarOT', registroController.guardarOT);
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 router.put('/actualizarOT', registroController.actualizarOT);
@@ -73,6 +81,9 @@ router.put('/otc', otcController.guardarOTC);  // Usamos PUT ya que la lógica m
 =======
 //router.put('/otc', otcController.guardarOTC);  // Usamos PUT ya que la lógica maneja tanto creación como actualización
 >>>>>>> 8c02b60 (commit cotizacion)
+=======
+router.put('/actualizarOT', registroController.actualizarOT);
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 
 // Ruta para obtener la Orden de Trabajo y sus cotizaciones
 router.get('/otc/:id', otcController.obtenerOTC);
@@ -83,9 +94,12 @@ router.delete('/material/:id', otcController.eliminarMaterial);
 // Ruta para actualizar la Orden de Trabajo y sus cotizaciones
 //router.put('/otc', otcController.guardarOTC);  // Usamos PUT ya que la lógica maneja tanto creación como actualización
 
+<<<<<<< HEAD
 =======
 >>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
 =======
 
 >>>>>>> 8810c29 (commit campos OT)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 module.exports = router;

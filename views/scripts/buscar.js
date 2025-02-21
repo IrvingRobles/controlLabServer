@@ -44,13 +44,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td>${registro.id}</td>
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 8171355 (commit FRegistro)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
                 <td contenteditable="false">${registro.clave}</td>
                 <td contenteditable="false">${registro.OT}</td>
                 <td contenteditable="false">${registro.empresa}</td>
                 <td contenteditable="false">${registro.fecha_envio}</td>
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
                 <td contenteditable="true">${registro.descripcion}</td>
                 <td contenteditable="true">${registro.contacto}</td>
                 <td contenteditable="false">${registro.importe_cotizado}</td>
@@ -60,6 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button class="btn btn-primary btn-sm btn-detalles" data-id="${registro.id}">Hacer Cotización</button>
                 <button class="btn btn-primary btn-sm btn-orden-trabajo" data-id="${registro.id}">Generar OT</button>
 
+<<<<<<< HEAD
 =======
                 <td contenteditable="true">${registro.clave}</td>
                 <td contenteditable="true">${registro.OT}</td>
@@ -80,6 +87,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button class="btn btn-primary btn-sm btn-orden-trabajo" data-id="${registro.id}">Generar OT</button>
 
 >>>>>>> 8810c29 (commit campos OT)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
             `;
 
                 tablaRegistros.appendChild(fila);
@@ -93,12 +102,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
    // <button class="btn btn-danger btn-sm btn-eliminar" data-id="${registro.id}">Eliminar</button>
 =======
 >>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
 =======
    // <button class="btn btn-danger btn-sm btn-eliminar" data-id="${registro.id}">Eliminar</button>
 >>>>>>> 8171355 (commit FRegistro)
+=======
+   // <button class="btn btn-danger btn-sm btn-eliminar" data-id="${registro.id}">Eliminar</button>
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 
 
     function redirigirADetalles() {
@@ -115,6 +128,9 @@ document.addEventListener("DOMContentLoaded", () => {
     function redirigirAOrdenTrabajo() {
         const botonesOT = document.querySelectorAll(".btn-orden-trabajo");
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 
         botonesOT.forEach((boton) => {
             boton.addEventListener("click", (e) => {
@@ -126,6 +142,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 
 
     // Función para actualizar un registro
@@ -159,6 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             console.error("Error al guardar los cambios:", error);
             alert("Error al guardar los cambios: " + error.message);
+<<<<<<< HEAD
 =======
 // Función para actualizar un registro
 async function guardarRegistro(id, fila) {
@@ -237,6 +257,8 @@ async function guardarRegistro(id, fila) {
         } catch (error) {
             console.error("Error al guardar los cambios:", error);
             alert("Error al guardar los cambios: " + error.message);
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
         }
     }
 
@@ -275,6 +297,7 @@ async function guardarRegistro(id, fila) {
     });
 
 
+<<<<<<< HEAD
     // Asignar evento de guardado a los botones
     document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll(".btn-guardar").forEach(boton => {
@@ -310,6 +333,8 @@ async function guardarRegistro(id, fila) {
     });
 
 
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
     // Eliminar un registro
     async function eliminarRegistro(id) {
         try {

@@ -1,6 +1,9 @@
 document.addEventListener("DOMContentLoaded", async () => {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get("id");
 
@@ -45,6 +48,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const data = await response.json();
             if (data && data.id) {
                 campos.forEach(field => setValue(field, data[field] || ""));
+<<<<<<< HEAD
 =======
     // Obtener el id de la URL
 =======
@@ -136,12 +140,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 =======
                 campos.forEach(field => setValue(field, data[field] || ""));
 >>>>>>> f516e26 (commit pdf OT)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
             } else {
                 alert("No se encontraron datos para esta Orden de Trabajo.");
             }
         } catch (error) {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
             console.error("❌ Error al obtener los datos de la OT:", error);
             alert("Hubo un problema al cargar los datos de la OT.");
         }
@@ -245,6 +254,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             doc.save(`OrdenTrabajo_${getValue("OT")}.pdf`);
         };
     }
+<<<<<<< HEAD
 =======
             console.error("Error al obtener los datos:", error);
 =======
@@ -360,4 +370,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         };
     }
 >>>>>>> f516e26 (commit pdf OT)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 });

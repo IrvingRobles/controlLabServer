@@ -1,7 +1,10 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 80c9a81 (commit retoques)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 // Función para generar la clave automáticamente con un folio continuo
 function generarClave(cliente, fecha) {
     if (!cliente || !fecha) return "";
@@ -43,10 +46,16 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 document.getElementById("crearRegistroForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
 <<<<<<< HEAD
+=======
+document.getElementById("crearRegistroForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
     // Obtener valores del formulario y convertirlos a mayúsculas
     const getValue = (id) => document.getElementById(id)?.value.trim().toUpperCase() || "";
 
@@ -56,6 +65,7 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
     let descripcion = getValue("descripcion");
     let contacto = getValue("contacto");
     let lugar = getValue("lugar");
+<<<<<<< HEAD
 =======
 =======
 >>>>>>> 80c9a81 (commit retoques)
@@ -81,6 +91,8 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
     let contacto = getValue("contacto");
     let lugar = getValue("lugar");
 >>>>>>> 80c9a81 (commit retoques)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 
     // Validar los campos obligatorios
     if (!cliente || !fechaEnvio || !empresa) {
@@ -90,6 +102,9 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
     // La clave se genera con el formato DDMMYYYY
     const claveGenerada = generarClave(cliente, formatearFechaParaClave(fechaEnvio));
 
@@ -107,6 +122,7 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
         lugar,
         cliente,
         creadoPor
+<<<<<<< HEAD
 =======
 =======
     // Generar la clave automáticamente
@@ -144,6 +160,8 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
         cliente,
         creadoPor
 >>>>>>> 8171355 (commit FRegistro)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
     };
 
     try {
@@ -165,6 +183,7 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
             alert(result.mensaje);
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
             // Limpiar el formulario
             document.getElementById("crearRegistroForm").reset();
             document.getElementById("fechaEnvio").value = fechaISO; // Restaurar la fecha actual
@@ -177,6 +196,11 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
             document.getElementById("crearRegistroForm").reset();
             document.getElementById("fechaEnvio").value = fechaISO; // Restaurar la fecha actual
 >>>>>>> 80c9a81 (commit retoques)
+=======
+            // Limpiar el formulario
+            document.getElementById("crearRegistroForm").reset();
+            document.getElementById("fechaEnvio").value = fechaISO; // Restaurar la fecha actual
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
         }
     } catch (error) {
         alert("Error de red o del servidor.");

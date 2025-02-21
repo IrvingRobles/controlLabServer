@@ -4,6 +4,9 @@ const { format } = require('date-fns');
 // Función para crear un nuevo registro
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 // Controlador para crear un nuevo registro
 exports.crearRegistro = async (req, res) => {
     try {
@@ -27,6 +30,7 @@ exports.crearRegistro = async (req, res) => {
         );
 
         res.status(201).json({ mensaje: "Registro creado exitosamente", id: result.insertId, clave: claveGenerada });
+<<<<<<< HEAD
 =======
 =======
 // Controlador para crear un nuevo registro
@@ -58,6 +62,8 @@ exports.crearRegistro = async (req, res) => {
 =======
         res.status(201).json({ mensaje: "Registro creado exitosamente", id: result.insertId, clave: claveGenerada });
 >>>>>>> 8171355 (commit FRegistro)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
     } catch (error) {
         console.error("Error al crear el registro:", error);
         res.status(500).json({ mensaje: "Error en el servidor" });
@@ -166,6 +172,7 @@ exports.obtenerRegistroAsignado = async (req, res) => {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 
@@ -173,6 +180,8 @@ exports.obtenerRegistroAsignado = async (req, res) => {
 >>>>>>> 64d0206 (commit admin ListaEmpleados Asignaciones)
 =======
 >>>>>>> 8810c29 (commit campos OT)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
 exports.obtenerEmpleados = async (req, res) => {
     try {
         const query = `SELECT id, nombre FROM users`; 
@@ -227,6 +236,9 @@ exports.asignarPersonal = async (req, res) => {
         res.status(500).json({ mensaje: "Error en el servidor" });
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
     }   
 
 };
@@ -328,6 +340,7 @@ exports.actualizarOT = async (req, res) => {
         res.status(500).json({ mensaje: "Error en el servidor", error: error.message });
     }
 };
+<<<<<<< HEAD
 =======
 =======
     }   
@@ -439,3 +452,5 @@ exports.actualizarOT = async (req, res) => {
     }
 };
 >>>>>>> 434725f (FORMULARIO OT)
+=======
+>>>>>>> 46908865f5686494c4c81643364f016f3943aa47
