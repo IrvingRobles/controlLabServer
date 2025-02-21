@@ -80,7 +80,6 @@ async function eliminarProveedor(id) {
     };
 }
 
-
 async function cargarProveedores() {
     try {
         const response = await fetch('/api/almacen/id/proveedores');
@@ -88,12 +87,13 @@ async function cargarProveedores() {
             throw new Error(`Error HTTP: ${response.status}`);
         }
         const proveedores = await response.json();
-        // Accede al primer array que contiene los proveedores
-        const listaProveedores = document.getElementById('listaProveedores');
-        listaProveedores.innerHTML = ''; // Limpiar tabla
-        // Verifica si proveedores tiene datos
-        if (Array.isArray(proveedores[0])) {
-            proveedores[0].forEach(proveedor => {
+
+        // Verifica si la respuesta es un arreglo de proveedores
+        if (Array.isArray(proveedores) && proveedores.length > 0) {
+            const listaProveedores = document.getElementById('listaProveedores');
+            listaProveedores.innerHTML = ''; // Limpiar tabla
+
+            proveedores.forEach(proveedor => {
                 const fila = document.createElement('tr');
                 fila.innerHTML = `
                     <td>${proveedor.idProveedor}</td>
@@ -109,7 +109,6 @@ async function cargarProveedores() {
         console.error('Error al cargar proveedores:', error);
     }
 }
-
 
 // Función para mostrar el modal personalizado
 function showModal(message, success) {

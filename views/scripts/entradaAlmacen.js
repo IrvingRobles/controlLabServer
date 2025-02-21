@@ -14,8 +14,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     movimientoSelect.innerHTML = '<option value="" selected disabled>Seleccione un movimiento</option>';
                     data.forEach(movimiento => {
                         const option = document.createElement('option');
-                        option.value = movimiento.idMovimiento; 
-                        option.textContent = movimiento.nombre; 
+                        option.value = movimiento.idMovimiento;
+                        option.textContent = movimiento.nombre;
                         movimientoSelect.appendChild(option);
                     });
                 } else {
@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const proveedorSelect = document.getElementById('proveedor');
     if (proveedorSelect) {
-        fetch('/api/almacen/id/proveedorselect') // Asegúrate de que esta ruta es la correcta
+        fetch('/api/almacen/proveedorselect/id') // Asegúrate de que esta ruta es la correcta
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -41,8 +41,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     proveedorSelect.innerHTML = '<option value="" selected disabled>Seleccione un proveedor</option>';
                     data.forEach(proveedor => {
                         const option = document.createElement('option');
-                        option.value = proveedor.idProveedor; 
-                        option.textContent = proveedor.nombre; 
+                        option.value = proveedor.idProveedor;
+                        option.textContent = proveedor.nombre;
                         proveedorSelect.appendChild(option);
                     });
                 } else {
@@ -54,9 +54,36 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
+    const productoselect = document.getElementById('producto');
+    if (productoselect) {
+        fetch('/api/almacen/productoselect/id') // Asegúrate de que esta ruta es la correcta
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (Array.isArray(data) && data.length > 0) {
+                    productoselect.innerHTML = '<option value="" selected disabled>Seleccione un producto</option>';
+                    data.forEach(producto => {
+                        const option = document.createElement('option');
+                        option.value = producto.idProducto;
+                        option.textContent = producto.nombre;
+                        productoselect.appendChild(option);
+                    });
+                } else {
+                    console.error("No se recibieron productos válidos");
+                }
+            })
+            .catch(error => {
+                console.error('Error al obtener los productos:', error);
+            });
+    }
+
     const empresaSelect = document.getElementById('empresa');
     if (empresaSelect) {
-        fetch('/api/almacen/id/empresa') // Ajusta la ruta si es diferente
+        fetch('/api/almacen/id/empresas') // Ajusta la ruta si es diferente
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -101,6 +128,26 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
+    document.getElementById('producto').addEventListener('change', async function () {
+        const idProducto = this.value;
+
+        if (!idProducto) return;
+
+        try {
+            const response = await fetch(`/api/almacen/producto/${idProducto}`);
+            if (!response.ok) throw new Error('Producto no encontrado');
+
+            const data = await response.json();
+            console.log('Datos recibidos:', data); // Verifica qué datos llegan en consola
+
+            document.getElementById('inicial').value = data.inicial ?? 0;
+            document.getElementById('precio_inicial').value = data.precio_inicial ?? 0;
+        } catch (error) {
+            console.error('Error al obtener datos del producto:', error);
+            alert('Error al cargar los datos del producto.');
+        }
+    });
+
 
     // Obtener el siguiente ID del almacén
     const idAlmacenField = document.getElementById('idAlmacen');
@@ -124,6 +171,26 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.error('Error al obtener el siguiente ID:', error);
             });
     }
+
+    // Manejar el botón de guardar
+    document.getElementById('guardarRegistro').addEventListener('click', function () {
+        // Obtener valores actuales
+        const inicial = parseFloat(document.getElementById('inicial').value) || 0;
+        const ctd_entradas = parseFloat(document.getElementById('ctd_entradas').value) || 0;
+        const pu_entrada = parseFloat(document.getElementById('pu_entrada').value) || 0;
+    
+        // Calcular nuevo inicial y precio_inicial
+        document.getElementById('inicial').value = inicial + ctd_entradas;
+        document.getElementById('precio_inicial').value = pu_entrada;
+    
+        // Enviar el formulario (una sola vez)
+        document.getElementById('formRegistroAlmacen').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    });
+
+    document.getElementById('guardarRegistro').addEventListener('click', function () {
+        // Aquí disparas el evento submit directamente en el formulario
+        document.getElementById('formRegistroAlmacen').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    });
 
     // Manejar el envío del formulario
     document.getElementById('formRegistroAlmacen').addEventListener('submit', async function (event) {
@@ -173,8 +240,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 showModal(`Error: ${error.mensaje}`, false);
             } else {
                 const result = await response.json();
-                document.getElementById('idAlmacen').value = result.siguiente_id;
-                showModal(`Registrado con éxito Id Mov: ${result.siguiente_id}`, true);
+                document.getElementById('idAlmacen').value = result.registroId;
+                showModal(`Registrado con éxito Id Mov: ${result.registroId}`, true);
+
             }
         } catch (error) {
             showModal("Hubo un problema al procesar la solicitud. Inténtalo de nuevo.", false);
