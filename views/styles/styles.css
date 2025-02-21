@@ -83,7 +83,10 @@ button {
     padding: 10px 15px;
     font-size: 14px;
 }
-
+.btn {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
 /* Estilo para los botones principales */
 .btn-primary {
     background-color: var(--primary-color);

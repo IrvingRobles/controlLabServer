@@ -20,28 +20,20 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
             <a class="navbar-brand" href="inicioAdmin.html">Menú Principal</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="adminRegistro.html">Crear Solicitud</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="adminBuscar.html">Buscar Solicitud</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="adminBusquedaPdf.html">Registro de cotizaciones</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="adminPersonal.html">Lista de empleados</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="adminRegistroPersonal.html">Registrar nuevo</a>
-                    </li>
-                    <button onclick="cerrarSesion()" class="btn btn-danger btn-sm">Cerrar Sesión</button>
+                    <li class="nav-item"><a class="nav-link" href="adminRegistro.html">Crear Solicitud</a></li>
+                    <li class="nav-item"><a class="nav-link" href="adminBuscar.html">Buscar Solicitud</a></li>
+                    <li class="nav-item"><a class="nav-link" href="adminBusquedaPdf.html">Registro de cotizaciones</a></li>
+                    <li class="nav-item"><a class="nav-link" href="adminPersonal.html">Lista de empleados</a></li>
+                    <li class="nav-item"><a class="nav-link" href="adminRegistroPersonal.html">Registrar nuevo</a></li>
                 </ul>
+                <span id="perfil-nombre" class="text-light ms-auto">Cargando...</span>
+                <button onclick="cerrarSesion()" class="btn btn-danger btn-sm ms-2">Cerrar Sesión</button>
             </div>
         </div>
     </nav>
