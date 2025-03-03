@@ -336,22 +336,20 @@ async function subirPDFAlServidor(formData) {
         alert("Hubo un error al subir el PDF.");
     }
 }
-
 function generarTablaMateriales(doc, marginLeft) {
     const margenSuperior = 80;
-    const margenLateral = marginLeft;
     const anchoTabla = 190;
     const altoFila = 8;
     const maxAltoPagina = doc.internal.pageSize.height - 30;
     let y = margenSuperior + 5;
 
     doc.setFontSize(10);
-    doc.text("Materiales:", margenLateral, margenSuperior);
+    doc.text("Materiales:", marginLeft, margenSuperior);
 
     const filas = document.querySelectorAll("#tablaMateriales tbody tr");
 
     if (filas.length === 0) {
-        doc.text("No hay materiales registrados.", margenLateral, margenSuperior + 5);
+        doc.text("No hay materiales registrados.", marginLeft, margenSuperior + 5);
         return;
     }
 
@@ -359,7 +357,7 @@ function generarTablaMateriales(doc, marginLeft) {
     const encabezados = ["PDA", "Cantidad", "Unidad", "Descripción", "Precio Unitario", "Importe Total"];
     const anchosColumnas = [20, 20, 20, 80, 25, 25];
 
-    let x = margenLateral;
+    let x = marginLeft;
 
     // Encabezados con fondo negro
     doc.setFillColor(0, 0, 0);
@@ -375,16 +373,14 @@ function generarTablaMateriales(doc, marginLeft) {
     doc.setTextColor(0, 0, 0);
     y += altoFila;
 
-    // Variable para almacenar el total de importes
     let totalImporte = 0;
 
-    // Dibujar filas
     filas.forEach(row => {
-        let x = margenLateral;
+        let x = marginLeft;
 
         const getValue = (index) => {
             const input = row.cells[index]?.querySelector("input");
-            return input ? input.value : "-";
+            return input && input.value.trim() !== "" ? input.value : "-";
         };
 
         let filaDatos = [
@@ -392,15 +388,13 @@ function generarTablaMateriales(doc, marginLeft) {
             getValue(1), 
             getValue(2), 
             doc.splitTextToSize(getValue(3), anchosColumnas[3] - 5), // Descripción ajustada
-            `$${parseFloat(getValue(4)).toFixed(2)}`, 
-            `$${parseFloat(getValue(5)).toFixed(2)}`
+            `$${parseFloat(getValue(4) || 0).toFixed(2)}`, 
+            `$${parseFloat(getValue(5) || 0).toFixed(2)}`
         ];
 
-        // Sumar el importe total
         totalImporte += parseFloat(getValue(5)) || 0;
 
-        let maxLineas = filaDatos.slice(0, 3).map(txt => txt.length > 20 ? 2 : 1);
-        let altoDinamico = Math.max(...maxLineas) * altoFila;
+        let altoDinamico = altoFila;
 
         // Verificar si se necesita una nueva página
         if (y + altoDinamico > maxAltoPagina) {
@@ -423,16 +417,12 @@ function generarTablaMateriales(doc, marginLeft) {
         y += altoDinamico;
     });
 
-    // Dibujar línea divisoria antes del total
-    doc.setLineWidth(0.5);
-    doc.line(margenLateral, y, margenLateral + anchoTabla, y);
-
-    // Dibujar fila del total
+    // Fila del total sin línea divisoria previa
     y += altoFila;
     doc.setFont("helvetica", "bold");
-    doc.text("TOTAL:", margenLateral + anchoTabla - anchosColumnas[5] - anchosColumnas[4] / 2, y + altoFila - 3, { align: "center" });
-    doc.text(`$${totalImporte.toFixed(2)}`, margenLateral + anchoTabla - anchosColumnas[5] / 2, y + altoFila - 3, { align: "center" });
+    doc.text("TOTAL:", marginLeft + anchoTabla - anchosColumnas[5] - anchosColumnas[4] / 2, y + altoFila - 3, { align: "center" });
+    doc.text(`$${totalImporte.toFixed(2)}`, marginLeft + anchoTabla - anchosColumnas[5] / 2, y + altoFila - 3, { align: "center" });
 
-    // Dibujar el borde exterior de la tabla
-    doc.rect(margenLateral, margenSuperior + 5, anchoTabla, y - margenSuperior - 5);
+    // Dibujar borde de la tabla
+    doc.rect(marginLeft, margenSuperior + 5, anchoTabla, y - margenSuperior - 5);
 }
