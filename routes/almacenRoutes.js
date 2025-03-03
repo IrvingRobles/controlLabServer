@@ -86,4 +86,6 @@ router.get('/id/:idAlmacen', almacenController.obtenerValePorId);
 
 router.post('/vales/guardar', almacenController.guardarVale);
 
+router.get('/user', almacenController.obtenerUsers);
+
 module.exports = router;

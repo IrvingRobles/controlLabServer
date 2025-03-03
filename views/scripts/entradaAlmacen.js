@@ -148,6 +148,30 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    // Rellenar el campo de monedas al cargar la página
+    const userSelect = document.getElementById('idUsuario');
+    if (userSelect) {
+        fetch('/api/almacen/user')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+
+                }
+                return response.json();
+            })
+            .then(data => {
+                userSelect.innerHTML = '<option value="" selected disabled>Seleccione un Usuario</option>';
+                data.forEach(users => {
+                    const option = document.createElement('option');
+                    option.value = users.id; // Guardamos el idMoneda como valor
+                    option.textContent = users.username; // Mostramos el nombre de la moneda
+                    userSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error al obtener los usuarios:', error);
+            });
+    }
 
     // Obtener el siguiente ID del almacén
     const idAlmacenField = document.getElementById('idAlmacen');

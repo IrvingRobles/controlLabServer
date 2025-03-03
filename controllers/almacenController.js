@@ -759,3 +759,16 @@ exports.guardarVale = async (req, res) => {
         res.status(500).json({ mensaje: "Error al guardar el vale", error });
     }
 };
+
+// Ruta para obtener las usuarios
+exports.obtenerUsers = async (req, res) => {
+    try {
+        // Consulta para obtener los nombres de los users y guardar el id
+        const query = 'SELECT id, username FROM users'; // Ajusta los campos según tu base de datos
+        const [rows] = await db.execute(query);
+
+        res.status(200).json(rows); // Enviar la lista de users como respuesta
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al obtener los users', error });
+    }
+};
