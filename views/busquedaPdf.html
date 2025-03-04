@@ -91,28 +91,27 @@
                     <div>
                         <a href="/PDFCotizacion/${file}" class="btn btn-primary btn-sm" target="_blank">Ver</a>
                         <a href="/PDFCotizacion/${file}" download class="btn btn-secondary btn-sm">Descargar</a>
-                        <button class="btn btn-danger btn-sm" onclick="deletePDF('${file}')">Eliminar</button>
                     </div>
                 `;
                 list.appendChild(listItem);
             });
         }
 
-        // Función para eliminar un PDF
-        function deletePDF(fileName) {
-            if (confirm(`¿Estás seguro de que deseas eliminar el archivo "${fileName}"?`)) {
-                fetch(`/PDFCotizacion/${fileName}`, { method: 'DELETE' })
-                    .then(response => {
-                        if (response.ok) {
-                            alert('Archivo eliminado con éxito.');
-                            fetchPDFs();
-                        } else {
-                            alert('Error al eliminar el archivo.');
-                        }
-                    })
-                    .catch(error => console.error('Error al eliminar el archivo:', error));
-            }
-        }
+        // // Función para eliminar un PDF
+        // function deletePDF(fileName) {
+        //     if (confirm(`¿Estás seguro de que deseas eliminar el archivo "${fileName}"?`)) {
+        //         fetch(`/PDFCotizacion/${fileName}`, { method: 'DELETE' })
+        //             .then(response => {
+        //                 if (response.ok) {
+        //                     alert('Archivo eliminado con éxito.');
+        //                     fetchPDFs();
+        //                 } else {
+        //                     alert('Error al eliminar el archivo.');
+        //                 }
+        //             })
+        //             .catch(error => console.error('Error al eliminar el archivo:', error));
+        //     }
+        // }
 
         // Función para filtrar los archivos disponibles
         function filtrarArchivos() {
