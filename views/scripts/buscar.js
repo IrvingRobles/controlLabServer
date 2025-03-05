@@ -216,9 +216,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const { jsPDF } = window.jspdf;
 
         // Solicitar número de revisión
-        const revision = "03"; // Número de revisión fijo
-        // const revision = prompt("Ingrese el número de revisión:", "03");
-        // if (!revision) return; // Si no se ingresa un número de revisión, no exporta
+        const revision = prompt("Ingrese el número de revisión:", "03");
+        if (!revision) return; // Si no se ingresa un número de revisión, no exporta
 
         const doc = new jsPDF("landscape", "mm", "letter"); // Orientación horizontal
 

@@ -1,12 +1,11 @@
 const { getRounds } = require('bcrypt');
 const mysql = require('mysql2/promise');
 
-// Crear el pool de conexiones
 const db = mysql.createPool({
-    host: 'localhost',       // Cambia a la dirección de tu servidor MySQL
-    user: 'root',            // Tu usuario de MySQL
-    password: '',            // Tu contraseña de MySQL
-    database: 'caltecmex',      // Nombre de la base de datos
+    host: 'bf7gchwsnq8qdjrroxwg-mysql.services.clever-cloud.com',       // dirección de tu servidor MySQL
+    user: 'uaioyc05nizrr2iw',      // usuario de MySQL
+    password: 'pGQtUIYobiEfGZTggEqn', // contraseña de MySQL
+    database: 'bf7gchwsnq8qdjrroxwg', // Nombre de la base de datos
 });
 
 module.exports = db;
