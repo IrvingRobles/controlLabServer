@@ -73,43 +73,20 @@
             <!-- Sección de datos del producto -->
             <h5>Datos del Producto</h5>
             <div class="row g-3">
-                <div class="col-md-4">
-                    <label for="pedido" class="form-label">Pedido:</label>
-                    <input type="text" class="form-control" id="pedido" placeholder="Ingrese el pedido" required>
-                </div>
+                
                 <div class="col-md-4">
                     <label for="producto" class="form-label">Producto:</label>
                     <select class="form-select" id="producto" required>
                         <option value="" selected disabled>Seleccione un producto</option>
                     </select>
                 </div>
-                <div class="col-md-4">
-                    <label for="marca" class="form-label">Marca:</label>
-                    <input type="text" class="form-control" id="marca" placeholder="Ingrese la marca" required>
+                <div class="mb-3">
+                    <label for="inicial" class="form-label fw-bold">Existencias:</label>
+                    <input type="number" id="inicial" name="inicial" class="form-control" readonly>
                 </div>
-                <div class="col-md-4">
-                    <label for="proveedor" class="form-label">Proveedor:</label>
-                    <select class="form-select" id="proveedor" required>
-                        <option value="" selected disabled>Seleccione un proveedor</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label for="no_parte" class="form-label">No. de Parte:</label>
-                    <input type="text" class="form-control" id="no_parte" placeholder="Ingrese el número de parte"
-                        required>
-                </div>
-                <div class="col-md-4">
-                    <label for="no_serie" class="form-label">No. de Serie:</label>
-                    <input type="text" class="form-control" id="no_serie" placeholder="Ingrese el número de serie"
-                        required>
-                </div>
-                <div class="col-md-4">
-                    <label for="modelo" class="form-label">Modelo: </label>
-                    <input type="text" class="form-control" id="modelo" placeholder="Ingrese el modelo" required>
-                </div>
-                <div class="col-md-4">
-                    <label for="equipo" class="form-label">Equipo:</label>
-                    <input type="text" class="form-control" id="equipo" placeholder="Ingrese el equipo" required>
+                <div class="mb-3">
+                    <label for="precio_inicial" class="form-label fw-bold">PU Inicial:</label>
+                    <input type="number" id="precio_inicial" name="precio_inicial" class="form-control" readonly>
                 </div>
             </div>
 
@@ -133,15 +110,7 @@
                                 <!-- Las opciones de monedas se agregarán dinámicamente aquí -->
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <label for="inicial" class="form-label">Existencias:</label>
-                            <input type="number" id="inicial" name="inicial" class="form-control" readonly>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="precio_inicial" class="form-label">PU Inicial:</label>
-                            <input type="number" id="precio_inicial" name="precio_inicial" class="form-control"
-                                readonly>
-                        </div>
+
 
                         <div class="col-md-3">
                             <label for="ctd_entradas" class="form-label">Cantidad Entradas:</label>
@@ -185,7 +154,7 @@
                 </div>
 
                 <hr class="my-4">
-
+ 
                 <!-- Observaciones -->
                 <div class="col-md-12">
                     <h5>Observaciones</h5>

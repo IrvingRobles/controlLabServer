@@ -1,32 +1,83 @@
 document.addEventListener('DOMContentLoaded', () => {
     cargarProductos();
+    cargarProveedores(); // Cargar proveedores al inicio
+    setInterval(cargarProveedores, 10000); // Actualiza cada 10 segundos
 });
+
+const proveedorSelect = document.getElementById('idProveedor');
+async function cargarProveedores() {
+    try {
+        const response = await fetch('/api/almacen/proveedorselect/id');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const data = await response.json();
+
+        if (Array.isArray(data) && data.length > 0) {
+            // Guardar el valor seleccionado actualmente
+            const selectedValue = proveedorSelect.value;
+
+            // Limpiar el select
+            proveedorSelect.innerHTML = '<option value="" disabled>Seleccione un proveedor</option>';
+
+            // Agregar las nuevas opciones
+            data.forEach(proveedor => {
+                const option = document.createElement('option');
+                option.value = proveedor.idProveedor;
+                option.textContent = proveedor.nombre;
+                proveedorSelect.appendChild(option);
+            });
+
+            // Restaurar la selección previa si sigue existiendo en la nueva lista
+            if ([...proveedorSelect.options].some(opt => opt.value === selectedValue)) {
+                proveedorSelect.value = selectedValue;
+            }
+        } else {
+            console.error("No se recibieron proveedores válidos.");
+        }
+    } catch (error) {
+        console.error('Error al obtener los proveedores:', error);
+    }
+}
 
 document.getElementById('formRegistroProducto').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const nombre = document.getElementById('nombre').value.trim();
-    const descripcion = document.getElementById('descripcion').value.trim();
-
-    if (!nombre || !descripcion) {
-        showModal('Todos los campos son obligatorios.', false);
+    if (!e.target.checkValidity()) {
+        e.stopPropagation();
         return;
     }
+
+    const data = {
+        nombre: document.getElementById('nombre').value,
+        descripcion: document.getElementById('descripcion').value,
+        pedido: document.getElementById("pedido").value,
+        marca: document.getElementById("marca").value,
+        idProveedor: document.getElementById("idProveedor").value,
+        no_parte: document.getElementById("no_parte").value,
+        no_serie: document.getElementById("no_serie").value,
+        modelo: document.getElementById("modelo").value,
+        equipo: document.getElementById("equipo").value,
+        inicial: document.getElementById("inicial").value,
+        precio_inicial: document.getElementById("precio_inicial").value
+    };
 
     try {
         const response = await fetch('/api/almacen/producto', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nombre, descripcion }),
+            body: JSON.stringify(data)
+
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Error al registrar el producto.');
+            const error = await response.json();
+            throw new Error(error.message || 'Error al registrar el producto.');
         }
 
         showModal('¡Producto registrado correctamente!', true);
-        cargarProductos(); // Recargar la lista de productos
+
+        await cargarProductos();   // Recargar lista de productos
+        await cargarProveedores(); // Actualizar lista de proveedores dinámicamente
 
     } catch (error) {
         showModal(`Error: ${error.message}`, false);
@@ -48,6 +99,16 @@ async function buscarProducto() {
         const producto = await response.json();
         document.getElementById('nombre').value = producto.nombre;
         document.getElementById('descripcion').value = producto.descripcion;
+        document.getElementById("pedido").value = producto.pedido;
+        document.getElementById("marca").value = producto.marca;
+        document.getElementById("idProveedor").value = producto.idProveedor;
+        document.getElementById("no_parte").value = producto.no_parte;
+        document.getElementById("no_serie").value = producto.no_serie;
+        document.getElementById("modelo").value = producto.modelo;
+        document.getElementById("equipo").value = producto.equipo;
+        document.getElementById("inicial").value = producto.inicial;
+        document.getElementById("precio_inicial").value = producto.precio_inicial;
+
     } catch (error) {
         showModal(`Error: ${error.message}`, false);
     }
@@ -75,6 +136,15 @@ async function eliminarProducto(id) {
             document.getElementById('idProducto').value = '';
             document.getElementById('nombre').value = '';
             document.getElementById('descripcion').value = '';
+            document.getElementById("pedido").value = '';
+            document.getElementById("marca").value = '';
+            document.getElementById("idProveedor").value = '';
+            document.getElementById("no_parte").value = '';
+            document.getElementById("no_serie").value = '';
+            document.getElementById("modelo").value = '';
+            document.getElementById("equipo").value = '';
+            document.getElementById("inicial").value = '';
+            document.getElementById("precio_inicial").value = '';
             cargarProductos(); // Recargar lista
         } catch (error) {
             showModal(`Error: ${error.message}`, false);
@@ -100,6 +170,15 @@ async function cargarProductos() {
                     <td>${producto.idProducto}</td>
                     <td>${producto.nombre}</td>
                     <td>${producto.descripcion}</td>
+                    <td>${producto.pedido}</td>
+                    <td>${producto.marca}</td>
+                    <td>${producto.idProveedor}</td>
+                    <td>${producto.no_parte}</td>
+                    <td>${producto.no_serie}</td>
+                    <td>${producto.modelo}</td>
+                    <td>${producto.equipo}</td>
+                    <td>${producto.inicial}</td>
+                    <td>${producto.precio_inicial}</td>
                 `;
                 listaProductos.appendChild(fila);
             });
@@ -120,7 +199,7 @@ function showModal(message, success) {
 
     modalTitle.textContent = success ? "¡Éxito!" : "Error";
     modalTitle.className = success ? "text-success" : "text-danger";
-    modalBody.textContent = message; 
+    modalBody.textContent = message;
     modalButton.textContent = "Cerrar";
     modalButton.className = success ? "btn btn-primary" : "btn btn-secondary";
 
@@ -167,12 +246,21 @@ async function generarPDF() {
             producto.idProducto,
             producto.nombre,
             producto.descripcion,
+            producto.pedido,
+            producto.marca,
+            producto.idProveedor,
+            producto.no_parte,
+            producto.no_serie,
+            producto.modelo,
+            producto.equipo,
+            producto.inicial,
+            producto.precio_inicial
         ]);
 
         // Crear la tabla en el PDF
         doc.autoTable({
             startY: 30,
-            head: [["ID", "Nombre", "Descripción"]],
+            head: [["ID", "Nombre", "Descripción", "Pedido", "Marca", "Proveedor", "N° Parte", "N° Serie", "Modelo", "Equipo", "Inicial", "Precio"]],
             body: datosTabla,
             theme: "striped",
         });

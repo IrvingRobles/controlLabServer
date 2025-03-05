@@ -4,7 +4,7 @@ const db = require('../model/db');
 exports.obtenerSiguienteIdAlmacen = async (req, res) => {
     try {
         // Consulta el último ID registrado
-        const query = `SELECT MAX(idAlmacen) AS ultimo_id FROM almacen`;
+        const query = `SELECT MAX(idAlmacen) AS ultimo_id FROM entrada`;
         const [rows] = await db.execute(query);
 
         const ultimoId = rows[0]?.ultimo_id || 0; // Si no hay registros, empieza en 0
@@ -580,15 +580,15 @@ exports.seleccionarProveedor = async (req, res) => {
 
 // Registrar un nuevo producto
 exports.registrarProducto = async (req, res) => {
-    const { nombre, descripcion } = req.body;
+    const { nombre, descripcion, pedido, marca, idProveedor, no_parte, no_serie, modelo, equipo, inicial, precio_inicial } = req.body;
 
-    if (!nombre || !descripcion) {
+    if (!nombre || !descripcion || !pedido || !marca || !idProveedor || !no_parte || !no_serie || !modelo || !equipo || !inicial || !precio_inicial) {
         return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
     }
 
     try {
         // 1️⃣ Verificar si el producto ya existe
-        const queryCheck = 'SELECT nombre, descripcion FROM producto WHERE nombre = ?';
+        const queryCheck = 'SELECT nombre FROM producto WHERE nombre = ?';
         const [rows] = await db.query(queryCheck, [nombre]);
 
         if (rows.length > 0) {
@@ -596,8 +596,8 @@ exports.registrarProducto = async (req, res) => {
         }
 
         // 2️⃣ Insertar el nuevo producto si no existe
-        const queryInsert = 'INSERT INTO producto (nombre, descripcion) VALUES (?, ?)';
-        await db.query(queryInsert, [nombre, descripcion]);
+        const queryInsert = 'INSERT INTO producto (nombre, descripcion, pedido, marca, idProveedor, no_parte, no_serie, modelo, equipo, inicial, precio_inicial) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        await db.query(queryInsert, [nombre, descripcion, pedido, marca, idProveedor, no_parte, no_serie, modelo, equipo, inicial, precio_inicial]);
 
         res.status(201).json({ message: 'Producto registrado correctamente.' });
 
@@ -612,7 +612,7 @@ exports.obtenerProductoPorId = async (req, res) => {
     const { idProducto } = req.params;
 
     try {
-        const query = 'SELECT nombre, descripcion FROM producto WHERE idProducto = ?';
+        const query = 'SELECT nombre, descripcion, pedido, marca, idProveedor, no_parte, no_serie, modelo, equipo, inicial, precio_inicial FROM producto WHERE idProducto = ?';
         const [rows] = await db.query(query, [idProducto]);
 
         if (rows.length === 0) {
@@ -649,7 +649,7 @@ exports.obtenerProducto = async (req, res) => {
 // Obtener todos los productos
 exports.obtenerProductos = async (req, res) => {
     try {
-        const [productos] = await db.query('SELECT idProducto, nombre, descripcion FROM producto');
+        const [productos] = await db.query('SELECT a.idProducto, a.nombre, a.descripcion, a.pedido, a.marca, pr.nombre AS idProveedor, a.no_parte, a.no_serie, a.modelo, a.equipo, a.inicial, a.precio_inicial FROM producto a JOIN proveedor pr ON a.idProveedor = pr.idProveedor');
 
         if (productos.length === 0) {
             return res.status(404).json({ message: 'No se encontraron productos.' });

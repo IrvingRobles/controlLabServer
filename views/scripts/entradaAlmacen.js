@@ -27,32 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    const proveedorSelect = document.getElementById('proveedor');
-    if (proveedorSelect) {
-        fetch('/api/almacen/proveedorselect/id') // Asegúrate de que esta ruta es la correcta
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    proveedorSelect.innerHTML = '<option value="" selected disabled>Seleccione un proveedor</option>';
-                    data.forEach(proveedor => {
-                        const option = document.createElement('option');
-                        option.value = proveedor.idProveedor;
-                        option.textContent = proveedor.nombre;
-                        proveedorSelect.appendChild(option);
-                    });
-                } else {
-                    console.error("No se recibieron proveedores válidos");
-                }
-            })
-            .catch(error => {
-                console.error('Error al obtener los proveedores:', error);
-            });
-    }
+
 
     const productoselect = document.getElementById('producto');
     if (productoselect) {
@@ -231,14 +206,7 @@ document.addEventListener("DOMContentLoaded", function () {
             empresa: document.getElementById("empresa").value,
             tipo_movimiento: document.getElementById("tipo_movimiento").value,
             fecha: document.getElementById("fecha").value,
-            pedido: document.getElementById("pedido").value,
             producto: document.getElementById("producto").value,
-            marca: document.getElementById("marca").value,
-            proveedor: document.getElementById("proveedor").value,
-            no_parte: document.getElementById("no_parte").value,
-            no_serie: document.getElementById("no_serie").value,
-            modelo: document.getElementById("modelo").value,
-            equipo: document.getElementById("equipo").value,
             factura: document.getElementById("factura").value,
             moneda: document.getElementById("moneda").value,
             inicial: document.getElementById("inicial").value,
