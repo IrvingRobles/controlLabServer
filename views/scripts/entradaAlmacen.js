@@ -330,6 +330,8 @@ async function buscarRegistro() {
         document.getElementById("seccion").value = entrada.seccion;
         document.getElementById("caja").value = entrada.caja;
         document.getElementById("observaciones").value = entrada.observaciones;
+
+        document.getElementById("idAlmacen").value = "";
     } catch (error) {
         showModal(`Error: ${error.message}`, false);
     }
