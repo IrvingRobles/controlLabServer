@@ -2,11 +2,21 @@
 const express = require('express');
 const router = express.Router();
 const registroController = require('../controllers/registroController');
-
 const otcController = require('../controllers/cotizacionesController');
+const registrosMaterialesController = require('../controllers/registrosMaterialesController');
+
+router.get('/listaMateriales', registrosMaterialesController.obtenerTodosRM); 
+router.get('/obtenerMaterial/:id', registrosMaterialesController.obtenerRM);
+router.post('/crearMaterial', registrosMaterialesController.crearRM);
+router.put('/actualizarMaterial/:id', registrosMaterialesController.actualizarRM);
+router.delete('/eliminarMaterial/:id', registrosMaterialesController.eliminarRM);
+router.get('/ultimoFolio', registrosMaterialesController.obtenerUltimoFolio); // Asegúrate de agregar esta función
 
 // Ruta para crear un nuevo registro
 router.post('/crear', registroController.crearRegistro);
+router.post('/crearCliente', registroController.crearCliente);
+router.get('/obtenerClientes', registroController.obtenerClientes);
+router.get('/listaClientes', registroController.listarClientes);
 
 // Ruta para obtener todos los registros
 router.get('/obtener', registroController.obtenerRegistros);
