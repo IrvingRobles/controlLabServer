@@ -73,10 +73,6 @@ async function eliminarMoneda(id) {
     }
 }
 
-
-
-
-
 // Función para cargar los movimientos registrados
 async function cargarMonedas() {
     try {

@@ -23,7 +23,15 @@ async function obtenerRegistrosAlmacen() {
     }
 }
 
-// Función para mostrar los registros en la tabla según la página actual
+// Función para formatear la fecha en formato dd/mm/yyyy
+function formatearFecha(fecha) {
+    const fechaObj = new Date(fecha); // Convertir la fecha en objeto Date
+    const dia = String(fechaObj.getDate()).padStart(2, '0'); // Obtener el día y asegurar que tenga dos dígitos
+    const mes = String(fechaObj.getMonth() + 1).padStart(2, '0'); // Obtener el mes y asegurar que tenga dos dígitos
+    const anio = fechaObj.getFullYear(); // Obtener el año
+    return `${dia}/${mes}/${anio}`; // Devolver la fecha en el formato dd/mm/yyyy
+}
+
 function mostrarPagina(pagina) {
     const listado = document.getElementById("listadoRegistros");
     listado.innerHTML = ""; // Limpiar contenido previo
@@ -37,28 +45,21 @@ function mostrarPagina(pagina) {
         fila.innerHTML = `
             <td>${registro.idAlmacen}</td>
             <td>${registro.idUsuario}</td>
-            <td>${registro.empresa}</td>
-            <td>${registro.tipo_movimiento}</td>
-            <td>${registro.fecha}</td>
-            <td>${registro.pedido}</td>
-            <td>${registro.producto}</td>
-            <td>${registro.marca}</td>
-            <td>${registro.proveedor}</td>
-            <td>${registro.no_parte}</td>
-            <td>${registro.no_serie}</td>
-            <td>${registro.modelo}</td>
-            <td>${registro.equipo}</td>
+            <td>${registro.idMovimiento}</td>
+            <td>${formatearFecha(registro.fecha)}</td>
+            <td>${registro.idProducto}</td>
             <td>${registro.factura}</td>
-            <td>${registro.moneda}</td>
             <td>${registro.inicial}</td>
-            <td>${registro.precio_inicial}</td>
-            <td>${registro.ctd_entradas}</td>
-            <td>${registro.pu_entrada}</td>
-            <td>${registro.concepto}</td>
             <td>${registro.anaquel}</td>
             <td>${registro.seccion}</td>
             <td>${registro.caja}</td>
-            <td>${registro.observaciones}</td>
+<td>
+    <button class="btn btn-secondary btn-sm fw-bold shadow-sm px-3" onclick="verMasDetalles(${registro.idAlmacen})">
+        <i class="bi bi-eye"></i> Ver Más
+    </button>
+</td>
+
+
         `;
         listado.appendChild(fila);
     });
@@ -67,6 +68,12 @@ function mostrarPagina(pagina) {
     document.getElementById("paginaActual").textContent = `Página ${pagina}`;
     document.getElementById("btnAnterior").disabled = pagina === 1;
     document.getElementById("btnSiguiente").disabled = fin >= registrosFiltrados.length;
+}
+
+// Función para redirigir a entradaAlmacen con el id
+function verMasDetalles(idAlmacen) {
+    // Redirigir a la página de entradaAlmacen y pasar el id como parámetro en la URL
+    window.location.href = `/entradaAlmacen.html?id=${idAlmacen}`;
 }
 
 // Eventos de los botones de paginación
@@ -91,23 +98,23 @@ document.addEventListener("DOMContentLoaded", obtenerRegistrosAlmacen);
 function filtrarRegistros() {
     const filtroIdMov = document.getElementById("filtroIdMov").value.toLowerCase();
     const filtroUsuario = document.getElementById("filtroUsuario").value.toLowerCase();
-    const filtroEmpresa = document.getElementById("filtroEmpresa").value.toLowerCase();
-    const filtroTipoMov = document.getElementById("filtroTipoMov").value.toLowerCase();
+    const filtroProducto = document.getElementById("filtroProducto").value.toLowerCase();
+    const filtroFactura = document.getElementById("filtroFactura").value.toLowerCase();
     const filtroFecha = document.getElementById("filtroFecha").value;
 
     // Filtrar los registros con base en los valores de los filtros
     registrosFiltrados = registrosAlmacen.filter(registro => {
-        const idMov = registro.idAlmacen.toString().toLowerCase();
-        const usuario = registro.idUsuario.toString().toLowerCase();
-        const empresa = registro.empresa.toLowerCase();
-        const tipoMov = registro.tipo_movimiento.toLowerCase();
+        const idAlmacen = registro.idAlmacen.toString().toLowerCase();
+        const idUsuario = registro.idUsuario.toString().toLowerCase();
+        const idProducto = registro.idProducto.toLowerCase();
+        const factura = registro.factura.toLowerCase();
         const fecha = registro.fecha.toLowerCase();
 
         return (
-            (filtroIdMov === "" || idMov.includes(filtroIdMov)) &&
-            (filtroUsuario === "" || usuario.includes(filtroUsuario)) &&
-            (filtroEmpresa === "" || empresa.includes(filtroEmpresa)) &&
-            (filtroTipoMov === "" || tipoMov.includes(filtroTipoMov)) &&
+            (filtroIdMov === "" || idAlmacen.includes(filtroIdMov)) &&
+            (filtroUsuario === "" || idUsuario.includes(filtroUsuario)) &&
+            (filtroProducto === "" || idProducto.includes(filtroProducto)) &&
+            (filtroFactura === "" || factura.includes(filtroFactura)) &&
             (filtroFecha === "" || fecha.includes(filtroFecha))
         );
     });
@@ -123,6 +130,6 @@ document.addEventListener("DOMContentLoaded", obtenerRegistrosAlmacen);
 // Añadir eventos de filtro
 document.getElementById("filtroIdMov").addEventListener("input", filtrarRegistros);
 document.getElementById("filtroUsuario").addEventListener("input", filtrarRegistros);
-document.getElementById("filtroEmpresa").addEventListener("input", filtrarRegistros);
-document.getElementById("filtroTipoMov").addEventListener("input", filtrarRegistros);
-document.getElementById("filtroFecha").addEventListener("input", filtrarRegistros);
+document.getElementById("filtroProducto").addEventListener("input", filtrarRegistros);
+document.getElementById("filtroFactura").addEventListener("input", filtrarRegistros);
+document.getElementById("filtroFecha").addEventListener("input", filtrarRegistros); 

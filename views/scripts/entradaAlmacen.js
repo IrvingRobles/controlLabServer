@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     // Rellenar el campo de tipo de movimiento al cargar la página
-    const movimientoSelect = document.getElementById('tipo_movimiento');
+    const movimientoSelect = document.getElementById('idMovimiento');
     if (movimientoSelect) {
         fetch('/api/almacen/id/movimientos') // Asegúrate de que esta ruta es la correcta
             .then(response => {
@@ -27,9 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-
-
-    const productoselect = document.getElementById('producto');
+    const productoselect = document.getElementById('idProducto');
     if (productoselect) {
         fetch('/api/almacen/productoselect/id') // Asegúrate de que esta ruta es la correcta
             .then(response => {
@@ -56,7 +54,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    const empresaSelect = document.getElementById('empresa');
+    const empresaSelect = document.getElementById('idEmpresa');
     if (empresaSelect) {
         fetch('/api/almacen/id/empresas') // Ajusta la ruta si es diferente
             .then(response => {
@@ -80,7 +78,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Rellenar el campo de monedas al cargar la página
-    const monedaSelect = document.getElementById('moneda');
+    const monedaSelect = document.getElementById('idMoneda');
     if (monedaSelect) {
         fetch('/api/almacen/moneda')
             .then(response => {
@@ -103,7 +101,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    document.getElementById('producto').addEventListener('change', async function () {
+    document.getElementById('idProducto').addEventListener('change', async function () {
         const idProducto = this.value;
 
         if (!idProducto) return;
@@ -126,7 +124,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Rellenar el campo de monedas al cargar la página
     const userSelect = document.getElementById('idUsuario');
     if (userSelect) {
-        fetch('/api/almacen/user')
+        fetch('/api/almacen/x/user')
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -176,21 +174,11 @@ document.addEventListener("DOMContentLoaded", function () {
         // Obtener valores actuales
         const inicial = parseFloat(document.getElementById('inicial').value) || 0;
         const ctd_entradas = parseFloat(document.getElementById('ctd_entradas').value) || 0;
-        const pu_entrada = parseFloat(document.getElementById('pu_entrada').value) || 0;
     
         // Calcular nuevo inicial y precio_inicial
         document.getElementById('inicial').value = inicial + ctd_entradas;
-        document.getElementById('precio_inicial').value = pu_entrada;
+    });
     
-        // Enviar el formulario (una sola vez)
-        document.getElementById('formRegistroAlmacen').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-    });
-
-    document.getElementById('guardarRegistro').addEventListener('click', function () {
-        // Aquí disparas el evento submit directamente en el formulario
-        document.getElementById('formRegistroAlmacen').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-    });
-
     // Manejar el envío del formulario
     document.getElementById('formRegistroAlmacen').addEventListener('submit', async function (event) {
         event.preventDefault();
@@ -203,12 +191,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const data = {
             idUsuario: document.getElementById("idUsuario").value,
-            empresa: document.getElementById("empresa").value,
-            tipo_movimiento: document.getElementById("tipo_movimiento").value,
+            idEmpresa: document.getElementById("idEmpresa").value,
+            idMovimiento: document.getElementById("idMovimiento").value,
             fecha: document.getElementById("fecha").value,
-            producto: document.getElementById("producto").value,
+            idProducto: document.getElementById("idProducto").value,
             factura: document.getElementById("factura").value,
-            moneda: document.getElementById("moneda").value,
+            idMoneda: document.getElementById("idMoneda").value,
             inicial: document.getElementById("inicial").value,
             precio_inicial: document.getElementById("precio_inicial").value,
             ctd_entradas: document.getElementById("ctd_entradas").value,
@@ -242,6 +230,176 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+document.getElementById('editarRegistro').addEventListener('click', async function () {
+    const idAlmacen = document.getElementById("id").value;
+    
+    if (!idAlmacen) {
+        showModal("Por favor, busca un registro antes de editar.", false);
+        return;
+    }
+
+    const data = {
+        idAlmacen,
+        idUsuario: document.getElementById("idUsuario").value,
+        idEmpresa: document.getElementById("idEmpresa").value,
+        idMovimiento: document.getElementById("idMovimiento").value,
+        fecha: document.getElementById("fecha").value,
+        idProducto: document.getElementById("idProducto").value,
+        factura: document.getElementById("factura").value,
+        idMoneda: document.getElementById("idMoneda").value,
+        ctd_entradas: document.getElementById("ctd_entradas").value,
+        pu_entrada: document.getElementById("pu_entrada").value,
+        concepto: document.getElementById("concepto").value,
+        anaquel: document.getElementById("anaquel").value,
+        seccion: document.getElementById("seccion").value,
+        caja: document.getElementById("caja").value,
+        observaciones: document.getElementById("observaciones").value
+    };
+
+    try {
+        const response = await fetch(`/api/almacen/editar/${idAlmacen}`, { 
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            showModal(`Error: ${error.message}`, false);
+        } else {
+            showModal("Registro editado correctamente.", true);
+        }
+    } catch (error) {
+        showModal("Hubo un problema al editar el registro.", false);
+    }
+});
+
+
+// Función para obtener el parámetro 'id' de la URL
+function obtenerIdDesdeUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('id');
+}
+
+// Al cargar la página, obtener el id de la URL y rellenar el campo
+document.addEventListener("DOMContentLoaded", function() {
+    const id = obtenerIdDesdeUrl();
+    if (id) {
+        // Si encontramos un id, lo insertamos en el campo de ID
+        document.getElementById("id").value = id;
+        // También puedes llamar a la función de búsqueda aquí si quieres que se realice automáticamente
+        buscarRegistro();
+    }
+});
+
+async function buscarRegistro() {
+    const id = document.getElementById('id').value.trim(); // Usamos el valor del campo 'id' para la búsqueda
+    if (!id) {
+        showModal('Por favor, ingresa un ID válido.', false);
+        return;
+    }
+    try {
+        const response = await fetch(`/api/almacen/entrada/id/${id}`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al obtener el registro.');
+        }
+        const entrada = await response.json();
+
+        // Formatear la fecha antes de asignarla al campo de fecha
+        if (entrada.fecha) {
+            let fechaFormateada = new Date(entrada.fecha).toLocaleDateString('en-CA'); // Formato yyyy-MM-dd
+            document.getElementById("fecha").value = fechaFormateada;
+        } else {
+            console.log('Fecha no válida');
+        }
+
+        // Asignar los demás campos como estaba antes
+        document.getElementById("idUsuario").value = entrada.idUsuario;
+        document.getElementById("idEmpresa").value = entrada.idEmpresa;
+        document.getElementById("idMovimiento").value = entrada.idMovimiento;
+        document.getElementById("idProducto").value = entrada.idProducto;
+        document.getElementById("factura").value = entrada.factura;
+        document.getElementById("idMoneda").value = entrada.idMoneda;
+        document.getElementById("inicial").value = entrada.inicial;
+        document.getElementById("precio_inicial").value = entrada.precio_inicial;
+        document.getElementById("ctd_entradas").value = entrada.ctd_entradas;
+        document.getElementById("pu_entrada").value = entrada.pu_entrada;
+        document.getElementById("concepto").value = entrada.concepto;
+        document.getElementById("anaquel").value = entrada.anaquel;
+        document.getElementById("seccion").value = entrada.seccion;
+        document.getElementById("caja").value = entrada.caja;
+        document.getElementById("observaciones").value = entrada.observaciones;
+    } catch (error) {
+        showModal(`Error: ${error.message}`, false);
+    }
+}
+
+document.getElementById('eliminarRegistro').addEventListener('click', function () {
+    const id = document.getElementById('id').value;
+    eliminarRegistro(id);
+});
+
+async function eliminarRegistro(id) {
+    if (!id) {
+        showModal('Por favor, ingresa un ID válido.', false);
+        return;
+    }
+
+    try {
+        const checkResponse = await fetch(`/api/almacen/entrada/id/${id}`);
+        if (!checkResponse.ok) {
+            showModal('El registro no existe o ya fue eliminado.', false);
+            return;
+        }
+
+        showModal('¿Estás seguro de que deseas eliminar este registro?', true);
+
+        const modalButton = document.getElementById('modalButton');
+        modalButton.textContent = "Eliminar";
+        modalButton.className = "btn btn-danger";
+
+        modalButton.onclick = async () => {
+            try {
+                const response = await fetch(`/api/almacen/entrada/${id}`, { method: 'DELETE' });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Error al eliminar el registro.');
+                }
+
+                showModal('Registro eliminado correctamente.', true);
+
+                // Limpiar los campos del formulario
+                document.getElementById("id").value = '';
+                document.getElementById("idAlmacen").value = '';
+                document.getElementById("idUsuario").value = '';
+                document.getElementById("idEmpresa").value = '';
+                document.getElementById("idMovimiento").value = '';
+                document.getElementById("fecha").value = '';
+                document.getElementById("idProducto").value = '';
+                document.getElementById("factura").value = '';
+                document.getElementById("idMoneda").value = '';
+                document.getElementById("inicial").value = '';
+                document.getElementById("precio_inicial").value = '';
+                document.getElementById("ctd_entradas").value = '';
+                document.getElementById("pu_entrada").value = '';
+                document.getElementById("concepto").value = '';
+                document.getElementById("anaquel").value = '';
+                document.getElementById("seccion").value = '';
+                document.getElementById("caja").value = '';
+                document.getElementById("observaciones").value = '';
+
+            } catch (error) {
+                showModal(`Error: ${error.message}`, false);
+            }
+        };
+
+    } catch (error) {
+        showModal(`Error: ${error.message}`, false);
+    }
+}
+
 // Función para mostrar el modal personalizado
 function showModal(message, success) {
     const modalTitle = document.getElementById('modalTitle');
@@ -255,10 +413,15 @@ function showModal(message, success) {
     modalButton.textContent = success ? "Ir al Almacén General" : "Cerrar";
     modalButton.classList = success ? "btn btn-primary" : "btn btn-secondary";
 
+    // Si es un mensaje de error, el botón no redirige
     modalButton.onclick = success
         ? () => { window.location.href = '/vistaAlmacen.html'; }
-        : null;
+        : () => {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('customModal'));
+            modal.hide();  // Cerrar el modal manualmente si es un error
+        };
 
+    // Crear el modal y mostrarlo
     const modal = new bootstrap.Modal(document.getElementById('customModal'));
     modal.show();
 }

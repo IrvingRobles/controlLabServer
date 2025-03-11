@@ -18,154 +18,238 @@
         </div>
 
         <!-- Botones superiores -->
-        <div class="d-flex flex-wrap justify-content-center gap-3 mb-4">
+        <div class="d-flex justify-content-between mb-4">
             <button class="btn btn-primary btn-sm" onclick="window.location.href='/vistaAlmacen.html';">
                 <i class="bi bi-box-seam"></i> Almacén General
             </button>
-            <button class="btn btn-success btn-sm" id="guardarRegistro">
-                <i class="bi bi-save"></i> Guardar Registro
-            </button>
-            <button class="btn btn-secondary btn-sm" onclick="window.location.href='/proveedor.html';">
-                <i class="bi bi-truck"></i> Registrar Proveedor
-            </button>
 
-            <button class="btn btn-warning btn-sm text-dark" onclick="window.location.href='/producto.html';">
-                <i class="bi bi-box-seam"></i> Registrar Producto
-            </button>
+            <div class="input-group w-50">
+                <input type="number" class="form-control" id="id" placeholder="Ingrese ID del registro">
+                <button class="btn btn-secondary" onclick="buscarRegistro()">🔍 Buscar</button>
+            </div>
         </div>
 
         <!-- Sección de datos generales -->
         <form id="formRegistroAlmacen">
-            <div class="row g-3">
-                <div class="col-md-3">
-                    <label for="idAlmacen">ID Mov:</label>
-                    <input type="text" id="idAlmacen" name="idAlmacen" disabled>
-                </div>
-                <div class="col-md-3">
-                    <label for="idUsuario" class="form-label">Usuario:</label>
-                    <select class="form-select" id="idUsuario" required>
-                        <option value="" selected disabled>Seleccione un usuario</option>
-                        <!-- Las opciones se cargarán dinámicamente aquí -->
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="empresa" class="form-label">Empresa:</label>
-                    <select class="form-select" id="empresa" required>
-                        <option value="" selected disabled>Seleccione una empresa</option>
-                        <!-- Las opciones se cargarán dinámicamente aquí -->
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="tipo_movimiento" class="form-label">Tipo de Movimiento:</label>
-                    <select class="form-select" id="tipo_movimiento" required>
-                        <option value="" selected disabled>Seleccione un movimiento</option>
-                        <!-- Las opciones se cargarán dinámicamente aquí -->
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="fecha" class="form-label">Fecha:</label>
-                    <input type="date" class="form-control" id="fecha" required>
-                </div>
-            </div>
-
-            <hr class="my-4">
-
-            <!-- Sección de datos del producto -->
-            <h5>Datos del Producto</h5>
-            <div class="row g-3">
-                
-                <div class="col-md-4">
-                    <label for="producto" class="form-label">Producto:</label>
-                    <select class="form-select" id="producto" required>
-                        <option value="" selected disabled>Seleccione un producto</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="inicial" class="form-label fw-bold">Existencias:</label>
-                    <input type="number" id="inicial" name="inicial" class="form-control" readonly>
-                </div>
-                <div class="mb-3">
-                    <label for="precio_inicial" class="form-label fw-bold">PU Inicial:</label>
-                    <input type="number" id="precio_inicial" name="precio_inicial" class="form-control" readonly>
-                </div>
-            </div>
-
-            <hr class="my-4">
-
-            <!-- Sección de entrada y salida -->
-            <div class="row">
-                <!-- Entrada -->
-                <div class="col-md-12">
-                    <h5>Entrada</h5>
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <label for="factura" class="form-label">Factura:</label>
-                            <input type="text" class="form-control" id="factura"
-                                placeholder="Ingrese el número de factura" required>
+            <div class="card shadow-lg p-4">
+                <div class="card-body">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-auto">
+                            <label for="idAlmacen" class="form-label fw-bold">ID Mov:</label>
+                            <input type="text" id="idAlmacen" name="idAlmacen" class="form-control form-control-sm"
+                                disabled>
                         </div>
-                        <div class="col-md-3">
-                            <label for="moneda" class="form-label">Moneda:</label>
-                            <select class="form-select" id="moneda" required>
-                                <option value="" selected disabled>Seleccione una moneda</option>
-                                <!-- Las opciones de monedas se agregarán dinámicamente aquí -->
+                        <div class="col-auto">
+                            <label for="fecha" class="form-label fw-bold">Fecha:</label>
+                            <input type="date" class="form-control form-control-sm" id="fecha" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="idUsuario" class="form-label fw-bold">Usuario:</label>
+                        <div class="d-flex gap-2">
+                            <select class="form-select flex-grow-1" id="idUsuario" required>
+                                <option value="" selected disabled>Seleccione un usuario</option>
+                                <!-- Las opciones se cargarán dinámicamente aquí -->
                             </select>
                         </div>
-
-
-                        <div class="col-md-3">
-                            <label for="ctd_entradas" class="form-label">Cantidad Entradas:</label>
-                            <input type="number" class="form-control" id="ctd_entradas"
-                                placeholder="Ingrese la cantidad de entradas" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="idEmpresa" class="form-label fw-bold">Empresa:</label>
+                        <div class="d-flex gap-2">
+                            <select class="form-select flex-grow-1" id="idEmpresa" required>
+                                <option value="" selected disabled>Seleccione una empresa</option>
+                                <!-- Las opciones se cargarán dinámicamente aquí -->
+                            </select>
+                            <button class="btn btn-secondary btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#modalEmpresa">
+                                <i class="bi bi-plus-circle"></i> Agregar
+                            </button>
                         </div>
-                        <div class="col-md-3">
-                            <label for="pu_entrada" class="form-label">PU Entrada:</label>
-                            <input type="number" class="form-control" id="pu_entrada"
-                                placeholder="Ingrese el precio unitario de entrada" step="0.01" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="concepto" class="form-label">Concepto:</label>
-                            <input type="text" class="form-control" id="concepto" placeholder="Ingrese el concepto"
-                                required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="idMovimiento" class="form-label fw-bold">Tipo de Movimiento:</label>
+                        <div class="d-flex gap-2">
+                            <select class="form-select flex-grow-1" id="idMovimiento" required>
+                                <option value="" selected disabled>Seleccione un movimiento</option>
+                                <!-- Las opciones se cargarán dinámicamente aquí -->
+                            </select>
+                            <button class="btn btn-secondary btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#modalMovimiento">
+                                <i class="bi bi-plus-circle"></i> Agregar
+                            </button>
                         </div>
                     </div>
                 </div>
-
-                <hr class="my-4">
-
-                <!-- Ubicación -->
-                <div class="col-md-12">
-                    <h5>Ubicación</h5>
+            </div>
+            <hr class="my-2">
+            <div class="card shadow-lg p-4">
+                <div class="card-body">
+                    <h5 align="center">Datos del Producto</h5>
+                    <div class="mb-3">
+                        <label for="idProducto" class="form-label fw-bold">Producto:</label>
+                        <div class="d-flex gap-2">
+                            <select class="form-select flex-grow-1" id="idProducto" required>
+                                <option value="" selected disabled>Seleccione un producto</option>
+                            </select>
+                            <button class="btn btn-secondary btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#modalProducto">
+                                <i class="bi bi-plus-circle"></i> Agregar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="inicial" class="form-label fw-bold">Existencias:</label>
+                            <input type="number" id="inicial" name="inicial" class="form-control" readonly>
+                        </div>
+                        <div class="col">
+                            <label for="precio_inicial" class="form-label fw-bold">PU Inicial:</label>
+                            <input type="number" id="precio_inicial" name="precio_inicial" class="form-control"
+                                readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-2">
+            <div class="card shadow-lg p-4">
+                <div class="card-body">
+                    <h5 align="center">Entrada</h5>
+                    <div class="mb-3">
+                        <label for="factura" class="form-label fw-bold">Factura:</label>
+                        <input type="text" class="form-control" id="factura" placeholder="Ingrese el número de factura"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="idMoneda" class="form-label fw-bold">Moneda:</label>
+                        <div class="d-flex gap-2">
+                            <select class="form-select flex-grow-1" id="idMoneda" required>
+                                <option value="" selected disabled>Seleccione una moneda</option>
+                                <!-- Las opciones de monedas se agregarán dinámicamente aquí -->
+                            </select>
+                            <button class="btn btn-secondary btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#modalMoneda">
+                                <i class="bi bi-plus-circle"></i> Agregar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="ctd_entradas" class="form-label fw-bold">Cantidad Entradas:</label>
+                            <input type="number" id="ctd_entradas" class="form-control"
+                                placeholder="Ingrese la cantidad de entradas" required>
+                        </div>
+                        <div class="col">
+                            <label for="pu_entrada" class="form-label fw-bold">Precio Entrada:</label>
+                            <input type="number" id="pu_entrada" name="pu_entrada" class="form-control"
+                                placeholder="Ingrese el precio unitario de entrada" step="0.00" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="concepto" class="form-label fw-bold">Concepto:</label>
+                        <textarea class="form-control" id="concepto" rows="3" placeholder="Ingrese el concepto"
+                            required></textarea>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-2">
+            <div class="card shadow-lg p-4">
+                <div class="card-body">
+                    <h5 align="center">Ubicación</h5>
                     <div class="row g-3">
-                        <div class="col-md-3">
-                            <label for="anaquel" class="form-label">Anaquel:</label>
+                        <div class="col mb-3">
+                            <label for="anaquel" class="form-label fw-bold">Anaquel:</label>
                             <input type="text" class="form-control" id="anaquel" placeholder="Ingrese el anaquel"
                                 required>
                         </div>
-                        <div class="col-md-3">
-                            <label for="seccion" class="form-label">Sección:</label>
+                        <div class="col mb-3">
+                            <label for="seccion" class="form-label fw-bold">Sección:</label>
                             <input type="text" class="form-control" id="seccion" placeholder="Ingrese la sección"
                                 required>
                         </div>
-                        <div class="col-md-3">
-                            <label for="caja" class="form-label">Caja:</label>
+                        <div class="col mb-3">
+                            <label for="caja" class="form-label fw-bold">Caja:</label>
                             <input type="text" class="form-control" id="caja" placeholder="Ingrese la caja" required>
                         </div>
                     </div>
                 </div>
-
-                <hr class="my-4">
- 
-                <!-- Observaciones -->
-                <div class="col-md-12">
-                    <h5>Observaciones</h5>
+            </div>
+            <hr class="my-2">
+            <div class="card shadow-lg p-4">
+                <div class="card-body">
+                    <h5 align="center">Observaciones</h5>
                     <div class="mb-3">
-                        <label for="observaciones" class="form-label">Observaciones:</label>
+                        <label for="observaciones" class="form-label fw-bold">Observaciones:</label>
                         <textarea class="form-control" id="observaciones" rows="3"
                             placeholder="Ingrese cualquier observación" required></textarea>
                     </div>
                 </div>
             </div>
+            <div class="d-flex justify-content-between mt-4">
+                <button type="submit" class="btn btn-success px-4" style="height: 40px;"
+                    id="guardarRegistro">Guardar</button>
+                <button type="button" class="btn btn-warning px-4 text-white" style="height: 40px;" id="editarRegistro">
+                    Editar
+                </button>
+                <button type="button" class="btn btn-danger px-4" id="eliminarRegistro">
+                    Eliminar
+                </button>
+            </div>
+            <hr class="my-2">
         </form>
+    </div>
+
+    <!-- Modal con iframe para cargar empresa.html -->
+    <div class="modal fade" id="modalEmpresa" tabindex="-1" aria-labelledby="modalEmpresaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <iframe src="empresa.html" width="100%" height="400px" style="border: none;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal con iframe para cargar movimiento.html -->
+    <div class="modal fade" id="modalMovimiento" tabindex="-1" aria-labelledby="modalMovimientoLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <iframe src="movimiento.html" width="100%" height="400px" style="border: none;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div> <!-- Modal con iframe para cargar producto.html -->
+    <div class="modal fade" id="modalProducto" tabindex="-1" aria-labelledby="modalProductoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <iframe src="producto.html" width="100%" height="400px" style="border: none;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal con iframe para cargar Moneda.html -->
+    <div class="modal fade" id="modalMoneda" tabindex="-1" aria-labelledby="modalMonedaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <iframe src="moneda.html" width="100%" height="400px" style="border: none;"></iframe>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Modal personalizado -->

@@ -141,19 +141,12 @@ exports.obtenerEmpresas = async (req, res) => {
 exports.crearRegistroAlmacen = async (req, res) => {
     const {
         idUsuario,
-        empresa,
-        tipo_movimiento,
+        idEmpresa,
+        idMovimiento,
         fecha,
-        pedido,
-        producto,  // ID del producto
-        marca,
-        proveedor,
-        no_parte,
-        no_serie,
-        modelo,
-        equipo,
+        idProducto,  // ID del producto
         factura,
-        moneda,
+        idMoneda,
         ctd_entradas, // Cantidad de entradas
         pu_entrada, // Precio unitario de la entrada
         concepto,
@@ -162,20 +155,16 @@ exports.crearRegistroAlmacen = async (req, res) => {
         caja,
         observaciones
     } = req.body;
-
     try {
         // 📌 1️⃣ Insertar el nuevo registro en 'almacen' (SIN especificar idAlmacen, ya que es AUTO_INCREMENT)
         const queryAlmacen = `
-            INSERT INTO almacen (
-                idUsuario, empresa, tipo_movimiento, fecha, pedido, producto, marca, proveedor, 
-                no_parte, no_serie, modelo, equipo, factura, moneda, ctd_entradas, pu_entrada, 
-                concepto, anaquel, seccion, caja, observaciones
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO entrada (idUsuario, idEmpresa, idMovimiento, fecha, idProducto, factura,
+        idMoneda, ctd_entradas, pu_entrada, concepto, anaquel, seccion, caja, observaciones
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
         const valuesAlmacen = [
-            idUsuario, empresa, tipo_movimiento, fecha, pedido, producto, marca, proveedor,
-            no_parte, no_serie, modelo, equipo, factura, moneda, ctd_entradas, pu_entrada,
-            concepto, anaquel, seccion, caja, observaciones
+            idUsuario, idEmpresa, idMovimiento, fecha, idProducto, factura, idMoneda, ctd_entradas,
+            pu_entrada, concepto, anaquel, seccion, caja, observaciones
         ];
         const [result] = await db.query(queryAlmacen, valuesAlmacen);
         const nuevoIdAlmacen = result.insertId; // Obtener el ID insertado automáticamente
@@ -183,10 +172,10 @@ exports.crearRegistroAlmacen = async (req, res) => {
         // 📌 2️⃣ Actualizar los datos en la tabla 'producto'
         const queryUpdateProducto = `
             UPDATE producto 
-            SET inicial = inicial + ?, precio_inicial = ?
+            SET inicial = inicial + ?
             WHERE idProducto = ?
         `;
-        await db.execute(queryUpdateProducto, [ctd_entradas, pu_entrada, producto]);
+        await db.execute(queryUpdateProducto, [ctd_entradas, idProducto]);
 
         // 📌 3️⃣ Responder con éxito
         res.status(201).json({
@@ -199,26 +188,43 @@ exports.crearRegistroAlmacen = async (req, res) => {
     }
 };
 
+// Obtener un registro por ID con información del producto
+exports.obtenerRegistroPorId1 = async (req, res) => {
+    const { idAlmacen } = req.params;
+
+    try {
+        const query = `
+            SELECT e.*, p.inicial, p.precio_inicial 
+            FROM entrada e
+            JOIN producto p ON e.idProducto = p.idProducto
+            WHERE e.idAlmacen = ?`;
+        
+        const [rows] = await db.query(query, [idAlmacen]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Registro no encontrado.' });
+        }
+
+        res.status(200).json(rows[0]); // Enviar el primer resultado encontrado
+    } catch (error) {
+        console.error('Error al obtener el registro:', error);
+        res.status(500).json({ message: 'Error al obtener el registro.' });
+    }
+};
+
 // Obtener todos los registros de almacen
 exports.obtenerRegistrosAlmacen = async (req, res) => {
     try {
         const query = `
             SELECT 
                 a.idAlmacen, 
-                a.idUsuario, 
-                e.codigo AS empresa, 
-                m.nombre AS tipo_movimiento, 
+                c.username AS idUsuario, 
+                e.codigo AS idEmpresa, 
+                m.nombre AS idMovimiento, 
                 a.fecha, 
-                a.pedido, 
-                p.nombre AS producto, 
-                a.marca, 
-                pr.nombre AS proveedor, 
-                a.no_parte,
-                a.no_serie, 
-                a.modelo, 
-                a.equipo, 
+                p.nombre AS idProducto,  
                 a.factura, 
-                b.codigo AS moneda, 
+                b.codigo AS idMoneda, 
                 p.inicial, -- Ahora tomado de producto
                 p.precio_inicial, -- Ahora tomado de producto
                 a.ctd_entradas, 
@@ -228,12 +234,12 @@ exports.obtenerRegistrosAlmacen = async (req, res) => {
                 a.seccion, 
                 a.caja, 
                 a.observaciones
-            FROM almacen a
-            JOIN empresa e ON a.empresa = e.idEmpresa
-            JOIN movimiento m ON a.tipo_movimiento = m.idMovimiento
-            JOIN producto p ON a.producto = p.idProducto -- Ajuste aquí
-            JOIN proveedor pr ON a.proveedor = pr.idProveedor
-            JOIN moneda b ON a.moneda = b.idMoneda
+            FROM entrada a
+            JOIN users c ON a.idUsuario = c.id
+            JOIN empresa e ON a.idEmpresa = e.idEmpresa
+            JOIN movimiento m ON a.idMovimiento = m.idMovimiento
+            JOIN producto p ON a.idProducto = p.idProducto -- Ajuste aquí
+            JOIN moneda b ON a.idMoneda = b.idMoneda
             ORDER BY a.idAlmacen ASC -- Ordenar por idAlmacen en orden ascendente
         `;
 
@@ -250,16 +256,13 @@ exports.obtenerRegistroPorId = async (req, res) => {
     try {
         const query = `
             SELECT 
-                a.idAlmacen, a.idUsuario, e.codigo AS empresa, 
-                m.nombre AS tipo_movimiento, a.fecha, a.pedido, 
-                p.nombre AS producto, p.inicial, -- 🔹 Agregamos el stock disponible
-                a.marca, pr.nombre AS proveedor, 
-                a.no_parte, a.no_serie, a.modelo, a.equipo 
-            FROM almacen a
-            JOIN empresa e ON a.empresa = e.idEmpresa
-            JOIN movimiento m ON a.tipo_movimiento = m.idMovimiento
-            JOIN producto p ON a.producto = p.idProducto
-            JOIN proveedor pr ON a.proveedor = pr.idProveedor
+                a.idAlmacen, a.idUsuario, e.codigo AS idEmpresa, 
+                m.nombre AS idMovimiento, a.fecha,
+                p.nombre AS idProducto, p.inicial -- 🔹 Agregamos el stock disponible
+            FROM entrada a
+            JOIN empresa e ON a.idEmpresa = e.idEmpresa
+            JOIN movimiento m ON a.idMovimiento = m.idMovimiento
+            JOIN producto p ON a.idProducto = p.idProducto
             WHERE a.idAlmacen = ?`;
 
         const [rows] = await db.execute(query, [idMov]);
@@ -272,6 +275,94 @@ exports.obtenerRegistroPorId = async (req, res) => {
     } catch (error) {
         console.error("Error al obtener el registro:", error);
         res.status(500).json({ mensaje: 'Error al obtener el registro por ID', error });
+    }
+};
+
+exports.eliminarRegistro = async (req, res) => {
+    const { id } = req.params;
+    try {
+        // 1️⃣ Obtener el idProducto y ctd_entradas antes de eliminar el registro
+        const [registro] = await db.query(
+            'SELECT idProducto, ctd_entradas FROM entrada WHERE idAlmacen = ?',
+            [id]
+        );
+
+        if (registro.length === 0) {
+            return res.status(404).json({ message: 'Registro no encontrado.' });
+        }
+
+        const { idProducto, ctd_entradas } = registro[0];
+
+        // 2️⃣ Eliminar el registro de la tabla entrada
+        await db.query('DELETE FROM entrada WHERE idAlmacen = ?', [id]);
+
+        // 3️⃣ Restar la cantidad eliminada en la tabla producto
+        await db.query(
+            'UPDATE producto SET inicial = inicial - ? WHERE idProducto = ?',
+            [ctd_entradas, idProducto]
+        );
+
+        res.status(200).json({ message: 'Registro eliminado correctamente.' });
+    } catch (error) {
+        console.error('Error al eliminar el registro:', error);
+        res.status(500).json({ message: 'Error al eliminar el registro.' });
+    }
+};
+
+exports.editarRegistroAlmacen = async (req, res) => {
+    const {
+        idAlmacen, idUsuario, idEmpresa, idMovimiento, fecha, idProducto, factura, idMoneda,
+        ctd_entradas, pu_entrada, concepto, anaquel, seccion, caja, observaciones
+    } = req.body;
+
+    try {
+        // 📌 1️⃣ Obtener el registro original
+        const [registroAnterior] = await db.query(
+            'SELECT idProducto, ctd_entradas FROM entrada WHERE idAlmacen = ?',
+            [idAlmacen]
+        );
+
+        if (registroAnterior.length === 0) {
+            return res.status(404).json({ message: 'Registro no encontrado.' });
+        }
+
+        const { idProducto: idProductoAnterior, ctd_entradas: ctdEntradasAnterior } = registroAnterior[0];
+
+        // 📌 2️⃣ Ajustar la cantidad en inventario si cambió el producto
+        if (idProducto !== idProductoAnterior) {
+            await db.query(
+                'UPDATE producto SET inicial = inicial - ? WHERE idProducto = ?',
+                [ctdEntradasAnterior, idProductoAnterior]
+            );
+            await db.query(
+                'UPDATE producto SET inicial = inicial + ? WHERE idProducto = ?',
+                [ctd_entradas, idProducto]
+            );
+        } else {
+            const diferencia = ctd_entradas - ctdEntradasAnterior;
+            await db.query(
+                'UPDATE producto SET inicial = inicial + ? WHERE idProducto = ?',
+                [diferencia, idProducto]
+            );
+        }
+
+        // 📌 3️⃣ Actualizar la entrada en la tabla 'entrada'
+        await db.query(`
+            UPDATE entrada SET 
+                idUsuario = ?, idEmpresa = ?, idMovimiento = ?, fecha = ?, idProducto = ?, 
+                factura = ?, idMoneda = ?, ctd_entradas = ?, pu_entrada = ?, concepto = ?, 
+                anaquel = ?, seccion = ?, caja = ?, observaciones = ?
+            WHERE idAlmacen = ?
+        `, [
+            idUsuario, idEmpresa, idMovimiento, fecha, idProducto, factura, idMoneda, 
+            ctd_entradas, pu_entrada, concepto, anaquel, seccion, caja, observaciones, idAlmacen
+        ]);
+
+        res.json({ message: 'Registro actualizado correctamente.' });
+
+    } catch (error) {
+        console.error('Error al editar el registro:', error);
+        res.status(500).json({ message: 'Error interno del servidor.' });
     }
 };
 

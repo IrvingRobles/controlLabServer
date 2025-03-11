@@ -6,7 +6,16 @@ const almacenController = require('../controllers/almacenController');
 // Ruta para crear un nuevo registro
 router.post('/entrada', almacenController.crearRegistroAlmacen); 
 
+// Ruta para eliminar registro por ID
+router.delete('/entrada/:id', almacenController.eliminarRegistro);
+
 router.get('/obtener', almacenController.obtenerRegistrosAlmacen);
+
+// Ruta para editar un registro
+router.put('/editar/:idAlmacen', almacenController.editarRegistroAlmacen);
+
+// Obtener todos los productos
+router.get('/entrada/id/:idAlmacen', almacenController.obtenerRegistroPorId1); 
 
 router.get('/siguiente-id', almacenController.obtenerSiguienteIdAlmacen);
 
@@ -86,6 +95,6 @@ router.get('/id/:idAlmacen', almacenController.obtenerValePorId);
 
 router.post('/vales/guardar', almacenController.guardarVale);
 
-router.get('/user', almacenController.obtenerUsers);
+router.get('/x/user', almacenController.obtenerUsers);
 
 module.exports = router;
