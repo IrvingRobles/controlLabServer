@@ -21,6 +21,7 @@
 <body>
     <div id="alertContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;"></div>
 
+
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
             <a class="navbar-brand" href="index1.html">Menú Principal</a>
@@ -40,8 +41,10 @@
                         <a class="nav-link" href="busquedaPdf.html">Registro de cotizaciones</a>
                     </li>
                     <button onclick="cerrarSesion()" class="btn btn-danger btn-sm">Cerrar Sesión</button>
-
                 </ul>
+                <span class="navbar-text ms-auto text-white">
+                    <span id="perfil-nombre">Cargando...</span>
+                </span>
             </div>
         </div>
     </nav>
@@ -207,6 +210,7 @@
                                     <th>Fecha de Ingreso</th>
                                     <th>Nombre Cliente</th>
                                     <th>Descripción del Equipo</th>
+                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -242,7 +246,7 @@
         });
     </script>
 
-    <script src="/scripts/RegistrodeEquiposyMateriales.js"></script>
+    <script src="/scriptsAdmin/RegistrodeEquiposyMateriales.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 

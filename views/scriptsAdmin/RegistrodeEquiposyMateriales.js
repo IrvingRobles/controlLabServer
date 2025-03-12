@@ -56,14 +56,32 @@ function mostrarRegistrosEnTabla(registros) {
             <td>${fecha_ingreso}</td>
             <td>${nombre_cliente || "N/A"}</td>
             <td>${descripcion_equipo || "N/A"}</td>
-           
+            <td>
+                <button class="btn btn-danger btn-sm btn-eliminar" data-id="${id}">Eliminar</button>
+            </td>
         `;
     });
 
-   
+    document.querySelectorAll(".btn-eliminar").forEach(btn => {
+        btn.addEventListener("click", () => eliminarRegistro(btn.dataset.id));
+    });
 }
 
+// 🔹 Eliminar registro
+async function eliminarRegistro(id) {
+    if (!confirm("¿Estás seguro de que quieres eliminar este registro?")) return;
 
+    try {
+        const response = await fetch(`/api/registro/eliminarMaterial/${id}`, { method: "DELETE" });
+        const result = await response.json();
+        mostrarMensaje(result.mensaje, "success");
+        await cargarRegistros();
+        await autocompletarCampos();
+    } catch (error) {
+        mostrarMensaje("Error al eliminar el registro.", "danger");
+        console.error(error);
+    }
+}
 
 // 🔹 Validar campos antes de enviar
 function validarCampos(data) {
