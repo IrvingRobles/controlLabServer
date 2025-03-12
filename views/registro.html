@@ -41,12 +41,15 @@
         </div>
     </nav>
 
+
     <div class="container mt-5">
         <h2>Formulario de Registro</h2>
         <form id="crearRegistroForm">
             <div class="mb-3">
-                <label for="cliente" class="form-label">Cliente:</label>
-                <input type="text" class="form-control" id="cliente" required>
+                <label for="clienteSelect" class="form-label">Cliente:</label>
+                <select class="form-control" id="clienteSelect" required>
+                    <option value="">Seleccione un cliente</option>
+                </select>
             </div>
             <div class="mb-3">
                 <label for="empresa" class="form-label">Empresa:</label>
@@ -70,7 +73,7 @@
             </div>
             <button type="submit" class="btn btn-primary">Registrar</button>
         </form>
-    </div>
+    
 
     <script>
         function cerrarSesion() {

@@ -5,42 +5,54 @@ document.addEventListener("DOMContentLoaded", async () => {
     const campos = [
         "id", "clave", "OT", "empresa", "fecha_envio", "descripcion", "contacto",
         "importe_cotizado", "resultado", "creadoPor", "empleado_asignado", "fecha_inicio",
-        "fecha_termino", "contrato_pedido", "lugar", "observaciones", "facturas", "cliente", "tipo_servicio"
+        "fecha_termino", "contrato_pedido", "lugar", "observaciones", "facturas",
+        "cliente", "tipo_servicio", "nombre_cliente"
     ];
 
+    // 🔹 Función para asignar valores a los inputs
     const setValue = (id, value) => {
-        if (id === "tipo_servicio") {
-            // Manejo especial para los checkboxes
-            document.querySelectorAll(`#${id} .form-check-input`).forEach(checkbox => {
-                checkbox.checked = value.includes(checkbox.value);
-            });
-        } else {
-            const element = document.getElementById(id);
-            if (!element) return;
-            if (element.type === "date" && value) {
-                const dateObj = new Date(value);
-                element.value = isNaN(dateObj) ? "" : dateObj.toISOString().split("T")[0];
-            } else {
-                element.value = value ?? "";
+        const element = document.getElementById(id);
+        if (!element) return;
+
+        if (id === "tipo_servicio" && value) {
+            try {
+                const parsedValue = Array.isArray(value) ? value : JSON.parse(value);
+                document.querySelectorAll(`#${id} .form-check-input`).forEach(checkbox => {
+                    checkbox.checked = parsedValue.includes(checkbox.value);
+                });
+            } catch (e) {
+                console.error("Error al parsear tipo_servicio:", e);
             }
-        }
-    };
-
-    const getValue = (id) => {
-        if (id === "tipo_servicio") {
-            // Capturar valores de los checkboxes seleccionados
-            const checkboxes = document.querySelectorAll(`#${id} .form-check-input:checked`);
-            return Array.from(checkboxes).map(cb => cb.value).join(", ") || "-";
+        } else if (element.type === "date" && value) {
+            const dateObj = new Date(value);
+            element.value = isNaN(dateObj) ? "" : dateObj.toISOString().split("T")[0];
         } else {
-            const element = document.getElementById(id);
-            return element ? (element.value.trim() || "-") : "-";
+            element.value = value ?? "";
         }
     };
 
+    // 🔹 Función para obtener valores de los inputs
+    function getValue(id) {
+        const element = document.getElementById(id);
+        if (!element) return null;
+
+        if (id === "tipo_servicio") {
+            return [...document.querySelectorAll(`#${id} .form-check-input:checked`)]
+                .map(checkbox => checkbox.value);
+        }
+        return element.value.trim();
+    }
+
+    // 🔹 Cargar datos de la OT si hay un ID en la URL
     if (id) {
         try {
+            console.log(`📡 Consultando OT con ID: ${id}...`);
+
             const response = await fetch(`/api/registro/obtenerOT?id=${id}`);
             const data = await response.json();
+
+            console.log("✅ Datos obtenidos de la API:", data);
+
             if (data && data.id) {
                 campos.forEach(field => setValue(field, data[field] || ""));
             } else {
@@ -52,47 +64,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
-    document.getElementById("guardarOT")?.addEventListener("click", async () => {
-        await enviarDatos("/api/registro/guardarOT", "POST");
-        exportPDF();
-    });
-
-    document.getElementById("actualizarOT")?.addEventListener("click", async () => {
-        await enviarDatos("/api/registro/actualizarOT", "PUT");
-    });
-
-    async function enviarDatos(url, metodo) {
-        const formData = Object.fromEntries(campos.map(field => [field, getValue(field)]));
-
-        // Validar que los campos obligatorios no estén vacíos
-        const requiredFields = ["id", "clave", "empresa", "contacto", "resultado", "creadoPor", "cliente", "tipo_servicio"];
-        const missingFields = requiredFields.filter(field => !formData[field] || formData[field] === "-");
-
-        if (missingFields.length > 0) {
-            alert(`⚠️ Faltan datos obligatorios: ${missingFields.join(", ")}`);
-            return;
-        }
-
-        try {
-            const response = await fetch(url, {
-                method: metodo,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
-            });
-            const result = await response.json();
-
-            if (response.ok) {
-                alert(metodo === "POST" ? "✅ Orden de Trabajo guardada correctamente." : "✅ Orden de Trabajo actualizada correctamente.");
-            } else {
-                alert(`❌ Error: ${result.mensaje || "No se pudo procesar la OT."}`);
-            }
-        } catch (error) {
-            console.error("❌ Error en la solicitud:", error);
-            alert("Hubo un problema en la solicitud.");
-        }
-    }
-
-    function exportPDF() {
+    // 🔹 Función para guardar PDF
+    function guardarOT() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF("portrait", "mm", "a4");
 
@@ -103,7 +76,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         logo.onload = function () {
             doc.rect(10, 10, 190, 30); // Marco del encabezado
             doc.addImage(logo, "JPEG", 12, 12, 26, 26);
-            
+
             doc.setFont("helvetica", "bold");
             doc.setFontSize(14);
             doc.text("CALIBRACIONES TECNICAS DE MEXICO, S.A. DE C.V.", 50, 18);
@@ -126,28 +99,45 @@ document.addEventListener("DOMContentLoaded", async () => {
             doc.setFont("helvetica", "normal");
             const columnWidths = [50, 140];
             const rowHeight = 7;
-
             campos.forEach((campo) => {
+                let valorCampo = campo === "tipo_servicio" ? getValue("tipo_servicio") : getValue(campo);
+            
+                // Convertir a string para evitar errores con trim()
+                if (Array.isArray(valorCampo)) {
+                    valorCampo = valorCampo.join(", ");  // Convierte array en string separado por comas
+                } else if (valorCampo === null || valorCampo === undefined) {
+                    return;  // Si es null o undefined, no lo mostramos
+                } else {
+                    valorCampo = String(valorCampo).trim(); // Convertir a string y quitar espacios
+                }
+            
+                // Si después de convertir sigue vacío, no imprimirlo
+                if (!valorCampo) return;
+            
                 if (y > 270) {
                     doc.addPage();
                     y = 20;
                 }
-                
+            
                 doc.rect(10, y, columnWidths[0], rowHeight);
                 doc.rect(60, y, columnWidths[1], rowHeight);
-                
+            
                 doc.setFont("helvetica", "bold");
                 doc.text(`${campo.replace(/_/g, ' ').toUpperCase()}:`, 12, y + 5);
                 doc.setFont("helvetica", "normal");
-
-                // Asegurar que el tipo de servicio se muestre correctamente en el PDF
-                const valorCampo = campo === "tipo_servicio" ? getValue("tipo_servicio") : getValue(campo);
+            
                 doc.text(valorCampo, 62, y + 5);
-
+            
                 y += rowHeight;
             });
-
+            
             doc.save(`OrdenTrabajo_${getValue("OT")}.pdf`);
         };
+    }
+
+    // 🔹 Asignar eventos
+    const guardarOTBtn = document.getElementById("guardarOT");
+    if (guardarOTBtn) {
+        guardarOTBtn.addEventListener("click", guardarOT);
     }
 });

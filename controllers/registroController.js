@@ -3,31 +3,99 @@ const { format } = require('date-fns');
 
 // Función para crear un nuevo registro
 // Controlador para crear un nuevo registro
+// exports.crearRegistro = async (req, res) => {
+//     try {
+//         const { clave, empresa, fechaEnvio, descripcion, contacto, lugar, cliente, creadoPor } = req.body;
+
+//         if (!empresa || !fechaEnvio) {
+//             return res.status(400).json({ mensaje: "Empresa y fecha de envío son obligatorios" });
+//         }
+
+//         // Generar la clave automáticamente si no está presente en la solicitud
+//         const claveGenerada = clave || generarClave(empresa, fechaEnvio);
+
+//         // Asignar un valor por defecto para 'resultado' si no se pasa en la solicitud
+//         const resultado = descripcion || "Sin descripción"; // Aquí se usa "Sin descripción" por defecto si no se pasa 'descripcion'
+
+//         // Insertar en la base de datos (sin OT y sin importe_cotizado)
+//         const [result] = await db.query(
+//             `INSERT INTO registros (clave, empresa, fecha_envio, descripcion, resultado, contacto, lugar, cliente, creadoPor) 
+//              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+//             [claveGenerada, empresa, fechaEnvio, descripcion, resultado, contacto, lugar, cliente, creadoPor]
+//         );
+
+//         res.status(201).json({ mensaje: "Registro creado exitosamente", id: result.insertId, clave: claveGenerada });
+//     } catch (error) {
+//         console.error("Error al crear el registro:", error);
+//         res.status(500).json({ mensaje: "Error en el servidor" });
+//     }
+// };
+
 exports.crearRegistro = async (req, res) => {
     try {
-        const { clave, empresa, fechaEnvio, descripcion, contacto, lugar, cliente, creadoPor } = req.body;
+        const { clave, empresa, fechaEnvio, descripcion, contacto, lugar, id_cliente, creadoPor } = req.body;
 
-        if (!empresa || !fechaEnvio) {
-            return res.status(400).json({ mensaje: "Empresa y fecha de envío son obligatorios" });
+        if (!empresa || !fechaEnvio || !id_cliente) {
+            return res.status(400).json({ mensaje: "Empresa, fecha de envío y cliente son obligatorios" });
         }
 
-        // Generar la clave automáticamente si no está presente en la solicitud
         const claveGenerada = clave || generarClave(empresa, fechaEnvio);
+        const resultado = descripcion || "Sin descripción";
 
-        // Asignar un valor por defecto para 'resultado' si no se pasa en la solicitud
-        const resultado = descripcion || "Sin descripción"; // Aquí se usa "Sin descripción" por defecto si no se pasa 'descripcion'
-
-        // Insertar en la base de datos (sin OT y sin importe_cotizado)
         const [result] = await db.query(
-            `INSERT INTO registros (clave, empresa, fecha_envio, descripcion, resultado, contacto, lugar, cliente, creadoPor) 
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [claveGenerada, empresa, fechaEnvio, descripcion, resultado, contacto, lugar, cliente, creadoPor]
+            'INSERT INTO registros (clave, empresa, fecha_envio, descripcion, resultado, contacto, lugar, id_cliente, creadoPor) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [claveGenerada, empresa, fechaEnvio, descripcion, resultado, contacto, lugar, id_cliente, creadoPor]
         );
 
         res.status(201).json({ mensaje: "Registro creado exitosamente", id: result.insertId, clave: claveGenerada });
     } catch (error) {
         console.error("Error al crear el registro:", error);
         res.status(500).json({ mensaje: "Error en el servidor" });
+    }
+};
+
+
+// Función para crear un nuevo cliente
+exports.crearCliente = async (req, res) => {
+    try {
+        const { nombre_cliente, razon_social, rfc, correo_electronico, telefono_contacto, calle, ciudad, estado, pais, codigo_postal } = req.body;
+
+        // Validar que los campos obligatorios estén presentes
+        if (!nombre_cliente || !rfc) {
+            return res.status(400).json({ mensaje: "El nombre del cliente y el RFC son obligatorios." });
+        }
+
+        // Insertar en la base de datos
+        const [result] = await db.query(
+            `INSERT INTO cliente (nombre_cliente, razon_social, rfc, correo_electronico, telefono_contacto, calle, ciudad, estado, pais, codigo_postal) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [nombre_cliente, razon_social, rfc, correo_electronico, telefono_contacto, calle, ciudad, estado, pais, codigo_postal]
+        );
+
+        res.status(201).json({ mensaje: "Cliente creado exitosamente.", id_cliente: result.insertId });
+    } catch (error) {
+        console.error("Error al crear cliente:", error);
+        res.status(500).json({ mensaje: "Error en el servidor." });
+    }
+};
+
+exports.obtenerClientes = async (req, res) => {
+    try {
+        const [clientes] = await db.query('SELECT id_cliente, nombre_cliente FROM cliente');
+        res.json(clientes);
+    } catch (error) {
+        console.error("Error al obtener clientes:", error);
+        res.status(500).json({ mensaje: "Error en el servidor" });
+    }
+};
+
+exports.listarClientes = async (req, res) => {
+    try {
+        const [clientes] = await db.query("SELECT id_cliente, nombre_cliente, rfc, correo_electronico, telefono_contacto FROM cliente");
+        res.json(clientes);
+    } catch (error) {
+        console.error("Error al obtener clientes:", error);
+        res.status(500).json({ mensaje: "Error en el servidor." });
     }
 };
 
@@ -186,6 +254,8 @@ exports.asignarPersonal = async (req, res) => {
     }   
 
 };
+
+// Cargar datos de la Orden de Trabajo (OT) junto con los datos del cliente
 exports.cargarDatosOT = async (req, res) => {
     const { id } = req.query;
     if (!id) {
@@ -193,33 +263,43 @@ exports.cargarDatosOT = async (req, res) => {
     }
 
     try {
-        const [result] = await db.execute(`
-            SELECT id, clave, OT, empresa, fecha_envio, descripcion, contacto, importe_cotizado, resultado, creadoPor, empleado_asignado, fecha_inicio, fecha_termino, contrato_pedido, lugar, observaciones, facturas, cliente, tipo_servicio
-            FROM registros WHERE id = ?`, 
+        // Realizar la consulta con JOIN entre registros y clientes
+        const [result] = await db.execute(
+            `SELECT 
+                r.id, r.clave, r.OT, r.empresa, r.fecha_envio, r.descripcion, r.contacto, r.importe_cotizado, 
+                r.resultado, r.creadoPor, r.empleado_asignado, r.fecha_inicio, r.fecha_termino, r.contrato_pedido, 
+                r.lugar, r.observaciones, r.facturas, r.id_cliente, r.tipo_servicio,
+                c.nombre_cliente, c.razon_social, c.rfc, c.correo_electronico, c.telefono_contacto,
+                c.calle, c.ciudad, c.estado, c.pais, c.codigo_postal
+            FROM registros r
+            LEFT JOIN cliente c ON r.id_cliente = c.id_cliente
+            WHERE r.id = ?`,
             [id]
         );
+
+        console.log("🔍 Consulta SQL ejecutada:", result); // Imprimir los datos obtenidos
 
         if (result.length === 0) {
             return res.status(404).json({ mensaje: "Orden de trabajo no encontrada" });
         }
 
-        res.json(result[0]); 
+        res.json(result[0]);
     } catch (error) {
-        console.error("Error al obtener la OT:", error);
+        console.error("❌ Error al obtener la OT:", error);
         res.status(500).json({ mensaje: "Error en el servidor" });
     }
 };
-// Guardar una nueva OT o actualizar si existe
+
 exports.guardarOT = async (req, res) => {
     try {
         const { id, clave, OT, empresa, fecha_envio, descripcion, contacto, importe_cotizado, resultado, creadoPor, empleado_asignado, fecha_inicio, fecha_termino, contrato_pedido, lugar, observaciones, facturas, cliente, tipo_servicio } = req.body;
 
         // Validar datos obligatorios
-        if (!clave || !empresa || !contacto || !resultado || !creadoPor || !cliente || !tipo_servicio) {
+        if (!clave?.trim() || !empresa?.trim() || !contacto?.trim() || !resultado?.trim() || !creadoPor?.trim() || !cliente?.trim() || !tipo_servicio?.length) {
             return res.status(400).json({ mensaje: "Faltan datos obligatorios (clave, empresa, contacto, resultado, creadoPor, cliente, tipo_servicio)" });
         }
 
-        console.log("Datos recibidos en guardarOT:", req.body);
+        console.log("📩 Datos recibidos en guardarOT:", req.body);
 
         const query = `
             INSERT INTO registros (id, clave, OT, empresa, fecha_envio, descripcion, contacto, importe_cotizado, resultado, creadoPor, empleado_asignado, fecha_inicio, fecha_termino, contrato_pedido, lugar, observaciones, facturas, cliente, tipo_servicio)
@@ -245,42 +325,55 @@ exports.guardarOT = async (req, res) => {
                 tipo_servicio = VALUES(tipo_servicio);
         `;
 
-        await db.execute(query, [id || null, clave, OT || null, empresa, fecha_envio || null, descripcion || null, contacto, importe_cotizado || null, resultado, creadoPor, empleado_asignado || null, fecha_inicio || null, fecha_termino || null, contrato_pedido || null, lugar || null, observaciones || null, facturas || null, cliente, tipo_servicio]);
+        await db.execute(query, [
+            id ?? null, clave, OT ?? null, empresa, fecha_envio ?? null, descripcion ?? null, contacto,
+            importe_cotizado ?? null, resultado, creadoPor, empleado_asignado ?? null, fecha_inicio ?? null,
+            fecha_termino ?? null, contrato_pedido ?? null, lugar ?? null, observaciones ?? null, facturas ?? null,
+            cliente, JSON.stringify(tipo_servicio) // Guardar como JSON si es un array
+        ]);
 
-        res.json({ mensaje: "Orden de Trabajo guardada correctamente" });
+        res.json({ mensaje: "✅ Orden de Trabajo guardada correctamente" });
+
     } catch (error) {
-        console.error("Error al guardar la OT:", error);
-        res.status(500).json({ mensaje: "Error en el servidor", error: error.message });
+        console.error("❌ Error al guardar la OT:", error);
+        res.status(500).json({ mensaje: "⚠️ Error en el servidor", error: error.message, code: error.code });
     }
 };
-
-// Actualizar una Orden de Trabajo existente
 exports.actualizarOT = async (req, res) => {
     try {
-        const { id, clave, OT, empresa, fecha_envio, descripcion, contacto, importe_cotizado, resultado, creadoPor, empleado_asignado, fecha_inicio, fecha_termino, contrato_pedido, lugar, observaciones, facturas, cliente, tipo_servicio } = req.body;
+        const { id, clave, OT, empresa, fecha_envio, descripcion, contacto, importe_cotizado, resultado, creadoPor, empleado_asignado, fecha_inicio, fecha_termino, contrato_pedido, lugar, observaciones, facturas,  tipo_servicio } = req.body;
 
         // Validar datos obligatorios
-        if (!id || !clave || !empresa || !contacto || !resultado || !creadoPor || !cliente || !tipo_servicio) {
-            return res.status(400).json({ mensaje: "Faltan datos obligatorios (id, clave, empresa, contacto, resultado, creadoPor, cliente, tipo_servicio)" });
+        if (!id || !clave?.trim() || !empresa?.trim() || !contacto?.trim() || !resultado?.trim() || !creadoPor?.trim() ||  !tipo_servicio?.length) {
+            return res.status(400).json({ mensaje: "Faltan datos obligatorios (id, clave, empresa, contacto, resultado, creadoPor,  tipo_servicio)" });
         }
 
-        console.log("Datos recibidos en actualizarOT:", req.body);
+        console.log("📩 Datos recibidos en actualizarOT:", req.body);
 
         const query = `
             UPDATE registros 
-            SET clave = ?, OT = ?, empresa = ?, fecha_envio = ?, descripcion = ?, contacto = ?, importe_cotizado = ?, resultado = ?, creadoPor = ?, empleado_asignado = ?, fecha_inicio = ?, fecha_termino = ?, contrato_pedido = ?, lugar = ?, observaciones = ?, facturas = ?, cliente = ?, tipo_servicio = ?
+            SET clave = ?, OT = ?, empresa = ?, fecha_envio = ?, descripcion = ?, contacto = ?, 
+                importe_cotizado = ?, resultado = ?, creadoPor = ?, empleado_asignado = ?, 
+                fecha_inicio = ?, fecha_termino = ?, contrato_pedido = ?, lugar = ?, 
+                observaciones = ?, facturas = ?, tipo_servicio = ?
             WHERE id = ?;
         `;
 
-        const [result] = await db.execute(query, [clave, OT || null, empresa, fecha_envio || null, descripcion || null, contacto, importe_cotizado || null, resultado, creadoPor, empleado_asignado || null, fecha_inicio || null, fecha_termino || null, contrato_pedido || null, lugar || null, observaciones || null, facturas || null, cliente, tipo_servicio, id]);
+        const [result] = await db.execute(query, [
+            clave, OT ?? null, empresa, fecha_envio ?? null, descripcion ?? null, contacto,
+            importe_cotizado ?? null, resultado, creadoPor, empleado_asignado ?? null, fecha_inicio ?? null,
+            fecha_termino ?? null, contrato_pedido ?? null, lugar ?? null, observaciones ?? null, facturas ?? null,
+             JSON.stringify(tipo_servicio), id
+        ]);
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({ mensaje: "Orden de Trabajo no encontrada" });
+            return res.status(404).json({ mensaje: "⚠️ Orden de Trabajo no encontrada" });
         }
 
-        res.json({ mensaje: "Orden de Trabajo actualizada correctamente" });
+        res.json({ mensaje: "✅ Orden de Trabajo actualizada correctamente" });
+
     } catch (error) {
-        console.error("Error al actualizar la OT:", error);
-        res.status(500).json({ mensaje: "Error en el servidor", error: error.message });
+        console.error("❌ Error al actualizar la OT:", error);
+        res.status(500).json({ mensaje: "⚠️ Error en el servidor", error: error.message, code: error.code });
     }
 };
