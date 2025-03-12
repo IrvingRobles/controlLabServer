@@ -24,35 +24,32 @@ app.use(session({
 }));
 
 function verificarSesion(req, res, next) {
-    if (req.session.user) {
-        next(); // Si la sesión existe, permite el acceso
-    } else {
-        res.redirect('/login.html'); // Si no hay sesión, redirige al login
+    // Permitir acceso libre a login.html y registroUsuario.html
+    if (req.path === '/login.html' || req.path === '/registroUsuario.html') {
+        return next();
     }
+
+    // Si hay sesión, permitir acceso
+    if (req.session.user) {
+        return next();
+    }
+
+    // Si no hay sesión, redirigir a login
+    res.redirect('/login.html');
 }
 
-// Proteger todas las páginas HTML
-app.get(['/',
-        '/index1.html',
-        '/registro.html',
-        '/detalle.html',
-        '/buscar.html',
-        '/busquedaPdf.html',
-        '/adminPersonal.html',
-        '/inicioAdmin.html',
-        '/adminBuscar.html',
-        '/OT.html',
-        '/adminBusquedaPdf.html',
-        '/adminRegistro.html',
-        ], verificarSesion, (req, res) => {
+// Proteger todas las páginas HTML excepto login y registroUsuario
+app.get('/*.html', verificarSesion, (req, res) => {
     res.sendFile(path.join(__dirname, 'views', req.path));
 });
 
+// Ruta para cerrar sesión
 app.get('/logout', (req, res) => {
     req.session.destroy(() => {
         res.redirect('/login.html');
     });
 });
+
 
 // Configuración de CORS
 const corsOptions = {
