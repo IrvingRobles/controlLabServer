@@ -34,7 +34,7 @@ async function autocompletarCampos() {
 async function cargarRegistros() {
     try {
         const response = await fetch("/api/registro/listaMateriales");
-        if (!response.ok) throw new Error("No se pudieron obtener los registros");
+        if (!response.ok) throw new Error(`Error ${response.status}: No se pudieron obtener los registros`);
 
         const { registros } = await response.json();
         mostrarRegistrosEnTabla(registros);
@@ -47,22 +47,25 @@ async function cargarRegistros() {
 // 🔹 Mostrar registros en la tabla
 function mostrarRegistrosEnTabla(registros) {
     const tbody = document.querySelector("#tablaRegistros tbody");
+    if (!tbody) return console.error("No se encontró la tabla.");
+
     tbody.innerHTML = ""; // Limpiar la tabla antes de agregar nuevos registros
 
+    const fragment = document.createDocumentFragment();
     registros.forEach(({ id, folio, fecha_ingreso, nombre_cliente, descripcion_equipo }) => {
-        const fila = tbody.insertRow();
+        const fila = document.createElement("tr");
+        fila.dataset.id = id; // Guardar el ID en un atributo de datos
         fila.innerHTML = `
             <td>${folio}</td>
             <td>${fecha_ingreso}</td>
             <td>${nombre_cliente || "N/A"}</td>
             <td>${descripcion_equipo || "N/A"}</td>
-           
         `;
+        fragment.appendChild(fila);
     });
 
-   
+    tbody.appendChild(fragment);
 }
-
 
 
 // 🔹 Validar campos antes de enviar
@@ -150,29 +153,26 @@ function mostrarMensaje(mensaje, tipo) {
     }, 3000);
 }
 
-// ✅ Agregar eventos a las filas dinámicamente
-document.addEventListener("DOMContentLoaded", () => {
-    document.querySelector("#tablaRegistros tbody").addEventListener("click", async function (event) {
+
+// 🔹 Evento para cargar datos al hacer clic en una fila
+document.addEventListener("DOMContentLoaded", () => { 
+    const tbody = document.querySelector("#tablaRegistros tbody");
+    if (!tbody) return console.error("No se encontró la tabla.");
+
+    tbody.addEventListener("click", async function (event) {
         const fila = event.target.closest("tr");
-        if (!fila) return; // Si no hay fila, salir
+        if (!fila) return;
 
-        // Obtener el ID del registro
-        const btnEliminar = fila.querySelector(".btn-eliminar");
-        if (!btnEliminar) {
-            console.error("No se encontró el botón de eliminar en la fila.");
-            return;
-        }
-
-        const id = btnEliminar.dataset.id;
-        if (!id) {
-            console.error("ID del registro no encontrado.");
-            return;
-        }
+        const id = fila.dataset.id; // Obtener ID desde dataset
+        if (!id) return console.error("El ID de la fila está vacío.");
 
         console.log("Cargando datos del ID:", id); // Depuración
 
-        // Llamar a la función para cargar los datos en el formulario
-        await cargarDatosEnFormulario(id);
+        try {
+            await cargarDatosEnFormulario(id);
+        } catch (error) {
+            console.error("Error al cargar los datos:", error);
+        }
     });
 });
 
