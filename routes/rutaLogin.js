@@ -4,7 +4,7 @@ const loginController = require('../controllers/authController');
 const personalController = require('../controllers/personalController');
 
 router.post('/login', loginController.login);
-router.post('/registroUsusario', loginController.register);
+router.post('/registroUsuario', loginController.register);
 router.get('/validar/:token', loginController.validarCuenta); 
 router.get('/listaEmpleados',personalController.listaEmpleados);
 
