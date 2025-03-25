@@ -347,6 +347,7 @@ async function subirPDFAlServidor(formData) {
         alert("Hubo un error al subir el PDF.");
     }
 }
+
 function generarTablaMateriales(doc, marginLeft) {
     const margenSuperior = 80;
     const anchoTabla = 190;

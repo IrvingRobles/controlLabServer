@@ -214,46 +214,53 @@ exports.obtenerEmpleados = async (req, res) => {
         res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
     }
 };
+
 exports.asignarPersonal = async (req, res) => {
     const { id } = req.params;
     const { empleadoId } = req.body;
 
-    console.log("Datos recibidos:", req.body); // <-- Agrega esto para depuración
+    console.log("Datos recibidos:", req.body); // Depuración
 
-    if (!empleadoId) {
-        return res.status(400).json({ mensaje: "El ID del empleado es obligatorio" });
+    if (!empleadoId || isNaN(empleadoId)) {
+        return res.status(400).json({ mensaje: "El ID del empleado es obligatorio y debe ser un número válido" });
     }
 
     try {
-        // Verificar si el registro existe
-        const [registro] = await db.execute("SELECT * FROM registros WHERE id = ?", [id]);
-        if (registro.length === 0) {
-            return res.status(404).json({ mensaje: "Registro no encontrado" });
+        // Unir ambas consultas en una sola para optimizar rendimiento
+        const query = `
+            SELECT r.id AS registroId, u.username 
+            FROM registros r 
+            JOIN users u ON u.id = ?
+            WHERE r.id = ?`;
+
+        const [rows] = await db.execute(query, [empleadoId, id]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ mensaje: "Registro o empleado no encontrado" });
         }
 
-        // Verificar si el empleado existe y obtener el username
-        const [empleado] = await db.execute("SELECT username FROM users WHERE id = ?", [empleadoId]);
-        if (empleado.length === 0) {
-            return res.status(404).json({ mensaje: "Empleado no encontrado" });
-        }
+        const username = rows[0].username;
 
-        const username = empleado[0].username;
-
-        // Asignar empleado
-        const query = "UPDATE registros SET empleado_asignado = ? WHERE id = ?";
-        const [result] = await db.execute(query, [username, id]);
+        // Actualizar el registro con el empleado asignado
+        const updateQuery = "UPDATE registros SET empleado_asignado = ? WHERE id = ?";
+        const [result] = await db.execute(updateQuery, [username, id]);
 
         if (result.affectedRows === 0) {
-            return res.status(400).json({ mensaje: "No se pudo asignar personal" });
+            return res.status(400).json({ mensaje: "El personal ya estaba asignado o no se pudo asignar" });
         }
 
-        res.json({ mensaje: "Personal asignado correctamente", empleado_asignado: username });
+        res.json({ 
+            mensaje: "Personal asignado correctamente", 
+            empleado_asignado: username, 
+            registroId: id 
+        });
+
     } catch (error) {
         console.error("Error al asignar personal:", error);
-        res.status(500).json({ mensaje: "Error en el servidor" });
-    }   
-
+        res.status(500).json({ mensaje: "Error en el servidor", error: error.message });
+    }
 };
+
 
 // Cargar datos de la Orden de Trabajo (OT) junto con los datos del cliente
 exports.cargarDatosOT = async (req, res) => {
@@ -340,40 +347,55 @@ exports.guardarOT = async (req, res) => {
     }
 };
 exports.actualizarOT = async (req, res) => {
-    try {
-        const { id, clave, OT, empresa, fecha_envio, descripcion, contacto, importe_cotizado, resultado, creadoPor, empleado_asignado, fecha_inicio, fecha_termino, contrato_pedido, lugar, observaciones, facturas,  tipo_servicio } = req.body;
+    const { id } = req.body; // Obtener el ID de la OT desde el cuerpo de la solicitud
 
-        // Validar datos obligatorios
-        if (!id || !clave?.trim() || !empresa?.trim() || !contacto?.trim() || !resultado?.trim() || !creadoPor?.trim() ||  !tipo_servicio?.length) {
-            return res.status(400).json({ mensaje: "Faltan datos obligatorios (id, clave, empresa, contacto, resultado, creadoPor,  tipo_servicio)" });
+    if (!id) {
+        return res.status(400).json({ mensaje: "El campo 'id' es obligatorio" });
+    }
+
+    try {
+        // Extraer los datos del cuerpo de la solicitud
+        let {
+            clave, OT, empresa, fecha_envio, descripcion, contacto, importe_cotizado,
+            resultado, creadoPor, empleado_asignado, fecha_inicio, fecha_termino,
+            contrato_pedido, lugar, observaciones, facturas, tipo_servicio
+        } = req.body;
+
+        console.log("🟢 Datos recibidos en el backend:", req.body);
+
+        // Asegurar que tipo_servicio sea un string separado por comas
+        if (Array.isArray(tipo_servicio)) {
+            tipo_servicio = tipo_servicio.join(", ");
         }
 
-        console.log("📩 Datos recibidos en actualizarOT:", req.body);
-
+        // Definir la consulta SQL para actualizar la OT
         const query = `
             UPDATE registros 
             SET clave = ?, OT = ?, empresa = ?, fecha_envio = ?, descripcion = ?, contacto = ?, 
                 importe_cotizado = ?, resultado = ?, creadoPor = ?, empleado_asignado = ?, 
                 fecha_inicio = ?, fecha_termino = ?, contrato_pedido = ?, lugar = ?, 
                 observaciones = ?, facturas = ?, tipo_servicio = ?
-            WHERE id = ?;
+            WHERE id = ?
         `;
 
+        // Ejecutar la consulta SQL
         const [result] = await db.execute(query, [
-            clave, OT ?? null, empresa, fecha_envio ?? null, descripcion ?? null, contacto,
-            importe_cotizado ?? null, resultado, creadoPor, empleado_asignado ?? null, fecha_inicio ?? null,
-            fecha_termino ?? null, contrato_pedido ?? null, lugar ?? null, observaciones ?? null, facturas ?? null,
-             JSON.stringify(tipo_servicio), id
+            clave, OT, empresa, fecha_envio, descripcion, contacto, importe_cotizado,
+            resultado, creadoPor, empleado_asignado, fecha_inicio, fecha_termino,
+            contrato_pedido, lugar, observaciones, facturas, tipo_servicio, id
         ]);
 
+        console.log("🔵 Resultado de la actualización:", result);
+
+        // Verificar si se actualizó algún registro
         if (result.affectedRows === 0) {
-            return res.status(404).json({ mensaje: "⚠️ Orden de Trabajo no encontrada" });
+            return res.status(404).json({ mensaje: "Orden de trabajo no encontrada o sin cambios" });
         }
 
-        res.json({ mensaje: "✅ Orden de Trabajo actualizada correctamente" });
+        res.json({ mensaje: "✅ Orden de trabajo actualizada correctamente" });
 
     } catch (error) {
         console.error("❌ Error al actualizar la OT:", error);
-        res.status(500).json({ mensaje: "⚠️ Error en el servidor", error: error.message, code: error.code });
+        res.status(500).json({ mensaje: "Error en el servidor" });
     }
 };
