@@ -17,6 +17,9 @@ router.put('/editar/:idAlmacen', almacenController.editarRegistroAlmacen);
 // Obtener todos los productos
 router.get('/entrada/id/:idAlmacen', almacenController.obtenerRegistroPorId1); 
 
+// Obtener todos los productos
+router.get('/entrada/id2/:idAlmacen', almacenController.obtenerRegistroPorId2); 
+
 router.get('/siguiente-id', almacenController.obtenerSiguienteIdAlmacen);
 
 router.get('/moneda', almacenController.obtenerMonedas);
@@ -31,7 +34,7 @@ router.delete('/monedas/:id', almacenController.eliminarMoneda);
 router.get('/:idMov', almacenController.obtenerRegistroPorId);
 
 // Ruta para registrar salidas vinculadas a un ID Mov
-router.post('/:idMov/salida', almacenController.registrarSalida);
+router.post('/:idAlmacen/salida', almacenController.registrarSalida);
 
 // Ruta para registrar una empresa
 router.post('/empresas', almacenController.registrarEmpresa);
@@ -96,5 +99,10 @@ router.get('/id/:idAlmacen', almacenController.obtenerValePorId);
 router.post('/vales/guardar', almacenController.guardarVale);
 
 router.get('/x/user', almacenController.obtenerUsers);
+
+// Ruta para obtener un usuario por ID
+router.get('/usuario/:id', almacenController.obtenerUsuarioPorId);
+
+router.get('/ot/id', almacenController.obtenerOT);
 
 module.exports = router;
