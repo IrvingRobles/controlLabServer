@@ -33,13 +33,8 @@
                     <li class="nav-item"><a class="nav-link" href="adminRegistro.html">Crear Solicitud</a></li>
                     <li class="nav-item"><a class="nav-link" href="adminBuscar.html">Buscar Solicitud</a></li>
                     <li class="nav-item"><a class="nav-link" href="adminBusquedaPdf.html">Registro de cotizaciones</a></li>
-<<<<<<< HEAD
-                    <li class="nav-item"><a class="nav-link active" href="adminPersonal.html">Lista de empleados</a></li>
-                    <li class="nav-item"><a class="nav-link" href="adminRegistroPersonal.html">Registrar nuevo</a></li>
-=======
                     <li class="nav-item"><a class="nav-link" href="adminPersonal.html">Lista de empleados</a></li>
                     <li class="nav-item"><a class="nav-link" href="adminRegistroPersonal.html">Registrar nuevo personal</a></li>
->>>>>>> desarrollo-c4
                 </ul>
                 <span id="perfil-nombre" class="text-light ms-auto">Cargando...</span>
                 <button onclick="cerrarSesion()" class="btn btn-danger btn-sm ms-2">Cerrar Sesión</button>
@@ -68,6 +63,8 @@
                                 <div class="col-md-3">
                                     <label for="folio" class="form-label">Folio (consecutivo):</label>
                                     <input type="text" class="form-control" id="folio" required>
+                                    <input type="hidden" id="registroId">
+
                                 </div>
                                 <div class="col-md-3">
                                     <label for="fechaIngreso" class="form-label">Fecha de Ingreso:</label>

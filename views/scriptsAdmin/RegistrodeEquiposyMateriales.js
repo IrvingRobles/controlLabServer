@@ -197,18 +197,11 @@ document.addEventListener("DOMContentLoaded", () => {
 // ✅ Cargar los datos de un registro en el formulario al hacer clic en una fila
 async function cargarDatosEnFormulario(id) {
     try {
-        console.log("Obteniendo datos de la API para el ID:", id); // Depuración
         const response = await fetch(`/api/registro/obtenerMaterial/${id}`);
-
         if (!response.ok) throw new Error(`Error en la respuesta de la API: ${response.status}`);
 
         const data = await response.json();
-        if (!data || !data.registro) {
-            throw new Error("La API devolvió un objeto vacío o sin datos de 'registro'.");
-        }
-
-        const registro = data.registro; // Acceder correctamente a los datos
-        console.log("Datos obtenidos:", registro); // Depuración
+        const registro = data.registro;
 
         // Llenar los campos del formulario con los datos obtenidos
         document.getElementById("folio").value = registro.folio || "";
@@ -235,6 +228,9 @@ async function cargarDatosEnFormulario(id) {
         document.getElementById("referencia").value = registro.referencia || "";
         document.getElementById("observaciones").value = registro.observaciones || "";
 
+        // Guardar el ID en un campo oculto del formulario
+        document.getElementById("registroId").value = registro.id; // Este es el ID del registro
+
         mostrarMensaje("Registro cargado en el formulario.", "success");
     } catch (error) {
         console.error("Error al cargar los datos en el formulario:", error);
@@ -244,7 +240,7 @@ async function cargarDatosEnFormulario(id) {
 
 async function actualizarRegistro() {
     try {
-        const id = document.getElementById("folio").value; // Suponiendo que el folio es el identificador único
+        const id = document.getElementById("registroId").value; // Obtener el ID del campo oculto
         if (!id) {
             mostrarMensaje("No se puede actualizar sin un ID válido.", "warning");
             return;
@@ -252,7 +248,7 @@ async function actualizarRegistro() {
 
         // Obtener los valores del formulario
         const datosActualizados = {
-            folio: id,
+            folio: document.getElementById("folio").value,
             fecha_ingreso: document.getElementById("fechaIngreso").value,
             responsable_ingreso: document.getElementById("responsableIngreso").value,
             nombre_cliente: document.getElementById("nombreCliente").value,
@@ -277,7 +273,7 @@ async function actualizarRegistro() {
             observaciones: document.getElementById("observaciones").value
         };
 
-        console.log("Enviando datos actualizados:", datosActualizados); // Depuración
+        console.log("Enviando datos actualizados:", datosActualizados);
 
         const response = await fetch(`/api/registro/actualizarMaterial/${id}`, {
             method: "PUT",
