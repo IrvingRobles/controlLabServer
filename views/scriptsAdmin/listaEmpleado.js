@@ -17,7 +17,7 @@ async function cargarListaEmpleados() {
         const data = await response.json();
 
         if (data.success) {
-            mostrarEmpleadosEnTabla(data.empleados);
+            mostrarEmpleadosEnCards(data.empleados);
         } else {
             console.error('Error al obtener la lista de empleados:', data.message);
         }
@@ -26,38 +26,52 @@ async function cargarListaEmpleados() {
     }
 }
 
-function mostrarEmpleadosEnTabla(empleados) {
-    const tabla = document.getElementById('tablaEmpleados').getElementsByTagName('tbody')[0];
-    tabla.innerHTML = '';
+function mostrarEmpleadosEnCards(empleados) {
+    const contenedor = document.getElementById('listaEmpleados');
+    contenedor.innerHTML = '';
 
-    empleados.forEach(empleado => {
-        let fila = tabla.insertRow();
-        fila.insertCell(0).textContent = empleado.id;
-        fila.insertCell(1).textContent = empleado.empresa;
-        fila.insertCell(2).textContent = empleado.nombre;
-        fila.insertCell(3).textContent = empleado.username;
-        fila.insertCell(4).textContent = empleado.rfc;
-        fila.insertCell(5).textContent = empleado.curp;
-        fila.insertCell(6).textContent = empleado.departamento;
-        fila.insertCell(7).textContent = empleado.puesto;
-        fila.insertCell(8).textContent = empleado.contrato;
-        fila.insertCell(9).textContent = empleado.jornada;
-        fila.insertCell(10).textContent = empleado.domicilio;
-        fila.insertCell(11).textContent = empleado.nss;
-        fila.insertCell(12).textContent = empleado.ingreso;
-        fila.insertCell(13).textContent = empleado.telefono;
-        fila.insertCell(14).textContent = empleado.correo;
-        fila.insertCell(15).textContent = empleado.role;
-        // No se muestra la contraseña por seguridad
+    empleados.forEach((empleado, index) => {
+        let card = document.createElement('div');
+        card.className = 'col-md-4 mb-3';
 
-        let acciones = fila.insertCell(16);
-        acciones.innerHTML = `
-            <button class="btn btn-warning btn-sm me-2" onclick="mostrarFormulario(${empleado.id})">Editar</button>
-            <button class="btn btn-danger btn-sm" onclick="eliminarEmpleado(${empleado.id})">Eliminar</button>
+        card.innerHTML = `
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-center">
+                        <a href="#" class="text-decoration-none" data-bs-toggle="collapse" data-bs-target="#infoEmpleado${index}">
+                            ${empleado.nombre}
+                        </a>
+                    </h5>
+                    <div id="infoEmpleado${index}" class="collapse">
+                        <h6 class="card-subtitle text-muted">${empleado.puesto} - ${empleado.empresa}</h6>
+                        <p class="card-text"><strong>Usuario:</strong> ${empleado.username}</p>
+                        <p class="card-text"><strong>RFC:</strong> ${empleado.rfc}</p>
+                        <p class="card-text"><strong>CURP:</strong> ${empleado.curp}</p>
+                        <p class="card-text"><strong>Departamento:</strong> ${empleado.departamento}</p>
+                        <p class="card-text"><strong>Contrato:</strong> ${empleado.contrato}</p>
+                        <p class="card-text"><strong>Jornada:</strong> ${empleado.jornada}</p>
+                        <p class="card-text"><strong>Domicilio:</strong> ${empleado.domicilio}</p>
+                        <p class="card-text"><strong>NSS:</strong> ${empleado.nss}</p>
+                        <p class="card-text"><strong>Fecha de Ingreso:</strong> ${empleado.ingreso}</p>
+                        <p class="card-text"><strong>Teléfono:</strong> ${empleado.telefono}</p>
+                        <p class="card-text"><strong>Correo:</strong> ${empleado.correo}</p>
+                        <p class="card-text"><strong>Rol:</strong> ${empleado.role}</p>
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-warning btn-sm" onclick="mostrarFormulario(${empleado.id})">Editar</button>
+                            <button class="btn btn-danger btn-sm" onclick="eliminarEmpleado(${empleado.id})">Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         `;
+
+        contenedor.appendChild(card);
     });
 }
 
+// Cargar la lista al iniciar
+cargarListaEmpleados();
+// Llamar la función para cargar empleados
 async function mostrarFormulario(id = null) { 
     const formulario = document.getElementById('modalEmpleado');
     const titulo = document.getElementById('modalTitulo');

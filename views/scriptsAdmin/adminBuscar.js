@@ -1,24 +1,59 @@
 document.addEventListener("DOMContentLoaded", () => {
     const tablaRegistros = document.querySelector("#tablaSolicitudes");
-    const filtroClave = document.querySelector("#buscarInput");
     const exportPDFBtn = document.getElementById("exportPDF");
-
-    if (!tablaRegistros || !filtroClave) {
-        console.error("Error: No se encontraron los elementos necesarios en el DOM.");
+    const contenedor = document.getElementById("contenedorSolicitudes");
+    const filtroClaveTarjetas = document.getElementById("buscarInputTarjetas");
+    const filtroClaveTabla = document.getElementById("buscarInputTabla");
+    const noResults = document.getElementById("noResults");
+    
+    if (!contenedor || !filtroClaveTarjetas || !filtroClaveTabla) {
+        console.error("Error: No se encontraron los elementos en el DOM.");
         return;
     }
-
-    // Filtrar solicitudes
-    function filtrarSolicitudes() {
-        const filtro = filtroClave.value.toLowerCase();
-        const filas = tablaRegistros.querySelectorAll("tbody tr");
-
-        filas.forEach((fila) => {
-            const clave = fila.children[1].textContent.toLowerCase();
-            const empresa = fila.children[3].textContent.toLowerCase();
-            fila.style.display = clave.includes(filtro) || empresa.includes(filtro) ? "" : "none";
+    
+    // Filtrar solicitudes en tarjetas
+    function filtrarSolicitudesTarjetas() {
+        const filtro = filtroClaveTarjetas.value.toLowerCase();
+        let hayResultados = false;
+    
+        document.querySelectorAll(".card").forEach(card => {
+            const clave = card.textContent.toLowerCase();
+            const empresa = card.textContent.toLowerCase();
+            const visible = clave.includes(filtro) || empresa.includes(filtro);
+            card.style.display = visible ? "" : "none";
+    
+            if (visible) hayResultados = true;
         });
+    
+        noResults.style.display = hayResultados ? "none" : "block";
     }
+    
+    
+    // Filtrar solicitudes en tabla
+    function filtrarSolicitudesTabla() {
+        const filtro = filtroClaveTabla.value.toLowerCase();
+        let hayResultados = false;
+    
+        const filas = document.querySelectorAll("#tablaSolicitudes tbody tr");
+        filas.forEach(fila => {
+            const columnas = fila.getElementsByTagName("td");
+            const clave = columnas[1] ? columnas[1].textContent.toLowerCase() : '';  // Comprobamos si existe el valor
+            const empresa = columnas[3] ? columnas[3].textContent.toLowerCase() : '';  // Comprobamos si existe el valor
+            const visible = clave.includes(filtro) || empresa.includes(filtro);
+            fila.style.display = visible ? "" : "none";
+    
+            if (visible) hayResultados = true;
+        });
+    
+        noResults.style.display = hayResultados ? "none" : "block";
+    }
+    
+    filtroClaveTarjetas.addEventListener("input", filtrarSolicitudesTarjetas);
+    filtroClaveTabla.addEventListener("input", filtrarSolicitudesTabla);
+    
+
+filtroClaveTarjetas.addEventListener("input", filtrarSolicitudesTarjetas);
+filtroClaveTabla.addEventListener("input", filtrarSolicitudesTabla);
 
     // Obtener empleados de la API
     async function obtenerEmpleados() {
@@ -74,80 +109,121 @@ document.addEventListener("DOMContentLoaded", () => {
 
         new bootstrap.Modal(modal).show();
     }
+// Asignar personal a una solicitud
+async function asignarPersonal(idRegistro, idEmpleado) {
+    if (!idEmpleado) {
+        alert("Debe seleccionar un empleado antes de asignar.");
+        return;
+    }
 
-    // Asignar personal a una solicitud
-    async function asignarPersonal(idRegistro, idEmpleado) {
-        if (!idEmpleado) {
-            alert("Debe seleccionar un empleado antes de asignar.");
+    try {
+        const respuesta = await fetch(`/api/registro/asignar/${idRegistro}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ empleadoId: idEmpleado }),
+        });
+
+        if (!respuesta.ok) throw new Error("No se pudo asignar personal.");
+
+        alert("Personal asignado correctamente.");
+        cargarRegistros();
+
+        // ✅ Cerrar automáticamente el modal después de asignar
+        const modalElement = document.querySelector("#modalAsignarPersonal");
+        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+        if (modalInstance) {
+            modalInstance.hide();
+        }
+
+    } catch (error) {
+        console.error("❌ Error en la asignación:", error);
+        alert(`Error en la asignación: ${error.message}`);
+    }
+}
+
+async function cargarRegistros() {
+    try {
+        const respuesta = await fetch("/api/registro/obtener");
+        if (!respuesta.ok) throw new Error("Error al cargar registros");
+
+        const data = await respuesta.json();
+        const tbody = tablaRegistros.querySelector("tbody");
+        const contenedor = document.getElementById("contenedorSolicitudes");
+
+        tbody.innerHTML = "";
+        contenedor.innerHTML = "";
+
+        if (data.registros.length === 0) {
+            document.getElementById("noResults").style.display = "";
             return;
         }
 
-        try {
-            const respuesta = await fetch(`/api/registro/asignar/${idRegistro}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ empleadoId: idEmpleado }),
-            });
+        data.registros.forEach((registro) => {
+            // Formatear la fecha
+            const fechaEnvio = new Date(registro.fecha_envio).toLocaleDateString("es-ES");
 
-            if (!respuesta.ok) throw new Error("No se pudo asignar personal.");
+            // 📌 Agregar registros a la Tabla
+            const fila = document.createElement("tr");
+            fila.innerHTML = `
+                <td>${registro.id}</td>
+                <td contenteditable="true">${registro.clave}</td>
+                <td>${registro.OT}</td>
+                <td>${registro.empresa}</td>
+                <td>${fechaEnvio}</td>
+                <td contenteditable="true">${registro.descripcion}</td>
+                <td>${registro.contacto}</td>
+                <td>${registro.importe_cotizado}</td>
+                <td contenteditable="true">${registro.resultado}</td>
+                <td>${registro.empleado_asignado || "No asignado"}</td>
+            `;
+            tbody.appendChild(fila);
 
-            alert("Personal asignado correctamente.");
-            cargarRegistros();
-        } catch (error) {
-            console.error("Error en la asignación:", error);
-            alert(`Error en la asignación: ${error.message}`);
-        }
+            // 📌 Agregar registros como tarjetas
+            const card = document.createElement("div");
+            card.className = "col-md-4 mb-3";
+            card.innerHTML = `
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">${registro.empresa}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Clave: ${registro.clave} | OT: ${registro.OT}</h6>
+                        <p><strong>Fecha Envío:</strong> ${fechaEnvio}</p>
+                        <p><strong>Descripción:</strong> <span contenteditable="true">${registro.descripcion}</span></p>
+                        <p><strong>Contacto:</strong> ${registro.contacto}</p>
+                        <p><strong>Importe Cotizado:</strong> ${registro.importe_cotizado}</p>
+                        <p><strong>Resultado:</strong> <span contenteditable="true">${registro.resultado}</span></p>
+                        <p><strong>Personal Asignado:</strong> ${registro.empleado_asignado || "No asignado"}</p>
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-primary btn-sm btn-asignar" data-id="${registro.id}">Asignar</button>
+                            <button class="btn btn-success btn-sm btn-guardar" data-id="${registro.id}">Guardar</button>
+                            <button class="btn btn-danger btn-sm btn-eliminar" data-id="${registro.id}">Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            contenedor.appendChild(card);
+        });
+
+        // Agregar eventos a los botones
+        document.querySelectorAll(".btn-asignar").forEach(boton => 
+            boton.addEventListener("click", (e) => mostrarModalAsignacion(e.target.dataset.id))
+        );
+
+        document.querySelectorAll(".btn-guardar").forEach(boton => 
+            boton.addEventListener("click", (e) => guardarRegistro(e.target.dataset.id, e.target.closest("tr")))
+        );
+
+        document.querySelectorAll(".btn-eliminar").forEach(boton => 
+            boton.addEventListener("click", (e) => eliminarRegistro(e.target.dataset.id))
+        );
+
+    } catch (error) {
+        console.error("Error al cargar registros:", error);
     }
+}
 
-    // Cargar registros desde la API
-    async function cargarRegistros() {
-        try {
-            const respuesta = await fetch("/api/registro/obtener");
-            if (!respuesta.ok) throw new Error("Error al cargar registros");
+cargarRegistros();
 
-            const data = await respuesta.json();
-            tablaRegistros.querySelector("tbody").innerHTML = "";
 
-            data.registros.forEach((registro) => {
-                const fila = document.createElement("tr");
-
-                fila.innerHTML = `
-                    <td>${registro.id}</td>
-                    <td contenteditable="true">${registro.clave}</td>
-                    <td>${registro.OT}</td>
-                    <td>${registro.empresa}</td>
-                    <td>${registro.fecha_envio}</td>
-                    <td contenteditable="true">${registro.descripcion}</td>
-                    <td>${registro.contacto}</td>
-                    <td>${registro.importe_cotizado}</td>
-                    <td contenteditable="true">${registro.resultado}</td>
-                    <td>${registro.empleado_asignado || "No asignado"}</td>
-                    <td>
-                        <button class="btn btn-primary btn-sm btn-asignar" data-id="${registro.id}">Asignar</button>
-                        <button class="btn btn-success btn-sm btn-guardar" data-id="${registro.id}">Guardar</button>
-                        <button class="btn btn-danger btn-sm btn-eliminar" data-id="${registro.id}">Eliminar</button>
-                    </td>
-                `;
-
-                tablaRegistros.querySelector("tbody").appendChild(fila);
-            });
-
-            document.querySelectorAll(".btn-asignar").forEach(boton => boton.addEventListener("click", (e) => {
-                mostrarModalAsignacion(e.target.dataset.id);
-            }));
-
-            document.querySelectorAll(".btn-guardar").forEach(boton => boton.addEventListener("click", (e) => {
-                guardarRegistro(e.target.dataset.id, e.target.closest("tr"));
-            }));
-
-            document.querySelectorAll(".btn-eliminar").forEach(boton => boton.addEventListener("click", (e) => {
-                eliminarRegistro(e.target.dataset.id);
-            }));
-
-        } catch (error) {
-            console.error("Error al cargar registros:", error);
-        }
-    }
 
     // Guardar cambios en un registro
     async function guardarRegistro(id, fila) {
@@ -194,7 +270,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    filtroClave.addEventListener("input", filtrarSolicitudes);
    
     exportPDFBtn.addEventListener("click", exportPDF);
     cargarRegistros();
@@ -328,7 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // Guardar el documento
-            doc.save(`Cotizacion_Folio_${folioFormateado}.pdf`);
+            doc.save(`Tabla_Registro_Folio_${folioFormateado}.pdf`);
         };
 
         logo.onerror = function () {

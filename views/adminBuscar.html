@@ -36,48 +36,105 @@
                     <li class="nav-item"><a class="nav-link" href="adminPersonal.html">Lista de empleados</a></li>
                     <li class="nav-item"><a class="nav-link" href="adminRegistroPersonal.html">Registrar nuevo</a></li>
                 </ul>
-                <span id="perfil-nombre" class="text-light ms-auto">Cargando...</span>
-                <button onclick="cerrarSesion()" class="btn btn-danger btn-sm ms-2">Cerrar Sesión</button>
+            </div>
+            <div class="d-flex align-items-center ms-auto">
+                <span id="perfil-nombre" class="text-light me-2">Cargando...</span>
+                <button onclick="cerrarSesion()" class="btn btn-danger btn-sm">Cerrar Sesión</button>
             </div>
         </div>
     </nav>
     <div class="container mt-4">
-        <h2>Buscar Solicitud</h2>
-
+        <h2 class="mb-4 text-center">Buscar Solicitud</h2>
+    
         <!-- Campo de búsqueda -->
-        <div class="mb-3">
-            <input type="text" id="buscarInput" class="form-control" placeholder="Buscar por empresa o clave..." aria-label="Buscar solicitudes">
-        </div>
 
-        <!-- Botón para exportar PDF -->
-        <div class="d-flex justify-content-end mb-3">
-            <button id="exportPDF" class="btn btn-success">Exportar a PDF</button>
-        </div>
+        <div class="container mt-4">
+            <h2>Solicitudes</h2>
+        
+            <div class="accordion" id="acordeonSolicitudes">
+                <!-- Sección de Tarjetas -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTarjetas">
+                            📋 Ver Solicitudes en Tarjetas
+                        </button>
+                    </h2>
+               
+                    <div id="collapseTarjetas" class="accordion-collapse collapse show">
+                        <div class="mb-3">
+                            <input type="text" id="buscarInputTarjetas" class="form-control" placeholder="Buscar por empresa o clave..." aria-label="Buscar solicitudes">
+                        </div>
 
-        <!-- Tabla con scroll -->
-        <div class="table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 5px;">
-            <table class="table table-striped mt-3 mb-3" id="tablaSolicitudes">
-                <thead class="table-dark">
-                    <tr>
-                        <th>ID</th>
-                        <th>Clave</th>
-                        <th>OT</th>
-                        <th>Empresa</th>
-                        <th>Fecha Envío</th>
-                        <th>Descripción</th>
-                        <th>Contacto</th>
-                        <th>Importe Cotizado</th>
-                        <th>Resultado</th>
-                        <th>Personal Asignado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr id="noResults" style="display: none;">
-                        <td colspan="11" class="text-center text-muted">No se encontraron registros.</td>
-                    </tr>
-                </tbody>
-            </table>
+                        <div class="accordion-body">
+                            <div class="row" id="contenedorSolicitudes"></div>
+                        </div>
+                    </div>
+                </div>
+        
+                <!-- Sección de Tabla -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTabla">
+                            📊 Ver Solicitudes en Tabla
+                        </button>
+                    </h2>
+                    <div id="collapseTabla" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                            <div class="mb-3">
+                                <input type="text" id="buscarInputTabla" class="form-control" placeholder="Buscar por empresa o clave...">
+                            </div>
+        
+                            <div class="d-flex justify-content-end mb-3">
+                                <button id="exportPDF" class="btn btn-success">Exportar a PDF</button>
+                            </div>
+        
+                            <div class="table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 5px;">
+                                <table class="table table-striped" id="tablaSolicitudes">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Clave</th>
+                                            <th>OT</th>
+                                            <th>Empresa</th>
+                                            <th>Fecha Envío</th>
+                                            <th>Descripción</th>
+                                            <th>Contacto</th>
+                                            <th>Importe Cotizado</th>
+                                            <th>Resultado</th>
+                                            <th>Personal Asignado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr id="noResults" style="display: none;">
+                                            <td colspan="11" class="text-center text-muted">No se encontraron registros.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    
+    <!-- Modal para asignar personal -->
+    <div id="modalAsignarPersonal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Asignar Personal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="selectPersonal">Seleccione el personal:</label>
+                    <select id="selectPersonal" class="form-control"></select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button id="btnConfirmarAsignacion" class="btn btn-primary">Asignar</button>
+                </div>
+            </div>
         </div>
     </div>
 

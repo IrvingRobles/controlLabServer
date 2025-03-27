@@ -70,9 +70,10 @@ app.use(express.json());
 
 // Servir archivos estáticos (CSS y JS)
 app.use(express.static(path.join(__dirname, 'views'))); // Carpeta 'views' donde están HTML, CSS, JS
+app.use('/api/almacen', almacenRoutes);
 
 // Configuración de multer para guardar PDFs en la carpeta PDFCotizacion
-const storage = multer.diskStorage({
+const storageCotizacion = multer.diskStorage({
     destination: (req, file, cb) => {
         const pdfPath = path.join(__dirname, 'views', 'PDFCotizacion');
         // Crear la carpeta si no existe
@@ -85,47 +86,102 @@ const storage = multer.diskStorage({
         cb(null, file.originalname); // Guardar el archivo con su nombre original
     },
 });
-const upload = multer({ storage });
+const uploadCotizacion = multer({ storage: storageCotizacion });
 
-app.use('/api/almacen', almacenRoutes);
-
-// Ruta para manejar la subida del PDF
-app.post('/guardar-pdf', upload.single('pdf'), (req, res) => {
+// Ruta para manejar la subida del PDF de cotización
+app.post('/guardar-pdf', uploadCotizacion.single('pdf'), (req, res) => {
     if (req.file) {
-        res.status(200).send('PDF guardado correctamente.');
+        res.status(200).send('PDF de cotización guardado correctamente.');
     } else {
-        res.status(500).send('Error al guardar el PDF.');
+        res.status(500).send('Error al guardar el PDF de cotización.');
     }
 });
 
-// Ruta para listar los PDFs guardados
+// Ruta para listar los PDFs de cotización guardados
 app.get('/listar-pdfs', (req, res) => {
     const directoryPath = path.join(__dirname, 'views', 'PDFCotizacion');
     fs.readdir(directoryPath, (err, files) => {
         if (err) {
-            return res.status(500).send('Error al listar los archivos.');
+            return res.status(500).send('Error al listar los archivos de cotización.');
         }
         res.status(200).json(files); // Devolver la lista de archivos como JSON
     });
 });
 
-// Ruta para eliminar un PDF
+// Ruta para eliminar un PDF de cotización
 app.delete('/PDFCotizacion/:fileName', (req, res) => {
     const fileName = req.params.fileName;
     const filePath = path.join(__dirname, 'views', 'PDFCotizacion', fileName);
   
     // Validar si el archivo existe
     if (!fs.existsSync(filePath)) {
-        return res.status(404).json({ message: 'Archivo no encontrado.' });
+        return res.status(404).json({ message: 'Archivo de cotización no encontrado.' });
     }
   
     fs.unlink(filePath, (err) => {
         if (err) {
-            return res.status(500).json({ message: 'Error al eliminar el archivo.' });
+            return res.status(500).json({ message: 'Error al eliminar el archivo de cotización.' });
         }
-        res.status(200).json({ message: 'Archivo eliminado correctamente.' });
+        res.status(200).json({ message: 'Archivo de cotización eliminado correctamente.' });
     });
 });
+
+// Configuración de multer para guardar PDFs en la carpeta PDFOt
+const storageOt = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const pdfPath = path.join(__dirname, 'views', 'PDFOt'); // Carpeta para los PDFs de OT
+        // Crear la carpeta si no existe
+        if (!fs.existsSync(pdfPath)) {
+            fs.mkdirSync(pdfPath, { recursive: true });
+        }
+        cb(null, pdfPath); // Ruta donde se guardarán los PDFs
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.originalname); // Guardar el archivo con su nombre original
+    },
+});
+const uploadOt = multer({ storage: storageOt });
+
+// Ruta para manejar la subida del PDF de OT
+app.post('/guardar-pdf-ot', uploadOt.single('pdf'), (req, res) => {
+    if (req.file) {
+        res.status(200).send('PDF de OT guardado correctamente.');
+    } else {
+        res.status(500).send('Error al guardar el PDF de OT.');
+    }
+});
+
+// Ruta para listar los PDFs de OT guardados
+app.get('/listar-pdfs-ot', (req, res) => {
+    const directoryPath = path.join(__dirname, 'views', 'PDFOt');
+    fs.readdir(directoryPath, (err, files) => {
+        if (err) {
+            return res.status(500).send('Error al listar los archivos de OT.');
+        }
+        res.status(200).json(files); // Devolver la lista de archivos como JSON
+    });
+});
+
+// Ruta para eliminar un PDF de OT
+app.delete('/PDFOt/:fileName', (req, res) => {
+    const fileName = req.params.fileName;
+    const filePath = path.join(__dirname, 'views', 'PDFOt', fileName);
+  
+    // Validar si el archivo existe
+    if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: 'Archivo de OT no encontrado.' });
+    }
+  
+    fs.unlink(filePath, (err) => {
+        if (err) {
+            return res.status(500).json({ message: 'Error al eliminar el archivo de OT.' });
+        }
+        res.status(200).json({ message: 'Archivo de OT eliminado correctamente.' });
+    });
+});
+
+app.use('/PDFCotizacion', express.static(path.join(__dirname, 'views', 'PDFCotizacion')));
+app.use('/PDFOt', express.static(path.join(__dirname, 'views', 'PDFOt')));
 
 // Usar las rutas de registro y login
 app.use('/api/registro', rutaRegistro); // Rutas del registro
