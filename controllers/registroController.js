@@ -1,36 +1,6 @@
 const db = require('../model/db'); // Configuración de la base de datos
 const { format } = require('date-fns');
 
-// Función para crear un nuevo registro
-// Controlador para crear un nuevo registro
-// exports.crearRegistro = async (req, res) => {
-//     try {
-//         const { clave, empresa, fechaEnvio, descripcion, contacto, lugar, cliente, creadoPor } = req.body;
-
-//         if (!empresa || !fechaEnvio) {
-//             return res.status(400).json({ mensaje: "Empresa y fecha de envío son obligatorios" });
-//         }
-
-//         // Generar la clave automáticamente si no está presente en la solicitud
-//         const claveGenerada = clave || generarClave(empresa, fechaEnvio);
-
-//         // Asignar un valor por defecto para 'resultado' si no se pasa en la solicitud
-//         const resultado = descripcion || "Sin descripción"; // Aquí se usa "Sin descripción" por defecto si no se pasa 'descripcion'
-
-//         // Insertar en la base de datos (sin OT y sin importe_cotizado)
-//         const [result] = await db.query(
-//             `INSERT INTO registros (clave, empresa, fecha_envio, descripcion, resultado, contacto, lugar, cliente, creadoPor) 
-//              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-//             [claveGenerada, empresa, fechaEnvio, descripcion, resultado, contacto, lugar, cliente, creadoPor]
-//         );
-
-//         res.status(201).json({ mensaje: "Registro creado exitosamente", id: result.insertId, clave: claveGenerada });
-//     } catch (error) {
-//         console.error("Error al crear el registro:", error);
-//         res.status(500).json({ mensaje: "Error en el servidor" });
-//     }
-// };
-
 exports.crearRegistro = async (req, res) => {
     try {
         const { clave, empresa, fechaEnvio, descripcion, contacto, lugar, id_cliente, creadoPor } = req.body;
@@ -53,8 +23,6 @@ exports.crearRegistro = async (req, res) => {
         res.status(500).json({ mensaje: "Error en el servidor" });
     }
 };
-
-
 // Función para crear un nuevo cliente
 exports.crearCliente = async (req, res) => {
     try {
@@ -98,8 +66,6 @@ exports.listarClientes = async (req, res) => {
         res.status(500).json({ mensaje: "Error en el servidor." });
     }
 };
-
-
 
 // Obtener todos los registros
 exports.obtenerRegistros = async (req, res) => {
@@ -215,52 +181,64 @@ exports.obtenerEmpleados = async (req, res) => {
     }
 };
 
+const { enviarCorreoAsignacion } = require("../services/correoAsignacion"); 
+
 exports.asignarPersonal = async (req, res) => {
     const { id } = req.params;
     const { empleadoId } = req.body;
-
-    console.log("Datos recibidos:", req.body); // Depuración
 
     if (!empleadoId || isNaN(empleadoId)) {
         return res.status(400).json({ mensaje: "El ID del empleado es obligatorio y debe ser un número válido" });
     }
 
     try {
-        // Unir ambas consultas en una sola para optimizar rendimiento
+        // Consultar usuario y datos del registro asignado
         const query = `
-            SELECT r.id AS registroId, u.username 
+            SELECT r.id AS registroId, r.clave, r.empresa, r.descripcion, r.contacto, 
+                   u.nombre, u.username, u.correo
             FROM registros r 
             JOIN users u ON u.id = ?
             WHERE r.id = ?`;
 
         const [rows] = await db.execute(query, [empleadoId, id]);
 
+        console.log("🔍 Datos obtenidos de la consulta:", rows);
+
         if (rows.length === 0) {
             return res.status(404).json({ mensaje: "Registro o empleado no encontrado" });
         }
 
-        const username = rows[0].username;
+        const usuario = rows[0];
+
+        if (!usuario.correo) {
+            console.error("❌ Error: El usuario no tiene un correo registrado.");
+            return res.status(400).json({ mensaje: "El usuario no tiene un correo registrado." });
+        }
+
+        console.log(`📧 Intentando enviar correo a: ${usuario.correo}, usuario: ${usuario.username}, registro ID: ${usuario.registroId}`);
 
         // Actualizar el registro con el empleado asignado
         const updateQuery = "UPDATE registros SET empleado_asignado = ? WHERE id = ?";
-        const [result] = await db.execute(updateQuery, [username, id]);
+        const [result] = await db.execute(updateQuery, [usuario.username, id]);
 
         if (result.affectedRows === 0) {
             return res.status(400).json({ mensaje: "El personal ya estaba asignado o no se pudo asignar" });
         }
 
+        // Enviar correo de notificación con los datos completos
+        await enviarCorreoAsignacion(usuario.correo, usuario);
+
         res.json({ 
-            mensaje: "Personal asignado correctamente", 
-            empleado_asignado: username, 
+            mensaje: "Personal asignado correctamente y correo enviado", 
+            empleado_asignado: usuario.username, 
             registroId: id 
         });
 
     } catch (error) {
-        console.error("Error al asignar personal:", error);
+        console.error("❌ Error al asignar personal:", error);
         res.status(500).json({ mensaje: "Error en el servidor", error: error.message });
     }
 };
-
 
 // Cargar datos de la Orden de Trabajo (OT) junto con los datos del cliente
 exports.cargarDatosOT = async (req, res) => {

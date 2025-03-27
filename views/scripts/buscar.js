@@ -11,60 +11,155 @@ document.addEventListener("DOMContentLoaded", () => {
     let folio = 1; // Variable para mantener el folio dinámico
 
     // Cargar registros al iniciar
-    async function cargarRegistros() {
-        try {
-            const usuario = JSON.parse(localStorage.getItem("user")); // Obtener el objeto user
-            const usuarioActual = usuario?.username; // Obtener el username
+   // Función para cargar los registros en tabla y cards
+async function cargarRegistros() {
+    try {
+        const usuario = JSON.parse(localStorage.getItem("user")); // Obtener el objeto user
+        const usuarioActual = usuario?.username; // Obtener el username
 
-            if (!usuarioActual) {
-                console.error("Usuario no autenticado");
-                return;
-            }
-
-            const respuesta = await fetch("/api/registro/obtenerAsignados", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "usuario": usuarioActual // Enviar username al backend
-                }
-            });
-
-            if (!respuesta.ok) throw new Error("Error al cargar los registros");
-
-            const data = await respuesta.json();
-            const registros = data.registros;
-
-            // Limpiar tabla antes de insertar nuevos datos
-            tablaRegistros.innerHTML = "";
-
-            registros.forEach((registro) => {
-                const fila = document.createElement("tr");
-
-                fila.innerHTML = `
-                <td>${registro.id}</td>
-                <td contenteditable="false">${registro.clave}</td>
-                <td contenteditable="false">${registro.OT}</td>
-                <td contenteditable="false">${registro.empresa}</td>
-                <td contenteditable="false">${registro.fecha_envio}</td>
-                <td contenteditable="true">${registro.descripcion}</td>
-                <td contenteditable="true">${registro.contacto}</td>
-                <td contenteditable="false">${registro.importe_cotizado}</td>
-                <td contenteditable="true">${registro.resultado}</td>
-                <td>${registro.empleado_asignado || "No asignado"}</td>
-                <button class="btn btn-primary btn-sm btn-guardar" data-id="${registro.id}">Guardar</button>
-                <button class="btn btn-primary btn-sm btn-detalles" data-id="${registro.id}">Hacer Cotización</button>
-                <button class="btn btn-primary btn-sm btn-orden-trabajo" data-id="${registro.id}">Generar OT</button>
-
-            `;
-
-                tablaRegistros.appendChild(fila);
-            });
-
-            agregarEventosBotones();
-        } catch (error) {
-            console.error("Error al cargar registros:", error);
+        if (!usuarioActual) {
+            console.error("Usuario no autenticado");
+            return;
         }
+
+        const respuesta = await fetch("/api/registro/obtenerAsignados", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "usuario": usuarioActual // Enviar username al backend
+            }
+        });
+
+        if (!respuesta.ok) throw new Error("Error al cargar los registros");
+
+        const data = await respuesta.json();
+        const registros = data.registros;
+
+        // Limpiar tabla y cards antes de insertar nuevos datos
+        document.getElementById("listadoRegistros").innerHTML = "";
+        document.getElementById("listaRegistrosCards").innerHTML = "";
+
+        // Mostrar registros en tabla
+        mostrarRegistrosEnTabla(registros);
+
+        // Mostrar registros en cards
+        mostrarRegistrosEnCards(registros);
+
+        // Agregar eventos a botones
+        agregarEventosBotones();
+    } catch (error) {
+        console.error("Error al cargar registros:", error);
     }
+}
+// Mostrar registros en la tabla
+function mostrarRegistrosEnTabla(registros) {
+    const tabla = document.getElementById("listadoRegistros");
+
+    registros.forEach((registro) => {
+        // Formatear la fecha
+        const fechaEnvio = new Date(registro.fecha_envio).toLocaleDateString("es-ES");
+
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+            <td>${registro.id}</td>
+            <td>${registro.clave}</td>
+            <td>${registro.OT}</td>
+            <td>${registro.empresa}</td>
+            <td>${fechaEnvio}</td>
+            <td contenteditable="true">${registro.descripcion}</td>
+            <td contenteditable="true">${registro.contacto}</td>
+            <td>${registro.importe_cotizado}</td>
+            <td contenteditable="true">${registro.resultado}</td>
+            <td>${registro.empleado_asignado || "No asignado"}</td>
+        `;
+        tabla.appendChild(fila);
+    });
+}
+
+// Mostrar registros en las cards
+function mostrarRegistrosEnCards(registros) {
+    const contenedor = document.getElementById("listaRegistrosCards");
+
+    registros.forEach((registro) => {
+        // Formatear la fecha
+        const fechaEnvio = new Date(registro.fecha_envio).toLocaleDateString("es-ES");
+
+        let card = document.createElement("div");
+        card.className = "col-md-4 mb-3";
+
+        card.innerHTML = `
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-center">
+                        <a href="#" class="text-decoration-none" data-bs-toggle="collapse" data-bs-target="#infoRegistro${registro.id}">
+                            ${registro.clave} - ${registro.empresa}
+                        </a>
+                    </h5>
+                    <div id="infoRegistro${registro.id}" class="collapse">
+                        <p class="card-text"><strong>Orden de Trabajo:</strong> ${registro.OT}</p>
+                        <p class="card-text"><strong>Fecha de Envío:</strong> ${fechaEnvio}</p>
+                        <p class="card-text"><strong>Descripción:</strong> ${registro.descripcion}</p>
+                        <p class="card-text"><strong>Contacto:</strong> ${registro.contacto}</p>
+                        <p class="card-text"><strong>Importe Cotizado:</strong> ${registro.importe_cotizado}</p>
+                        <p class="card-text"><strong>Resultado:</strong> ${registro.resultado}</p>
+                        <p class="card-text"><strong>Persona Asignada:</strong> ${registro.empleado_asignado || "No asignado"}</p>
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-primary btn-sm btn-guardar" data-id="${registro.id}">Guardar</button>
+                            <button class="btn btn-warning btn-sm btn-detalles" data-id="${registro.id}">Hacer Cotización</button>
+                            <button class="btn btn-success btn-sm btn-orden-trabajo" data-id="${registro.id}">Generar OT</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        contenedor.appendChild(card);
+    });
+}
+
+
+// Filtrar registros dinámicamente
+function filtrarRegistros() {
+    const filtroClaveValue = filtroClave.value.toLowerCase();
+    const filtroEmpresaValue = filtroEmpresa.value.toLowerCase();
+    const filtroFechaValue = filtroFecha.value;
+    const filtroResultadoValue = filtroResultado.value.toLowerCase();
+
+    const filas = tablaRegistros.querySelectorAll("tr");
+    const cards = document.querySelectorAll("#listaRegistrosCards .col-md-4");
+
+    // Filtrar en la tabla
+    filas.forEach((fila) => {
+        const clave = fila.children[1].textContent.toLowerCase();
+        const empresa = fila.children[3].textContent.toLowerCase();
+        const fecha = fila.children[4].textContent;
+        const resultado = fila.children[8].textContent.toLowerCase();
+
+        const mostrar =
+            (!filtroClaveValue || clave.includes(filtroClaveValue)) &&
+            (!filtroEmpresaValue || empresa.includes(filtroEmpresaValue)) &&
+            (!filtroFechaValue || fecha.includes(filtroFechaValue)) &&
+            (!filtroResultadoValue || resultado.includes(filtroResultadoValue));
+
+        fila.style.display = mostrar ? "" : "none";
+    });
+
+    // Filtrar en las cards
+    cards.forEach((card) => {
+        const clave = card.querySelector(".card-title").textContent.toLowerCase();
+        const empresa = card.querySelector(".card-title").textContent.toLowerCase();
+        const fecha = card.querySelector(".card-text").textContent.toLowerCase();
+        const resultado = card.querySelectorAll(".card-text")[5].textContent.toLowerCase();  // Resultado es el sexto .card-text
+
+        const mostrar =
+            (!filtroClaveValue || clave.includes(filtroClaveValue)) &&
+            (!filtroEmpresaValue || empresa.includes(filtroEmpresaValue)) &&
+            (!filtroFechaValue || fecha.includes(filtroFechaValue)) &&
+            (!filtroResultadoValue || resultado.includes(filtroResultadoValue));
+
+        card.style.display = mostrar ? "" : "none";
+    });
+}
 
    // <button class="btn btn-danger btn-sm btn-eliminar" data-id="${registro.id}">Eliminar</button>
 
@@ -90,9 +185,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
     }
-
-
-
 
     // Función para actualizar un registro
     async function guardarRegistro(id, fila) {
@@ -161,8 +253,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
     });
-
-
     // Eliminar un registro
     async function eliminarRegistro(id) {
         try {
@@ -177,38 +267,6 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             console.error("Error al eliminar el registro:", error);
         }
-    }
-
-    // Filtrar registros dinámicamente
-    function filtrarRegistros() {
-        const filtroClaveValue = filtroClave.value.toLowerCase();
-        const filtroEmpresaValue = filtroEmpresa.value.toLowerCase();
-        const filtroFechaValue = filtroFecha.value;
-        const filtroResultadoValue = filtroResultado.value.toLowerCase();
-
-        const filas = tablaRegistros.querySelectorAll("tr");
-
-        filas.forEach((fila) => {
-            const clave = fila.children[1].textContent.toLowerCase();
-            const empresa = fila.children[3].textContent.toLowerCase();
-            const fecha = fila.children[4].textContent;
-            const resultado = fila.children[8].textContent.toLowerCase();
-
-            const mostrar =
-                (!filtroClaveValue || clave.includes(filtroClaveValue)) &&
-                (!filtroEmpresaValue || empresa.includes(filtroEmpresaValue)) &&
-                (!filtroFechaValue || fecha.includes(filtroFechaValue)) &&
-                (!filtroResultadoValue || resultado.includes(filtroResultadoValue));
-
-            fila.style.display = mostrar ? "" : "none";
-        });
-    }
-
-    // Restablecer folios
-    function restablecerFolios() {
-        // Restablecer el contador de folios a 1 en localStorage
-        localStorage.setItem("ultimoFolio", 1);
-        alert("Folio restablecido a 1.");
     }
 
     document.getElementById("exportPDF").addEventListener("click", exportPDF);
@@ -340,7 +398,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // Guardar el documento
-            doc.save(`Cotizacion_Folio_${folioFormateado}.pdf`);
+            doc.save(`Tabla_Registro_Folio_${folioFormateado}.pdf`);
         };
 
         logo.onerror = function () {
