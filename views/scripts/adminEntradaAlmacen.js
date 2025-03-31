@@ -192,6 +192,8 @@ document.addEventListener("DOMContentLoaded", function () {
             precio_inicial: document.getElementById("precio_inicial").value,
             ctd_entradas: document.getElementById("ctd_entradas").value,
             pu_entrada: document.getElementById("pu_entrada").value,
+            cant_mal: document.getElementById("cant_mal").value,
+            cant_bien: document.getElementById("cant_bien").value,
             concepto: document.getElementById("concepto").value,
             anaquel: document.getElementById("anaquel").value,
             seccion: document.getElementById("seccion").value,
@@ -219,6 +221,8 @@ document.addEventListener("DOMContentLoaded", function () {
             showModal("Hubo un problema al procesar la solicitud. Inténtalo de nuevo.", false);
         }
     });
+    document.getElementById('editarRegistro').disabled = true;
+    document.getElementById('eliminarRegistro').disabled = true;
 });
 
 document.getElementById('editarRegistro').addEventListener('click', async function () {
@@ -241,6 +245,8 @@ document.getElementById('editarRegistro').addEventListener('click', async functi
         idMoneda: document.getElementById("idMoneda").value,
         ctd_entradas: document.getElementById("ctd_entradas").value,
         pu_entrada: document.getElementById("pu_entrada").value,
+        cant_mal: document.getElementById("cant_mal").value,
+        cant_bien: document.getElementById("cant_bien").value,
         concepto: document.getElementById("concepto").value,
         anaquel: document.getElementById("anaquel").value,
         seccion: document.getElementById("seccion").value,
@@ -260,6 +266,8 @@ document.getElementById('editarRegistro').addEventListener('click', async functi
         idMoneda: document.getElementById("idMoneda").dataset.originalValue,
         ctd_entradas: document.getElementById("ctd_entradas").dataset.originalValue,
         pu_entrada: document.getElementById("pu_entrada").dataset.originalValue,
+        cant_mal: document.getElementById("cant_mal").dataset.originalValue,
+        cant_bien: document.getElementById("cant_bien").dataset.originalValue,
         concepto: document.getElementById("concepto").dataset.originalValue,
         anaquel: document.getElementById("anaquel").dataset.originalValue,
         seccion: document.getElementById("seccion").dataset.originalValue,
@@ -338,6 +346,10 @@ async function buscarRegistro() {
             document.getElementById("ctd_entradas").dataset.originalValue = entrada.ctd_entradas || '';
             document.getElementById("pu_entrada").value = entrada.pu_entrada || '';
             document.getElementById("pu_entrada").dataset.originalValue = entrada.pu_entrada || '';
+            document.getElementById("cant_mal").value = entrada.cant_mal || '';
+            document.getElementById("cant_mal").dataset.originalValue = entrada.cant_mal || '';
+            document.getElementById("cant_bien").value = entrada.cant_bien || '';
+            document.getElementById("cant_bien").dataset.originalValue = entrada.cant_bien || '';
             document.getElementById("concepto").value = entrada.concepto || '';
             document.getElementById("concepto").dataset.originalValue = entrada.concepto || '';
             document.getElementById("anaquel").value = entrada.anaquel || '';
@@ -351,12 +363,24 @@ async function buscarRegistro() {
 
             // Desactivar el botón de "Guardar"
             document.getElementById('guardarRegistro').disabled = true;
+
+            // ACTIVAR botones de Editar y Eliminar
+            document.getElementById('editarRegistro').disabled = false;
+            document.getElementById('eliminarRegistro').disabled = false;
+
             // Si el campo idAlmacen no es relevante, puedes quitar esta línea
-            document.getElementById("idAlmacen").value = "";  // O bien, asignar un valor adecuado si es necesario
+            document.getElementById("idAlmacen").value = "";
+
         } else {
+            // Si no encuentra registro, mantener botones desactivados
+            document.getElementById('editarRegistro').disabled = true;
+            document.getElementById('eliminarRegistro').disabled = true;
             throw new Error('No se encontraron datos para el ID proporcionado.');
         }
     } catch (error) {
+        // En caso de error, desactivar botones
+        document.getElementById('editarRegistro').disabled = true;
+        document.getElementById('eliminarRegistro').disabled = true;
         showModal(`Error: ${error.message}`, false);
     }
 }
@@ -427,6 +451,8 @@ async function eliminarRegistro(id) {
                 document.getElementById("precio_inicial").value = '';
                 document.getElementById("ctd_entradas").value = '';
                 document.getElementById("pu_entrada").value = '';
+                document.getElementById("cant_mal").value = '';
+                document.getElementById("cant_bien").value = '';
                 document.getElementById("concepto").value = '';
                 document.getElementById("anaquel").value = '';
                 document.getElementById("seccion").value = '';

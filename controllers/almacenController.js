@@ -149,6 +149,8 @@ exports.crearRegistroAlmacen = async (req, res) => {
         idMoneda,
         ctd_entradas, // Cantidad de entradas
         pu_entrada, // Precio unitario de la entrada
+        cant_mal,
+        cant_bien,
         concepto,
         anaquel,
         seccion,
@@ -159,12 +161,12 @@ exports.crearRegistroAlmacen = async (req, res) => {
         // 📌 1️⃣ Insertar el nuevo registro en 'almacen' (SIN especificar idAlmacen, ya que es AUTO_INCREMENT)
         const queryAlmacen = `
             INSERT INTO entrada (idUsuario, idEmpresa, idMovimiento, fecha, idProducto, factura,
-        idMoneda, ctd_entradas, pu_entrada, concepto, anaquel, seccion, caja, observaciones
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        idMoneda, ctd_entradas, pu_entrada, cant_mal, cant_bien, concepto, anaquel, seccion, caja, observaciones
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
         const valuesAlmacen = [
             idUsuario, idEmpresa, idMovimiento, fecha, idProducto, factura, idMoneda, ctd_entradas,
-            pu_entrada, concepto, anaquel, seccion, caja, observaciones
+            pu_entrada, cant_mal, cant_bien, concepto, anaquel, seccion, caja, observaciones
         ];
         const [result] = await db.query(queryAlmacen, valuesAlmacen);
         const nuevoIdAlmacen = result.insertId; // Obtener el ID insertado automáticamente
@@ -196,7 +198,7 @@ exports.obtenerRegistroPorId1 = async (req, res) => {
         const query = `
             SELECT 
                 e.idAlmacen, e.idEmpresa, e.idMovimiento, e.fecha, e.idProducto, e.factura, 
-                e.idMoneda, e.ctd_entradas, e.pu_entrada, e.concepto, e.anaquel, e.seccion, 
+                e.idMoneda, e.ctd_entradas, e.pu_entrada, e.cant_mal, e.cant_bien, e.concepto, e.anaquel, e.seccion, 
                 e.caja, e.observaciones, e.idUsuario,
                 emp.codigo AS idEmpresa, 
                 m.nombre AS idMovimiento, 
@@ -239,7 +241,9 @@ exports.obtenerRegistroPorId2 = async (req, res) => {
                 e.factura, 
                 e.idMoneda, 
                 e.ctd_entradas, 
-                e.pu_entrada, 
+                e.pu_entrada,
+                e.cant_mal, 
+                e.cant_bien, 
                 e.concepto, 
                 e.anaquel, 
                 e.seccion, 
@@ -284,6 +288,8 @@ exports.obtenerRegistroPorId2 = async (req, res) => {
             factura: rows[0].factura,
             ctd_entradas: rows[0].ctd_entradas,
             pu_entrada: rows[0].pu_entrada,
+            cant_mal: rows[0].cant_mal, 
+            cant_bien: rows[0].cant_bien,
             concepto: rows[0].concepto,
             anaquel: rows[0].anaquel,
             seccion: rows[0].seccion,
@@ -317,6 +323,8 @@ exports.obtenerRegistrosAlmacen = async (req, res) => {
                 p.precio_inicial, -- Ahora tomado de producto
                 a.ctd_entradas, 
                 a.pu_entrada, 
+                a.cant_mal, 
+                a.cant_bien,
                 a.concepto, 
                 a.anaquel, 
                 a.seccion, 
@@ -419,7 +427,7 @@ exports.eliminarRegistro = async (req, res) => {
 exports.editarRegistroAlmacen = async (req, res) => {
     const {
         idAlmacen, idUsuario, idEmpresa, idMovimiento, fecha, idProducto, factura, idMoneda,
-        ctd_entradas, pu_entrada, concepto, anaquel, seccion, caja, observaciones
+        ctd_entradas, pu_entrada, concepto, cant_mal, cant_bien, anaquel, seccion, caja, observaciones
     } = req.body;
 
     try {
@@ -457,12 +465,12 @@ exports.editarRegistroAlmacen = async (req, res) => {
         await db.query(`
             UPDATE entrada SET
         idUsuario = ?, idEmpresa = ?, idMovimiento = ?, fecha = ?, idProducto = ?,
-            factura = ?, idMoneda = ?, ctd_entradas = ?, pu_entrada = ?, concepto = ?,
+            factura = ?, idMoneda = ?, ctd_entradas = ?, pu_entrada = ?, cant_mal = ?, cant_bien = ?,concepto = ?,
             anaquel = ?, seccion = ?, caja = ?, observaciones = ?
                 WHERE idAlmacen = ?
                     `, [
             idUsuario, idEmpresa, idMovimiento, fecha, idProducto, factura, idMoneda, 
-            ctd_entradas, pu_entrada, concepto, anaquel, seccion, caja, observaciones, idAlmacen
+            ctd_entradas, pu_entrada, cant_mal, cant_bien, concepto, anaquel, seccion, caja, observaciones, idAlmacen
         ]);
 
         res.json({ message: 'Registro actualizado correctamente.' });
