@@ -121,30 +121,21 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // Rellenar el campo de monedas al cargar la página
-    const userSelect = document.getElementById('idUsuario');
-    if (userSelect) {
-        fetch('/api/almacen/x/user')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-
-                }
-                return response.json();
-            })
-            .then(data => {
-                userSelect.innerHTML = '<option value="" selected disabled>Seleccione un Usuario</option>';
-                data.forEach(users => {
-                    const option = document.createElement('option');
-                    option.value = users.id; // Guardamos el idMoneda como valor
-                    option.textContent = users.username; // Mostramos el nombre de la moneda
-                    userSelect.appendChild(option);
-                });
-            })
-            .catch(error => {
-                console.error('Error al obtener los usuarios:', error);
-            });
-    }
+    // Obtener y mostrar usuario actual
+    fetch('/api/almacen/user/actual')
+        .then(response => {
+            if (!response.ok) throw new Error('Error de autenticación');
+            return response.json();
+        })
+        .then(user => {
+            document.getElementById('usernameDisplay').value = user.username;
+            document.getElementById('idUsuario').value = user.id;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Redirigir a login si hay error
+            window.location.href = '/login.html'; // Ajusta esta ruta
+        });
 
     // Obtener el siguiente ID del almacén
     const idAlmacenField = document.getElementById('idAlmacen');
@@ -174,11 +165,11 @@ document.addEventListener("DOMContentLoaded", function () {
         // Obtener valores actuales
         const inicial = parseFloat(document.getElementById('inicial').value) || 0;
         const ctd_entradas = parseFloat(document.getElementById('ctd_entradas').value) || 0;
-    
+
         // Calcular nuevo inicial y precio_inicial
         document.getElementById('inicial').value = inicial + ctd_entradas;
     });
-    
+
     // Manejar el envío del formulario
     document.getElementById('formRegistroAlmacen').addEventListener('submit', async function (event) {
         event.preventDefault();
@@ -232,7 +223,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 document.getElementById('editarRegistro').addEventListener('click', async function () {
     const idAlmacen = document.getElementById("id").value;
-    
+
     if (!idAlmacen) {
         showModal("Por favor, busca un registro antes de editar.", false);
         return;
@@ -285,7 +276,7 @@ document.getElementById('editarRegistro').addEventListener('click', async functi
     }
 
     try {
-        const response = await fetch(`/api/almacen/editar/${idAlmacen}`, { 
+        const response = await fetch(`/api/almacen/editar/${idAlmacen}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(currentData),
@@ -358,8 +349,8 @@ async function buscarRegistro() {
             document.getElementById("observaciones").value = entrada.observaciones || '';
             document.getElementById("observaciones").dataset.originalValue = entrada.observaciones || '';
 
-                        // Desactivar el botón de "Guardar"
-                        document.getElementById('guardarRegistro').disabled = true;
+            // Desactivar el botón de "Guardar"
+            document.getElementById('guardarRegistro').disabled = true;
             // Si el campo idAlmacen no es relevante, puedes quitar esta línea
             document.getElementById("idAlmacen").value = "";  // O bien, asignar un valor adecuado si es necesario
         } else {
@@ -377,7 +368,7 @@ function obtenerIdDesdeUrl() {
 }
 
 // Al cargar la página, obtener el id de la URL y rellenar el campo
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     const id = obtenerIdDesdeUrl();
     if (id) {
         // Si encontramos un id, lo insertamos en el campo de ID
@@ -386,8 +377,6 @@ document.addEventListener("DOMContentLoaded", function() {
         buscarRegistro();
     }
 });
-
-
 
 document.getElementById('eliminarRegistro').addEventListener('click', function () {
     const id = document.getElementById('id').value;
@@ -453,6 +442,40 @@ async function eliminarRegistro(id) {
         showModal(`Error: ${error.message}`, false);
     }
 }
+
+// Función para actualizar cualquier select
+function actualizarSelect(url, selectId, valorCampo = 'id', textoCampo = 'nombre') {
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById(selectId);
+            select.innerHTML = `<option value="" selected disabled>Seleccione...</option>`;
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item[valorCampo];
+                option.textContent = item[textoCampo] || item.codigo; // Usa 'codigo' para empresas/monedas
+                select.appendChild(option);
+            });
+        });
+}
+
+// Escuchar mensajes de los modales
+window.addEventListener('message', (event) => {
+    switch (event.data) {
+        case 'actualizarEmpresas':
+            actualizarSelect('/api/almacen/id/empresas', 'idEmpresa', 'idEmpresa', 'codigo');
+            break;
+        case 'actualizarMonedas':
+            actualizarSelect('/api/almacen/moneda', 'idMoneda', 'idMoneda', 'codigo');
+            break;
+        case 'actualizarProductos':
+            actualizarSelect('/api/almacen/productoselect/id', 'idProducto', 'idProducto', 'nombre');
+            break;
+        case 'actualizarMovimientos':
+            actualizarSelect('/api/almacen/id/movimientos', 'idMovimiento', 'idMovimiento', 'nombre');
+            break;
+    }
+});
 
 // Función para mostrar el modal personalizado
 function showModal(message, success) {

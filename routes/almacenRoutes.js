@@ -94,14 +94,18 @@ router.delete('/producto/:id', almacenController.eliminarProducto);
 router.get('/productoselect/id', almacenController.seleccionarProductos);
 
 // Ruta para buscar registro por ID Mov
-router.get('/id/:idAlmacen', almacenController.obtenerValePorId);
+//router.get('/id/:idAlmacen', almacenController.obtenerValePorId);
 
-router.post('/vales/guardar', almacenController.guardarVale);
+//router.post('/vales/guardar', almacenController.guardarVale);
 
 router.get('/x/user', almacenController.obtenerUsers);
 
+router.get('/id/user', almacenController.obtenerUsers2);
+
 // Ruta para obtener un usuario por ID
 router.get('/usuario/:id', almacenController.obtenerUsuarioPorId);
+
+router.get('/user/actual', almacenController.obtenerUsuarioActual);
 
 router.get('/ot/id', almacenController.obtenerOT);
 

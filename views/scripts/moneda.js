@@ -1,28 +1,41 @@
 document.addEventListener('DOMContentLoaded', () => {
-    cargarMonedas(); // Cargar los monedas registrados al cargar la página
+    cargarMonedas();
 });
 
 document.getElementById('formRegistroMoneda').addEventListener('submit', async (e) => {
     e.preventDefault();
     const nombre = document.getElementById('nombre').value.trim();
     const codigo = document.getElementById('codigo').value.trim();
+    
     if (!nombre || !codigo) {
         showModal('Todos los campos son obligatorios.', false);
         return;
     }
+
     try {
         const response = await fetch('/api/almacen/monedas', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nombre, codigo }),
         });
+
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Error al registrar la moneda.');
         }
+
         showModal('¡Moneda registrada correctamente!', true);
         document.getElementById('formRegistroMoneda').reset();
-        cargarMonedas(); // Recargar la lista de monedas
+        cargarMonedas();
+        
+        // 🔥 NUEVO: Notificar a la ventana principal para actualizar el select
+        window.parent.postMessage('actualizarMonedas', '*');
+        
+        // Cerrar el modal después de 2 segundos (opcional)
+        setTimeout(() => {
+            window.parent.bootstrap.Modal.getInstance(window.parent.document.getElementById('modalMoneda')).hide();
+        }, 2000);
+
     } catch (error) {
         showModal(`Error: ${error.message}`, false);
     }

@@ -875,7 +875,7 @@ exports.seleccionarProductos = async (req, res) => {
 };
 
 // Obtener el vale por ID
-exports.obtenerValePorId = async (req, res) => {
+/*exports.obtenerValePorId = async (req, res) => {
     const { idAlmacen } = req.params;
     try {
         const query = `
@@ -883,7 +883,7 @@ exports.obtenerValePorId = async (req, res) => {
         a.idAlmacen, a.folio_vale_salida, a.solicito, p.nombre AS producto, a.marca,
             a.no_serie, a.no_parte, a.modelo, a.ctd_salidas, a.servicio,
             a.uso_en, pr.condiciones AS condicion
-            FROM almacen a
+            FROM entrada a
             JOIN producto p ON a.producto = p.idProducto
             JOIN condicion pr ON a.condicion = pr.idCondicion
             WHERE a.idAlmacen = ? `;
@@ -937,10 +937,42 @@ exports.guardarVale = async (req, res) => {
         console.error("Error al guardar el vale:", error);
         res.status(500).json({ mensaje: "Error al guardar el vale", error });
     }
-};
+};*/
 
 // Ruta para obtener las usuarios
 exports.obtenerUsers = async (req, res) => {
+    try {
+        // Consulta para obtener los nombres de los users y guardar el id
+        const query = 'SELECT id, username FROM users'; // Ajusta los campos según tu base de datos
+        const [rows] = await db.execute(query);
+
+        res.status(200).json(rows); // Enviar la lista de users como respuesta
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al obtener los users', error });
+    }
+};
+ 
+// Ruta para obtener el usuario actual (Versión final con sesiones)
+exports.obtenerUsuarioActual = async (req, res) => {
+    try {
+        // Verificar si el usuario está en sesión
+        if (!req.session.user) {
+            return res.status(401).json({ mensaje: 'No hay sesión activa' });
+        }
+        
+        // Devolver los datos del usuario de la sesión
+        res.status(200).json({
+            id: req.session.user.id,
+            username: req.session.user.username
+        });
+        
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al obtener usuario', error });
+    }
+};
+
+// Ruta para obtener las usuarios
+exports.obtenerUsers2 = async (req, res) => {
     try {
         // Consulta para obtener los nombres de los users y guardar el id
         const query = 'SELECT id, username FROM users'; // Ajusta los campos según tu base de datos

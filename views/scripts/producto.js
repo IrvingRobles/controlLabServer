@@ -66,7 +66,6 @@ document.getElementById('formRegistroProducto').addEventListener('submit', async
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
-
         });
 
         if (!response.ok) {
@@ -75,9 +74,18 @@ document.getElementById('formRegistroProducto').addEventListener('submit', async
         }
 
         showModal('¡Producto registrado correctamente!', true);
-
-        await cargarProductos();   // Recargar lista de productos
-        await cargarProveedores(); // Actualizar lista de proveedores dinámicamente
+        document.getElementById('formRegistroProducto').reset();
+        
+        await cargarProductos();
+        await cargarProveedores();
+        
+        // 🔥 NUEVO: Notificar a la ventana principal para actualizar el select
+        window.parent.postMessage('actualizarProductos', '*');
+        
+        // Cerrar el modal después de 2 segundos (opcional)
+        setTimeout(() => {
+            window.parent.bootstrap.Modal.getInstance(window.parent.document.getElementById('modalProducto')).hide();
+        }, 2000);
 
     } catch (error) {
         showModal(`Error: ${error.message}`, false);
@@ -215,6 +223,39 @@ function showModal(message, success) {
     const modal = new bootstrap.Modal(document.getElementById('customModal'));
     modal.show();
 }
+
+// Función idéntica a la que ya usas en adminEntradaAlmacen.js
+function actualizarSelect(url, selectId, valorCampo = 'id', textoCampo = 'nombre') {
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById(selectId);
+            const selectedValue = select.value; // Guardamos la selección actual
+            
+            select.innerHTML = `<option value="" selected disabled>Seleccione...</option>`;
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item[valorCampo];
+                option.textContent = item[textoCampo] || item.codigo;
+                select.appendChild(option);
+            });
+            
+            // Restaurar selección si existe en las nuevas opciones
+            if (selectedValue && [...select.options].some(opt => opt.value == selectedValue)) {
+                select.value = selectedValue;
+            }
+        });
+}
+
+// Escucha de mensajes (igual que en adminEntradaAlmacen)
+window.addEventListener('message', (event) => {
+    switch (event.data) {
+        case 'actualizarProveedores':
+            actualizarSelect('/api/almacen/proveedorselect/id', 'idProveedor', 'idProveedor', 'nombre');
+            break;
+        // Mantén tus otros casos aquí...
+    }
+});
 
 // Función para generar el PDF del catálogo de productos
 async function generarPDF() {

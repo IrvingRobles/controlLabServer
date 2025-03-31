@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 document.getElementById('formRegistroProveedor').addEventListener('submit', async (e) => {
     e.preventDefault();
-
     const nombre = document.getElementById('nombre').value.trim();
 
     if (!nombre) {
@@ -16,7 +15,7 @@ document.getElementById('formRegistroProveedor').addEventListener('submit', asyn
         const response = await fetch('/api/almacen/proveedor', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nombre }),
+            body: JSON.stringify({ nombre })
         });
 
         if (!response.ok) {
@@ -27,6 +26,14 @@ document.getElementById('formRegistroProveedor').addEventListener('submit', asyn
         showModal('¡Proveedor registrado correctamente!', true);
         document.getElementById('formRegistroProveedor').reset();
         cargarProveedores();
+        
+        // 🔥 Notificar para actualizar (igual que en otros modales)
+        window.parent.postMessage('actualizarProveedores', '*');
+        
+        // Cerrar modal (Bootstrap 5)
+        setTimeout(() => {
+            window.parent.bootstrap.Modal.getInstance(window.parent.document.getElementById('modalProveedor')).hide();
+        }, 2000);
 
     } catch (error) {
         showModal(`Error: ${error.message}`, false);

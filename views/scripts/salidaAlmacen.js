@@ -105,7 +105,7 @@ if (userSelect) {
 // Rellenar el campo de monedas al cargar la página
 const userSelect1 = document.getElementById('recibio');
 if (userSelect1) {
-    fetch('/api/almacen/x/user')
+    fetch('/api/almacen/id/user')
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);

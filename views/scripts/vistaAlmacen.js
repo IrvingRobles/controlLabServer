@@ -97,26 +97,81 @@ function filtrarRegistros() {
     const filtroUsuario = document.getElementById("filtroUsuario").value.toLowerCase();
     const filtroProducto = document.getElementById("filtroProducto").value.toLowerCase();
     const filtroFactura = document.getElementById("filtroFactura").value.toLowerCase();
-    const filtroFecha = document.getElementById("filtroFecha").value;
+    const filtroFecha = document.getElementById("filtroFecha").value.trim();
 
-    // Filtrar los registros con base en los valores de los filtros
     registrosFiltrados = registrosAlmacen.filter(registro => {
+        // Filtros existentes (sin cambios)
         const idAlmacen = registro.idAlmacen.toString().toLowerCase();
         const idUsuario = registro.idUsuario.toString().toLowerCase();
         const idProducto = registro.idProducto.toLowerCase();
         const factura = registro.factura.toLowerCase();
-        const fecha = registro.fecha.toLowerCase();
-
-        return (
+        
+        // Corregimos esta condición que tenía un paréntesis mal cerrado
+        if (!(
             (filtroIdMov === "" || idAlmacen.includes(filtroIdMov)) &&
             (filtroUsuario === "" || idUsuario.includes(filtroUsuario)) &&
             (filtroProducto === "" || idProducto.includes(filtroProducto)) &&
-            (filtroFactura === "" || factura.includes(filtroFactura)) &&
-            (filtroFecha === "" || fecha.includes(filtroFecha))
-        );
+            (filtroFactura === "" || factura.includes(filtroFactura))
+        )) {
+            return false;
+        }
+
+        // Si no hay filtro de fecha, devolver true
+        if (filtroFecha === "") return true;
+
+        // Convertir la fecha del registro a componentes
+        const fechaRegistro = new Date(registro.fecha);
+        const diaRegistro = fechaRegistro.getDate();
+        const mesRegistro = fechaRegistro.getMonth() + 1; // Los meses son 0-11
+        const anioRegistro = fechaRegistro.getFullYear();
+
+        // Analizar el filtro de fecha
+        const partesFecha = filtroFecha.split('-');
+        
+        // Caso 1: Solo un número (podría ser día o mes)
+        if (partesFecha.length === 1) {
+            const num = parseInt(filtroFecha);
+            if (isNaN(num)) return false;
+            
+            // Si es <= 31, asumimos que es día
+            if (num <= 31) {
+                return diaRegistro === num;
+            }
+            // Si es > 31, asumimos que es mes
+            return mesRegistro === num;
+        }
+        
+        // Caso 2: Dos números (DD-MM o MM-AAAA)
+        if (partesFecha.length === 2) {
+            const primeraParte = parseInt(partesFecha[0]);
+            const segundaParte = parseInt(partesFecha[1]);
+            if (isNaN(primeraParte) || isNaN(segundaParte)) return false;
+            
+            // Si la segunda parte tiene 4 dígitos, es MM-AAAA
+            if (partesFecha[1].length === 4) {
+                return mesRegistro === primeraParte && 
+                       anioRegistro === segundaParte;
+            }
+            // Si no, es DD-MM
+            return diaRegistro === primeraParte && 
+                   mesRegistro === segundaParte;
+        }
+        
+        // Caso 3: Tres números (DD-MM-AAAA)
+        if (partesFecha.length === 3) {
+            const dia = parseInt(partesFecha[0]);
+            const mes = parseInt(partesFecha[1]);
+            const anio = parseInt(partesFecha[2]);
+            if (isNaN(dia) || isNaN(mes) || isNaN(anio)) return false;
+            
+            return diaRegistro === dia &&
+                   mesRegistro === mes &&
+                   anioRegistro === anio;
+        }
+        
+        return false;
     });
 
-    // Volver a mostrar la primera página con los registros filtrados
     paginaActual = 1;
     mostrarPagina(paginaActual);
 }

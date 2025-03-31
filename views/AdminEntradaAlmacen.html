@@ -48,10 +48,8 @@
                     <div class="mb-3">
                         <label for="idUsuario" class="form-label fw-bold">Usuario:</label>
                         <div class="d-flex gap-2">
-                            <select class="form-select flex-grow-1" id="idUsuario" required>
-                                <option value="" selected disabled>Seleccione un usuario</option>
-                                <!-- Las opciones se cargarán dinámicamente aquí -->
-                            </select>
+                            <input type="text" class="form-control" id="usernameDisplay" readonly>
+                            <input type="hidden" id="idUsuario"> <!-- Campo oculto para enviar el ID -->
                         </div>
                     </div>
                     <div class="mb-3">
@@ -198,7 +196,7 @@
             <hr class="my-2">
         </form>
     </div>
-
+ 
     <!-- Modal con iframe para cargar empresa.html -->
     <div class="modal fade" id="modalEmpresa" tabindex="-1" aria-labelledby="modalEmpresaLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
