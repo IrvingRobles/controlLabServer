@@ -1,24 +1,24 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menú Admin</title>
-    <link rel="stylesheet" href="styles/styles.css">
-    
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    
+
     <style>
+        /* Barra de perfil */
         .perfil-container {
             display: flex;
             align-items: center;
-            justify-content: flex-end;
-            background: #f8f9fa;
+            justify-content: space-between;
+            background: #007bff;
             padding: 10px 20px;
-            border-bottom: 2px solid #ddd;
+            color: white;
             position: fixed;
             top: 0;
             right: 0;
@@ -26,64 +26,99 @@
             z-index: 1000;
         }
 
+        .perfil-info {
+            display: flex;
+            align-items: center;
+        }
+
         .perfil-container i {
-            font-size: 24px;
+            font-size: 30px;
             margin-right: 10px;
-            color: #007bff;
         }
 
         .perfil-container span {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
-            color: #333;
         }
 
         .btn-logout {
-            margin-left: 10px;
-            background: none;
+            background: #dc3545;
             border: none;
-            color: red;
-            font-size: 16px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 14px;
+            border-radius: 5px;
             cursor: pointer;
         }
 
         .btn-logout:hover {
-            text-decoration: underline;
+            background: #c82333;
         }
 
+        /* Contenedor del menú */
         .menu-container {
-            margin-top: 70px;
+            margin-top: 80px;
         }
-        
+
+        /* Tarjetas del menú */
+        .menu-card {
+            transition: 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .menu-card i {
+            font-size: 40px;
+            color: #007bff;
+        }
+
+        /* Submenú */
         .submenu-item {
-            margin-left: 20px;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .submenu-item a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .submenu-item a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
-<body>
+<body class="bg-light">
 
     <!-- Barra de Perfil -->
     <header>
         <div class="perfil-container">
-            <i class="bi bi-person-circle"></i>
-            <span id="perfil-nombre">Cargando...</span>
+            <div class="perfil-info">
+                <i class="bi bi-person-circle"></i>
+                <span id="perfil-nombre">Cargando...</span>
+            </div>
             <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
         </div>
     </header>
-    
+
     <!-- Contenedor del Menú -->
-    <div class="container">
-        <div id="menuAdmin" class="menu-container">
-            <h3>Menú Administrador</h3>
-            <ul class="list-group" id="menuList">
-                <!-- Los módulos y submódulos se generarán dinámicamente -->
-            </ul>
+    <div class="container mt-4">
+        <h3 class="text-center mb-4">Menú Administrador</h3>
+        <div id="menuAdmin" class="row g-3">
+            <!-- Los módulos se generarán dinámicamente -->
         </div>
     </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Script para manejar sesión y perfil -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const perfilNombre = document.getElementById('perfil-nombre');
@@ -110,15 +145,17 @@
         const menuData = [
             {
                 name: "Solicitud",
+                icon: "bi-pencil-square",
                 submodules: [
                     { name: "Crear", link: "adminRegistro.html" },
                     { name: "Buscar", link: "adminBuscar.html" },
                     { name: "Registro de cotizaciones", link: "adminBusquedaPdf.html" },
-                    { name: "Registro de Equipos Ajenos", link: "adminIngresoEgresoDeEquiposAjenos.html" },
-                ]
+                    { name: "Registro de Equipos Ajenos", link: "adminIngresoEgresoDeEquiposAjenos.html" }
+                ]                
             },
             {
                 name: "Personal",
+                icon: "bi-people",
                 submodules: [
                     { name: "Lista de empleados", link: "adminPersonal.html" },
                     { name: "Registrar nuevo empleado", link: "adminRegistroPersonal.html" },
@@ -126,92 +163,51 @@
                 ]
             },
             {
-                name: "Almacen",
+                name: "Almacén",
+                icon: "bi-box-seam",
                 submodules: [
-                    { name: "Almacen general", link: "vistaAlmacen.html" },
+                    { name: "Almacén general", link: "vistaAlmacen.html" }
                 ]
             }
         ];
 
         function generateMenu() {
-            const menuList = document.getElementById("menuList");
+            const menuContainer = document.getElementById("menuAdmin");
 
             if (!menuData.length) {
-                const emptyMessage = document.createElement("li");
-                emptyMessage.className = "list-group-item text-center";
-                emptyMessage.textContent = "No hay módulos disponibles.";
-                menuList.appendChild(emptyMessage);
+                menuContainer.innerHTML = '<p class="text-center text-muted">No hay módulos disponibles.</p>';
                 return;
             }
 
             menuData.forEach((module, index) => {
-                const moduleItem = document.createElement("li");
-                moduleItem.className = "list-group-item list-group-item-primary";
+                const moduleCard = document.createElement("div");
+                moduleCard.className = "col-md-4";
 
-                moduleItem.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span>${module.name}</span>
-                        <button class="btn btn-sm btn-secondary" data-bs-toggle="collapse" data-bs-target="#subMenu${index}" aria-expanded="false">
-                            <i class="bi bi-chevron-down"></i>
+                moduleCard.innerHTML = `
+                    <div class="card menu-card p-3 text-center">
+                        <i class="bi ${module.icon}"></i>
+                        <h5 class="mt-2">${module.name}</h5>
+                        <button class="btn btn-primary btn-sm mt-2" data-bs-toggle="collapse" data-bs-target="#subMenu${index}">
+                            Ver opciones <i class="bi bi-chevron-down"></i>
                         </button>
+                        <ul id="subMenu${index}" class="collapse list-group list-group-flush mt-3"></ul>
                     </div>
                 `;
 
-                const subMenu = document.createElement("ul");
-                subMenu.id = `subMenu${index}`;
-                subMenu.className = "collapse list-group list-group-flush";
+                const subMenu = moduleCard.querySelector(`#subMenu${index}`);
+                module.submodules.forEach(submodule => {
+                    const submoduleItem = document.createElement("li");
+                    submoduleItem.className = "list-group-item submenu-item";
+                    submoduleItem.innerHTML = `<a href="${submodule.link}">${submodule.name}</a>`;
+                    subMenu.appendChild(submoduleItem);
+                });
 
-                if (module.submodules && module.submodules.length) {
-                    module.submodules.forEach(submodule => {
-                        const submoduleItem = document.createElement("li");
-                        submoduleItem.className = "list-group-item submenu-item";
-                        submoduleItem.innerHTML = `
-                            <a href="${submodule.link}" class="btn btn-link p-0 text-decoration-none">
-                                ${submodule.name}
-                            </a>
-                        `;
-                        subMenu.appendChild(submoduleItem);
-                    });
-                } else {
-                    const emptySubmodule = document.createElement("li");
-                    emptySubmodule.className = "list-group-item text-muted submenu-item";
-                    emptySubmodule.textContent = "No hay submódulos disponibles.";
-                    subMenu.appendChild(emptySubmodule);
-                }
-
-                moduleItem.appendChild(subMenu);
-                menuList.appendChild(moduleItem);
+                menuContainer.appendChild(moduleCard);
             });
         }
 
         document.addEventListener("DOMContentLoaded", generateMenu);
     </script>
-    <script>
-        function cerrarSesion() {
-            localStorage.removeItem('user'); // Borrar datos del usuario
-            window.location.href = "/logout"; // Cerrar sesión en el backend
-        }
-    </script>
-        <!-- Script para manejar sesión y perfil -->
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const perfilNombre = document.getElementById('perfil-nombre');
-                const usuario = JSON.parse(localStorage.getItem('user'));
-    
-                if (usuario) {
-                    perfilNombre.textContent = usuario.username || 'Usuario';
-                } else {
-                    perfilNombre.textContent = 'Invitado';
-                    setTimeout(() => {
-                        window.location.href = "login.html"; // Redirigir al login si no hay usuario
-                    }, 2000);
-                }
-            });
-    
-            function cerrarSesion() {
-                localStorage.removeItem('user'); // Borrar datos del usuario
-                window.location.href = "login.html"; // Redirigir al login
-            }
-        </script>
+
 </body>
 </html>

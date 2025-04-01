@@ -17,6 +17,11 @@ router.post('/crear', registroController.crearRegistro);
 router.post('/crearCliente', registroController.crearCliente);
 router.get('/obtenerClientes', registroController.obtenerClientes);
 router.get('/listaClientes', registroController.listarClientes);
+router.get("/obtenerCliente/:id_cliente", registroController.obtenerCliente);
+
+router.put("/actualizarCliente/:id_cliente", registroController.actualizarCliente);
+router.delete("/eliminarCliente/:id_cliente", registroController.eliminarCliente);
+
 
 // Ruta para obtener todos los registros
 router.get('/obtener', registroController.obtenerRegistros);
