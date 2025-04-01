@@ -6,7 +6,19 @@ const almacenController = require('../controllers/almacenController');
 // Ruta para crear un nuevo registro
 router.post('/entrada', almacenController.crearRegistroAlmacen); 
 
+// Ruta para eliminar registro por ID
+router.delete('/entrada/:id', almacenController.eliminarRegistro);
+
 router.get('/obtener', almacenController.obtenerRegistrosAlmacen);
+
+// Ruta para editar un registro
+router.put('/editar/:idAlmacen', almacenController.editarRegistroAlmacen);
+
+// Obtener todos los productos
+router.get('/entrada/id/:idAlmacen', almacenController.obtenerRegistroPorId1); 
+
+// Obtener todos los productos
+router.get('/entrada/id2/:idAlmacen', almacenController.obtenerRegistroPorId2); 
 
 router.get('/siguiente-id', almacenController.obtenerSiguienteIdAlmacen);
 
@@ -22,7 +34,7 @@ router.delete('/monedas/:id', almacenController.eliminarMoneda);
 router.get('/:idMov', almacenController.obtenerRegistroPorId);
 
 // Ruta para registrar salidas vinculadas a un ID Mov
-router.post('/:idMov/salida', almacenController.registrarSalida);
+router.post('/:idAlmacen/salida', almacenController.registrarSalida);
 
 // Ruta para registrar una empresa
 router.post('/empresas', almacenController.registrarEmpresa);
@@ -82,8 +94,19 @@ router.delete('/producto/:id', almacenController.eliminarProducto);
 router.get('/productoselect/id', almacenController.seleccionarProductos);
 
 // Ruta para buscar registro por ID Mov
-router.get('/id/:idAlmacen', almacenController.obtenerValePorId);
+//router.get('/id/:idAlmacen', almacenController.obtenerValePorId);
 
-router.post('/vales/guardar', almacenController.guardarVale);
+//router.post('/vales/guardar', almacenController.guardarVale);
+
+router.get('/x/user', almacenController.obtenerUsers);
+
+router.get('/id/user', almacenController.obtenerUsers2);
+
+// Ruta para obtener un usuario por ID
+router.get('/usuario/:id', almacenController.obtenerUsuarioPorId);
+
+router.get('/user/actual', almacenController.obtenerUsuarioActual);
+
+router.get('/ot/id', almacenController.obtenerOT);
 
 module.exports = router;

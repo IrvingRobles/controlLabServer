@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    cargarEmpresas(); // Cargar las empresas registradas al cargar la página
+    cargarEmpresas();
 });
 
 document.getElementById('formRegistroEmpresa').addEventListener('submit', async (e) => {
@@ -29,7 +29,16 @@ document.getElementById('formRegistroEmpresa').addEventListener('submit', async 
 
         showModal('¡Empresa registrada correctamente!', true);
         document.getElementById('formRegistroEmpresa').reset();
-        cargarEmpresas(); // Recargar la lista de empresas
+        cargarEmpresas();
+        
+        // 🔥 NUEVO: Notificar a la ventana principal para actualizar el select
+        window.parent.postMessage('actualizarEmpresas', '*');
+        
+        // Cerrar el modal después de 2 segundos (opcional)
+        setTimeout(() => {
+            window.parent.bootstrap.Modal.getInstance(window.parent.document.getElementById('modalEmpresa')).hide();
+        }, 2000);
+
     } catch (error) {
         showModal(`Error: ${error.message}`, false);
     }

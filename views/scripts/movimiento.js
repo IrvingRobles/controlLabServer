@@ -1,28 +1,41 @@
 document.addEventListener('DOMContentLoaded', () => {
-    cargarMovimientos(); // Cargar los movimientos registrados al cargar la página
+    cargarMovimientos();
 });
 
 document.getElementById('formRegistroMovimiento').addEventListener('submit', async (e) => {
     e.preventDefault();
     const nombre = document.getElementById('nombre').value.trim();
     const descripcion = document.getElementById('descripcion').value.trim();
+    
     if (!nombre || !descripcion) {
         showModal('Todos los campos son obligatorios.', false);
         return;
     }
+
     try {
         const response = await fetch('/api/almacen/movimiento', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nombre, descripcion }),
+            body: JSON.stringify({ nombre, descripcion })
         });
+
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Error al registrar el movimiento.');
         }
+
         showModal('¡Movimiento registrado correctamente!', true);
         document.getElementById('formRegistroMovimiento').reset();
-        cargarMovimientos(); // Recargar la lista de movimientos
+        cargarMovimientos();
+        
+        // 🔥 NUEVO: Notificar a la ventana principal para actualizar el select
+        window.parent.postMessage('actualizarMovimientos', '*');
+        
+        // Cerrar el modal después de 2 segundos (opcional)
+        setTimeout(() => {
+            window.parent.bootstrap.Modal.getInstance(window.parent.document.getElementById('modalMovimiento')).hide();
+        }, 2000);
+
     } catch (error) {
         showModal(`Error: ${error.message}`, false);
     }

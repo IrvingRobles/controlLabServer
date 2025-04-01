@@ -4,7 +4,7 @@ const db = require('../model/db');
 exports.obtenerSiguienteIdAlmacen = async (req, res) => {
     try {
         // Consulta el último ID registrado
-        const query = `SELECT MAX(idAlmacen) AS ultimo_id FROM almacen`;
+        const query = `SELECT MAX(idAlmacen) AS ultimo_id FROM entrada`;
         const [rows] = await db.execute(query);
 
         const ultimoId = rows[0]?.ultimo_id || 0; // Si no hay registros, empieza en 0
@@ -141,41 +141,32 @@ exports.obtenerEmpresas = async (req, res) => {
 exports.crearRegistroAlmacen = async (req, res) => {
     const {
         idUsuario,
-        empresa,
-        tipo_movimiento,
+        idEmpresa,
+        idMovimiento,
         fecha,
-        pedido,
-        producto,  // ID del producto
-        marca,
-        proveedor,
-        no_parte,
-        no_serie,
-        modelo,
-        equipo,
+        idProducto,  // ID del producto
         factura,
-        moneda,
+        idMoneda,
         ctd_entradas, // Cantidad de entradas
         pu_entrada, // Precio unitario de la entrada
+        cant_mal,
+        cant_bien,
         concepto,
         anaquel,
         seccion,
         caja,
         observaciones
     } = req.body;
-
     try {
         // 📌 1️⃣ Insertar el nuevo registro en 'almacen' (SIN especificar idAlmacen, ya que es AUTO_INCREMENT)
         const queryAlmacen = `
-            INSERT INTO almacen (
-                idUsuario, empresa, tipo_movimiento, fecha, pedido, producto, marca, proveedor, 
-                no_parte, no_serie, modelo, equipo, factura, moneda, ctd_entradas, pu_entrada, 
-                concepto, anaquel, seccion, caja, observaciones
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO entrada (idUsuario, idEmpresa, idMovimiento, fecha, idProducto, factura,
+        idMoneda, ctd_entradas, pu_entrada, cant_mal, cant_bien, concepto, anaquel, seccion, caja, observaciones
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
         const valuesAlmacen = [
-            idUsuario, empresa, tipo_movimiento, fecha, pedido, producto, marca, proveedor,
-            no_parte, no_serie, modelo, equipo, factura, moneda, ctd_entradas, pu_entrada,
-            concepto, anaquel, seccion, caja, observaciones
+            idUsuario, idEmpresa, idMovimiento, fecha, idProducto, factura, idMoneda, ctd_entradas,
+            pu_entrada, cant_mal, cant_bien, concepto, anaquel, seccion, caja, observaciones
         ];
         const [result] = await db.query(queryAlmacen, valuesAlmacen);
         const nuevoIdAlmacen = result.insertId; // Obtener el ID insertado automáticamente
@@ -183,10 +174,10 @@ exports.crearRegistroAlmacen = async (req, res) => {
         // 📌 2️⃣ Actualizar los datos en la tabla 'producto'
         const queryUpdateProducto = `
             UPDATE producto 
-            SET inicial = inicial + ?, precio_inicial = ?
+            SET inicial = inicial + ?
             WHERE idProducto = ?
         `;
-        await db.execute(queryUpdateProducto, [ctd_entradas, pu_entrada, producto]);
+        await db.execute(queryUpdateProducto, [ctd_entradas, idProducto]);
 
         // 📌 3️⃣ Responder con éxito
         res.status(201).json({
@@ -199,41 +190,152 @@ exports.crearRegistroAlmacen = async (req, res) => {
     }
 };
 
+// Obtener un registro por ID con información del producto
+exports.obtenerRegistroPorId1 = async (req, res) => {
+    const { idAlmacen } = req.params;
+
+    try {
+        const query = `
+            SELECT 
+                e.idAlmacen, e.idEmpresa, e.idMovimiento, e.fecha, e.idProducto, e.factura, 
+                e.idMoneda, e.ctd_entradas, e.pu_entrada, e.cant_mal, e.cant_bien, e.concepto, e.anaquel, e.seccion, 
+                e.caja, e.observaciones, e.idUsuario,
+                emp.codigo AS idEmpresa, 
+                m.nombre AS idMovimiento, 
+                p.nombre AS idProducto, p.inicial, p.precio_inicial, 
+                mon.codigo AS idMoneda, 
+                u.username AS idUsuario
+            FROM entrada e
+            JOIN empresa emp ON e.idEmpresa = emp.idEmpresa
+            JOIN movimiento m ON e.idMovimiento = m.idMovimiento
+            JOIN producto p ON e.idProducto = p.idProducto
+            JOIN moneda mon ON e.idMoneda = mon.idMoneda
+            JOIN users u ON e.idUsuario = u.id
+            WHERE e.idAlmacen = ?`;
+
+        const [rows] = await db.query(query, [idAlmacen]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Registro no encontrado.' });
+        }
+
+        res.status(200).json(rows[0]); // Retornar el primer resultado encontrado
+    } catch (error) {
+        console.error('Error al obtener el registro:', error);
+        res.status(500).json({ message: 'Error al obtener el registro.' });
+    }
+};
+
+// Obtener un registro por ID con información del producto
+exports.obtenerRegistroPorId2 = async (req, res) => {
+    const { idAlmacen } = req.params;
+
+    try {
+        const query = `
+            SELECT 
+                e.idAlmacen, 
+                e.idEmpresa, 
+                e.idMovimiento, 
+                e.fecha, 
+                e.idProducto, 
+                e.factura, 
+                e.idMoneda, 
+                e.ctd_entradas, 
+                e.pu_entrada,
+                e.cant_mal, 
+                e.cant_bien, 
+                e.concepto, 
+                e.anaquel, 
+                e.seccion, 
+                e.caja, 
+                e.observaciones, 
+                e.idUsuario,
+                emp.codigo AS empresaCodigo, 
+                m.nombre AS movimientoNombre, 
+                p.nombre AS productoNombre, 
+                p.inicial, 
+                p.precio_inicial, 
+                mon.codigo AS monedaCodigo, 
+                u.username AS usuarioNombre
+            FROM entrada e
+            JOIN empresa emp ON e.idEmpresa = emp.idEmpresa
+            JOIN movimiento m ON e.idMovimiento = m.idMovimiento
+            JOIN producto p ON e.idProducto = p.idProducto
+            JOIN moneda mon ON e.idMoneda = mon.idMoneda
+            JOIN users u ON e.idUsuario = u.id
+            WHERE e.idAlmacen = ?`;
+
+        const [rows] = await db.query(query, [idAlmacen]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Registro no encontrado.' });
+        }
+
+        // Formatear la respuesta para que coincida con lo que espera el frontend
+        const registro = {
+            idAlmacen: rows[0].idAlmacen,
+            idEmpresa: rows[0].idEmpresa, // ID de la empresa
+            empresaCodigo: rows[0].empresaCodigo, // Código de la empresa
+            idMovimiento: rows[0].idMovimiento, // ID del movimiento
+            movimientoNombre: rows[0].movimientoNombre, // Nombre del movimiento
+            idProducto: rows[0].idProducto, // ID del producto
+            productoNombre: rows[0].productoNombre, // Nombre del producto
+            idMoneda: rows[0].idMoneda, // ID de la moneda
+            monedaCodigo: rows[0].monedaCodigo, // Código de la moneda
+            idUsuario: rows[0].idUsuario, // ID del usuario
+            usuarioNombre: rows[0].usuarioNombre, // Nombre del usuario
+            fecha: rows[0].fecha,
+            factura: rows[0].factura,
+            ctd_entradas: rows[0].ctd_entradas,
+            pu_entrada: rows[0].pu_entrada,
+            cant_mal: rows[0].cant_mal, 
+            cant_bien: rows[0].cant_bien,
+            concepto: rows[0].concepto,
+            anaquel: rows[0].anaquel,
+            seccion: rows[0].seccion,
+            caja: rows[0].caja,
+            observaciones: rows[0].observaciones,
+            inicial: rows[0].inicial,
+            precio_inicial: rows[0].precio_inicial
+        };
+
+        res.status(200).json(registro); // Retornar el registro formateado
+    } catch (error) {
+        console.error('Error al obtener el registro:', error);
+        res.status(500).json({ message: 'Error al obtener el registro.' });
+    }
+};
+
 // Obtener todos los registros de almacen
 exports.obtenerRegistrosAlmacen = async (req, res) => {
     try {
         const query = `
             SELECT 
                 a.idAlmacen, 
-                a.idUsuario, 
-                e.codigo AS empresa, 
-                m.nombre AS tipo_movimiento, 
+                c.username AS idUsuario, 
+                e.codigo AS idEmpresa, 
+                m.nombre AS idMovimiento, 
                 a.fecha, 
-                a.pedido, 
-                p.nombre AS producto, 
-                a.marca, 
-                pr.nombre AS proveedor, 
-                a.no_parte,
-                a.no_serie, 
-                a.modelo, 
-                a.equipo, 
+                p.nombre AS idProducto,  
                 a.factura, 
-                b.codigo AS moneda, 
+                b.codigo AS idMoneda, 
                 p.inicial, -- Ahora tomado de producto
                 p.precio_inicial, -- Ahora tomado de producto
                 a.ctd_entradas, 
                 a.pu_entrada, 
+                a.cant_mal, 
+                a.cant_bien,
                 a.concepto, 
                 a.anaquel, 
                 a.seccion, 
                 a.caja, 
                 a.observaciones
-            FROM almacen a
-            JOIN empresa e ON a.empresa = e.idEmpresa
-            JOIN movimiento m ON a.tipo_movimiento = m.idMovimiento
-            JOIN producto p ON a.producto = p.idProducto -- Ajuste aquí
-            JOIN proveedor pr ON a.proveedor = pr.idProveedor
-            JOIN moneda b ON a.moneda = b.idMoneda
+            FROM entrada a
+            JOIN users c ON a.idUsuario = c.id
+            JOIN empresa e ON a.idEmpresa = e.idEmpresa
+            JOIN movimiento m ON a.idMovimiento = m.idMovimiento
+            JOIN producto p ON a.idProducto = p.idProducto -- Ajuste aquí
+            JOIN moneda b ON a.idMoneda = b.idMoneda
             ORDER BY a.idAlmacen ASC -- Ordenar por idAlmacen en orden ascendente
         `;
 
@@ -244,23 +346,39 @@ exports.obtenerRegistrosAlmacen = async (req, res) => {
     }
 };
 
-// Buscar un registro de almacén por ID
+// Buscar un registro de entrada por ID
 exports.obtenerRegistroPorId = async (req, res) => {
-    const { idMov } = req.params;
+    const { idMov } = req.params; // ID del registro de entrada
     try {
         const query = `
             SELECT 
-                a.idAlmacen, a.idUsuario, e.codigo AS empresa, 
-                m.nombre AS tipo_movimiento, a.fecha, a.pedido, 
-                p.nombre AS producto, p.inicial, -- 🔹 Agregamos el stock disponible
-                a.marca, pr.nombre AS proveedor, 
-                a.no_parte, a.no_serie, a.modelo, a.equipo 
-            FROM almacen a
-            JOIN empresa e ON a.empresa = e.idEmpresa
-            JOIN movimiento m ON a.tipo_movimiento = m.idMovimiento
-            JOIN producto p ON a.producto = p.idProducto
-            JOIN proveedor pr ON a.proveedor = pr.idProveedor
-            WHERE a.idAlmacen = ?`;
+                e.idAlmacen, 
+                e.idUsuario, 
+                e.idEmpresa, 
+                e.idMovimiento, 
+                e.fecha,
+                e.idProducto, 
+                p.inicial AS inicial, -- 🔹 Stock disponible del producto
+                u.username AS idUsuario,  -- 🔹 Nombre del usuario
+                emp.codigo AS idEmpresa,  -- 🔹 Código de la empresa
+                m.nombre AS idMovimiento, -- 🔹 Nombre del movimiento
+                p.nombre AS idProducto,  -- 🔹 Nombre del producto
+                p.pedido,                    -- 🔹 Pedido del producto
+                p.marca,                     -- 🔹 Marca del producto
+                p.idProveedor,               -- 🔹 ID del proveedor
+                prov.nombre AS idProveedor, -- 🔹 Nombre del proveedor
+                p.no_parte,                  -- 🔹 Número de parte
+                p.no_serie,                  -- 🔹 Número de serie
+                p.modelo,                    -- 🔹 Modelo del producto
+                p.equipo,                    -- 🔹 Equipo relacionado
+                p.precio_inicial             -- 🔹 Precio inicial del producto
+            FROM entrada e
+            JOIN empresa emp ON e.idEmpresa = emp.idEmpresa
+            JOIN movimiento m ON e.idMovimiento = m.idMovimiento
+            JOIN producto p ON e.idProducto = p.idProducto
+            JOIN proveedor prov ON p.idProveedor = prov.idProveedor -- 🔹 Unir con la tabla proveedor
+            JOIN users u ON e.idUsuario = u.id
+            WHERE e.idAlmacen = ?`;
 
         const [rows] = await db.execute(query, [idMov]);
 
@@ -275,15 +393,101 @@ exports.obtenerRegistroPorId = async (req, res) => {
     }
 };
 
-// Registrar datos de salida para un registro de almacén
+exports.eliminarRegistro = async (req, res) => {
+    const { id } = req.params;
+    try {
+        // 1️⃣ Obtener el idProducto y ctd_entradas antes de eliminar el registro
+        const [registro] = await db.query(
+            'SELECT idProducto, ctd_entradas FROM entrada WHERE idAlmacen = ?',
+            [id]
+        );
+
+        if (registro.length === 0) {
+            return res.status(404).json({ message: 'Registro no encontrado.' });
+        }
+
+        const { idProducto, ctd_entradas } = registro[0];
+
+        // 2️⃣ Eliminar el registro de la tabla entrada
+        await db.query('DELETE FROM entrada WHERE idAlmacen = ?', [id]);
+
+        // 3️⃣ Restar la cantidad eliminada en la tabla producto
+        await db.query(
+            'UPDATE producto SET inicial = inicial - ? WHERE idProducto = ?',
+            [ctd_entradas, idProducto]
+        );
+
+        res.status(200).json({ message: 'Registro eliminado correctamente.' });
+    } catch (error) {
+        console.error('Error al eliminar el registro:', error);
+        res.status(500).json({ message: 'Error al eliminar el registro.' });
+    }
+};
+
+exports.editarRegistroAlmacen = async (req, res) => {
+    const {
+        idAlmacen, idUsuario, idEmpresa, idMovimiento, fecha, idProducto, factura, idMoneda,
+        ctd_entradas, pu_entrada, concepto, cant_mal, cant_bien, anaquel, seccion, caja, observaciones
+    } = req.body;
+
+    try {
+        // 📌 1️⃣ Obtener el registro original
+        const [registroAnterior] = await db.query(
+            'SELECT idProducto, ctd_entradas FROM entrada WHERE idAlmacen = ?',
+            [idAlmacen]
+        );
+
+        if (registroAnterior.length === 0) {
+            return res.status(404).json({ message: 'Registro no encontrado.' });
+        }
+
+        const { idProducto: idProductoAnterior, ctd_entradas: ctdEntradasAnterior } = registroAnterior[0];
+
+        // 📌 2️⃣ Ajustar la cantidad en inventario si cambió el producto
+        if (idProducto !== idProductoAnterior) {
+            await db.query(
+                'UPDATE producto SET inicial = inicial - ? WHERE idProducto = ?',
+                [ctdEntradasAnterior, idProductoAnterior]
+            );
+            await db.query(
+                'UPDATE producto SET inicial = inicial + ? WHERE idProducto = ?',
+                [ctd_entradas, idProducto]
+            );
+        } else {
+            const diferencia = ctd_entradas - ctdEntradasAnterior;
+            await db.query(
+                'UPDATE producto SET inicial = inicial + ? WHERE idProducto = ?',
+                [diferencia, idProducto]
+            );
+        }
+
+        // 📌 3️⃣ Actualizar la entrada en la tabla 'entrada'
+        await db.query(`
+            UPDATE entrada SET
+        idUsuario = ?, idEmpresa = ?, idMovimiento = ?, fecha = ?, idProducto = ?,
+            factura = ?, idMoneda = ?, ctd_entradas = ?, pu_entrada = ?, cant_mal = ?, cant_bien = ?,concepto = ?,
+            anaquel = ?, seccion = ?, caja = ?, observaciones = ?
+                WHERE idAlmacen = ?
+                    `, [
+            idUsuario, idEmpresa, idMovimiento, fecha, idProducto, factura, idMoneda, 
+            ctd_entradas, pu_entrada, cant_mal, cant_bien, concepto, anaquel, seccion, caja, observaciones, idAlmacen
+        ]);
+
+        res.json({ message: 'Registro actualizado correctamente.' });
+
+    } catch (error) {
+        console.error('Error al editar el registro:', error);
+        res.status(500).json({ message: 'Error interno del servidor.' });
+    }
+};
+
 exports.registrarSalida = async (req, res) => {
-    const { idMov } = req.params; // ID del registro en almacen
+    const { idAlmacen } = req.params;
     const {
         folio_vale_salida,
         ctd_salidas,
         precio_salidas,
         solicito,
-        cliente,
         servicio,
         aplicacion,
         uso_en,
@@ -292,65 +496,48 @@ exports.registrarSalida = async (req, res) => {
     } = req.body;
 
     try {
-        // Verificar que el registro en almacen existe y obtener el idProducto
-        const queryVerificar = 'SELECT producto FROM almacen WHERE idAlmacen = ?';
-        const [registro] = await db.execute(queryVerificar, [idMov]);
-
-        if (registro.length === 0) {
-            return res.status(404).json({ mensaje: 'El registro con el ID proporcionado no existe' });
-        }
-
-        const idProducto = registro[0].producto; // Obtener el idProducto vinculado (campo "producto" en la tabla "almacen")
-
-        // Obtener el valor actual del campo "inicial" en la tabla producto
-        const queryProducto = 'SELECT inicial FROM producto WHERE idProducto = ?';
-        const [producto] = await db.execute(queryProducto, [idProducto]);
-
-        if (producto.length === 0) {
-            return res.status(404).json({ mensaje: 'El producto relacionado no existe' });
-        }
-
-        let inicialActual = producto[0].inicial; // Cantidad actual en "inicial"
-        let nuevaCantidad = inicialActual - ctd_salidas; // Restar la cantidad de salida
-
-        if (nuevaCantidad < 0) {
-            return res.status(400).json({ mensaje: 'No hay suficiente stock disponible' });
-        }
-
-        // Actualizar los datos de salida en la tabla almacen
-        const queryActualizarAlmacen = `
-            UPDATE almacen
-            SET 
-                folio_vale_salida = ?,
-                ctd_salidas = ?,
-                precio_salidas = ?,
-                solicito = ?,
-                cliente = ?,
-                servicio = ?,
-                aplicacion = ?,
-                uso_en = ?,
-                recibio = ?,
-                condicion = ?
-            WHERE idAlmacen = ?
+        // 1️⃣ Registrar la salida
+        const querySalida = `
+            INSERT INTO salida (
+                idAlmacen, folio_vale_salida, ctd_salidas, precio_salidas,
+                solicito, servicio, aplicacion, uso_en, recibio, condicion
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
-        const valuesAlmacen = [
-            folio_vale_salida, ctd_salidas, precio_salidas, solicito, cliente, servicio,
-            aplicacion, uso_en, recibio, condicion, idMov
-        ];
-        await db.execute(queryActualizarAlmacen, valuesAlmacen);
+        await db.query(querySalida, [
+            idAlmacen, folio_vale_salida, ctd_salidas, precio_salidas,
+            solicito, servicio, aplicacion, uso_en, recibio, condicion
+        ]);
 
-        // Actualizar el campo "inicial" en la tabla producto
-        const queryActualizarProducto = 'UPDATE producto SET inicial = ? WHERE idProducto = ?';
-        await db.execute(queryActualizarProducto, [nuevaCantidad, idProducto]);
+        // 2️⃣ Obtener el idProducto asociado a esta entrada
+        const [producto] = await db.query(
+            'SELECT idProducto FROM entrada WHERE idAlmacen = ?',
+            [idAlmacen]
+        );
 
-        // Responder con éxito
-        res.status(200).json({ mensaje: 'Salida registrada y stock actualizado con éxito' });
+        if (!producto.length) {
+            return res.status(404).json({ mensaje: 'No se encontró el producto asociado' });
+        }
+
+        const idProducto = producto[0].idProducto;
+
+        // 3️⃣ Actualizar el stock del producto
+        await db.query(
+            'UPDATE producto SET inicial = inicial - ? WHERE idProducto = ?',
+            [ctd_salidas, idProducto]
+        );
+
+        // 4️⃣ Responder con éxito
+        res.status(200).json({
+            mensaje: 'Salida registrada con éxito',
+            idAlmacen: idAlmacen,
+            idProducto: idProducto
+        });
+
     } catch (error) {
-        console.error('Error al registrar la salida:', error);
+        console.error('Error al registrar salida:', error);
         res.status(500).json({ mensaje: 'Error al registrar la salida', error });
     }
 };
-
 
 exports.registrarCondicion = async (req, res) => {
     const { condiciones } = req.body;
@@ -377,7 +564,7 @@ exports.registrarCondicion = async (req, res) => {
 // Obtener todas las condiciones
 exports.obtenerCondiciones = async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT * FROM condicion');
+        const [rows] = await db.query('SELECT idCondicion, condiciones FROM condicion');
         res.json(rows);
     } catch (error) {
         console.error(error);
@@ -580,15 +767,15 @@ exports.seleccionarProveedor = async (req, res) => {
 
 // Registrar un nuevo producto
 exports.registrarProducto = async (req, res) => {
-    const { nombre, descripcion } = req.body;
+    const { nombre, descripcion, pedido, marca, idProveedor, no_parte, no_serie, modelo, equipo, inicial, precio_inicial } = req.body;
 
-    if (!nombre || !descripcion) {
+    if (!nombre || !descripcion || !pedido || !marca || !idProveedor || !no_parte || !no_serie || !modelo || !equipo || !inicial || !precio_inicial) {
         return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
     }
 
     try {
         // 1️⃣ Verificar si el producto ya existe
-        const queryCheck = 'SELECT nombre, descripcion FROM producto WHERE nombre = ?';
+        const queryCheck = 'SELECT nombre FROM producto WHERE nombre = ?';
         const [rows] = await db.query(queryCheck, [nombre]);
 
         if (rows.length > 0) {
@@ -596,8 +783,8 @@ exports.registrarProducto = async (req, res) => {
         }
 
         // 2️⃣ Insertar el nuevo producto si no existe
-        const queryInsert = 'INSERT INTO producto (nombre, descripcion) VALUES (?, ?)';
-        await db.query(queryInsert, [nombre, descripcion]);
+        const queryInsert = 'INSERT INTO producto (nombre, descripcion, pedido, marca, idProveedor, no_parte, no_serie, modelo, equipo, inicial, precio_inicial) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        await db.query(queryInsert, [nombre, descripcion, pedido, marca, idProveedor, no_parte, no_serie, modelo, equipo, inicial, precio_inicial]);
 
         res.status(201).json({ message: 'Producto registrado correctamente.' });
 
@@ -612,7 +799,7 @@ exports.obtenerProductoPorId = async (req, res) => {
     const { idProducto } = req.params;
 
     try {
-        const query = 'SELECT nombre, descripcion FROM producto WHERE idProducto = ?';
+        const query = 'SELECT nombre, descripcion, pedido, marca, idProveedor, no_parte, no_serie, modelo, equipo, inicial, precio_inicial FROM producto WHERE idProducto = ?';
         const [rows] = await db.query(query, [idProducto]);
 
         if (rows.length === 0) {
@@ -649,7 +836,7 @@ exports.obtenerProducto = async (req, res) => {
 // Obtener todos los productos
 exports.obtenerProductos = async (req, res) => {
     try {
-        const [productos] = await db.query('SELECT idProducto, nombre, descripcion FROM producto');
+        const [productos] = await db.query('SELECT a.idProducto, a.nombre, a.descripcion, a.pedido, a.marca, pr.nombre AS idProveedor, a.no_parte, a.no_serie, a.modelo, a.equipo, a.inicial, a.precio_inicial FROM producto a JOIN proveedor pr ON a.idProveedor = pr.idProveedor');
 
         if (productos.length === 0) {
             return res.status(404).json({ message: 'No se encontraron productos.' });
@@ -696,18 +883,18 @@ exports.seleccionarProductos = async (req, res) => {
 };
 
 // Obtener el vale por ID
-exports.obtenerValePorId = async (req, res) => {
+/*exports.obtenerValePorId = async (req, res) => {
     const { idAlmacen } = req.params;
     try {
         const query = `
-            SELECT 
-                a.idAlmacen, a.folio_vale_salida, a.solicito, p.nombre AS producto, a.marca,
-                a.no_serie, a.no_parte, a.modelo, a.ctd_salidas, a.servicio,
-                a.uso_en, pr.condiciones AS condicion
-            FROM almacen a
+            SELECT
+        a.idAlmacen, a.folio_vale_salida, a.solicito, p.nombre AS producto, a.marca,
+            a.no_serie, a.no_parte, a.modelo, a.ctd_salidas, a.servicio,
+            a.uso_en, pr.condiciones AS condicion
+            FROM entrada a
             JOIN producto p ON a.producto = p.idProducto
             JOIN condicion pr ON a.condicion = pr.idCondicion
-            WHERE a.idAlmacen = ?`;
+            WHERE a.idAlmacen = ? `;
 
         const [rows] = await db.execute(query, [idAlmacen]);
 
@@ -743,13 +930,13 @@ exports.guardarVale = async (req, res) => {
 
     try {
         const query = `
-            INSERT INTO vale (idAlmacen, entrego, recibio, observacion, fecha)
-            VALUES (?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE 
-                entrego = VALUES(entrego), 
-                recibio = VALUES(recibio), 
-                observacion = VALUES(observacion), 
-                fecha = VALUES(fecha)`;
+            INSERT INTO vale(idAlmacen, entrego, recibio, observacion, fecha)
+        VALUES(?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+        entrego = VALUES(entrego),
+            recibio = VALUES(recibio),
+            observacion = VALUES(observacion),
+            fecha = VALUES(fecha)`;
 
         await db.execute(query, [idAlmacen, entrego, recibio, observacion, fechaHoy]);
 
@@ -757,5 +944,85 @@ exports.guardarVale = async (req, res) => {
     } catch (error) {
         console.error("Error al guardar el vale:", error);
         res.status(500).json({ mensaje: "Error al guardar el vale", error });
+    }
+};*/
+
+// Ruta para obtener las usuarios
+exports.obtenerUsers = async (req, res) => {
+    try {
+        // Consulta para obtener los nombres de los users y guardar el id
+        const query = 'SELECT id, username FROM users'; // Ajusta los campos según tu base de datos
+        const [rows] = await db.execute(query);
+
+        res.status(200).json(rows); // Enviar la lista de users como respuesta
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al obtener los users', error });
+    }
+};
+ 
+// Ruta para obtener el usuario actual (Versión final con sesiones)
+exports.obtenerUsuarioActual = async (req, res) => {
+    try {
+        // Verificar si el usuario está en sesión
+        if (!req.session.user) {
+            return res.status(401).json({ mensaje: 'No hay sesión activa' });
+        }
+        
+        // Devolver los datos del usuario de la sesión
+        res.status(200).json({
+            id: req.session.user.id,
+            username: req.session.user.username
+        });
+        
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al obtener usuario', error });
+    }
+};
+
+// Ruta para obtener las usuarios
+exports.obtenerUsers2 = async (req, res) => {
+    try {
+        // Consulta para obtener los nombres de los users y guardar el id
+        const query = 'SELECT id, username FROM users'; // Ajusta los campos según tu base de datos
+        const [rows] = await db.execute(query);
+
+        res.status(200).json(rows); // Enviar la lista de users como respuesta
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al obtener los users', error });
+    }
+};
+
+// Controlador para obtener un usuario por ID
+exports.obtenerUsuarioPorId = async (req, res) => {
+    const userId = req.params.id; // Obtener el ID del usuario desde los parámetros de la URL
+
+    try {
+        // Consulta para obtener el usuario por su ID
+        const query = 'SELECT id, username FROM users WHERE id = ?'; // Ajusta los campos según tu base de datos
+        const [rows] = await db.execute(query, [userId]);
+
+        if (rows.length > 0) {
+            // Si se encuentra el usuario, devolver sus datos
+            res.status(200).json(rows[0]);
+        } else {
+            // Si no se encuentra el usuario, devolver un error 404
+            res.status(404).json({ mensaje: 'Usuario no encontrado' });
+        }
+    } catch (error) {
+        // Manejar errores de la base de datos
+        res.status(500).json({ mensaje: 'Error al obtener el usuario', error });
+    }
+};
+
+// Ruta para obtener las OT
+exports.obtenerOT = async (req, res) => {
+    try {
+        // Consulta para obtener los nombres de los users y guardar el id
+        const query = 'SELECT id, clave FROM registros'; // Ajusta los campos según tu base de datos
+        const [rows] = await db.execute(query);
+
+        res.status(200).json(rows); // Enviar la lista de users como respuesta
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al obtener los registros', error });
     }
 };

@@ -49,15 +49,19 @@ document.getElementById('btnBuscarVale').addEventListener('click', async () => {
     }
 });
 
-// Evento para guardar el vale
-document.getElementById('btnGuardarVale').addEventListener('click', async function (event) {
+// Evento para disparar el submit al hacer clic en el botón de guardar
+document.getElementById('btnGuardarVale').addEventListener('click', function () {
+    document.getElementById('formRegistroAlmacen').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+});
+
+// Evento para registrar salida
+document.getElementById('formRegistroAlmacen').addEventListener('submit', async function (event) {
     event.preventDefault();
     if (!this.checkValidity()) {
         event.stopPropagation();
         this.classList.add('was-validated');
         return;
     }
-
     const valeData = {
         idAlmacen: document.getElementById('idAlmacen').value.trim(),
         observacion: document.getElementById('observacion').value.trim(),

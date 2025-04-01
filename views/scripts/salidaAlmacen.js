@@ -10,8 +10,8 @@ function rellenarCampos(registro, campos) {
 
 // Evento para buscar registro
 document.getElementById('buscarRegistro').addEventListener('click', async () => {
-    const idMov = document.getElementById('idMov').value.trim();
-    if (!idMov) {
+    const idAlmacen = document.getElementById('idAlmacen').value.trim();
+    if (!idAlmacen) {
         showModal('Por favor, ingrese un ID Mov.', false);
         return;
     }
@@ -19,9 +19,9 @@ document.getElementById('buscarRegistro').addEventListener('click', async () => 
         const buscarBtn = document.getElementById('buscarRegistro');
         buscarBtn.disabled = true;
         buscarBtn.textContent = 'Cargando...';
-        const response = await fetch(`/api/almacen/${idMov}`);
+        const response = await fetch(`/api/almacen/${idAlmacen}`);
         buscarBtn.disabled = false;
-        buscarBtn.textContent = 'Buscar Registro';
+        buscarBtn.textContent = 'Registro obtenido';
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.mensaje || 'Registro no encontrado.');
@@ -29,9 +29,18 @@ document.getElementById('buscarRegistro').addEventListener('click', async () => 
         const data = await response.json();
         console.log('Datos del registro obtenido:', data);
         const campos = [
-            'idUsuario', 'empresa', 'tipo_movimiento', 'fecha',
-            'pedido', 'producto', 'marca', 'proveedor',
-            'no_parte', 'no_serie', 'modelo', 'equipo'
+            'idUsuario',
+            'idEmpresa',
+            'idMovimiento',
+            'fecha',
+            'pedido',       // 🔹 Pedido del producto
+            'idProducto',
+            'marca',        // 🔹 Marca del producto
+            'idProveedor',    // 🔹 Proveedor del producto
+            'no_parte',     // 🔹 Número de parte
+            'no_serie',     // 🔹 Número de serie
+            'modelo',       // 🔹 Modelo del producto
+            'equipo'        // 🔹 Equipo relacionado
         ];
         // Rellenamos los campos con los datos
         rellenarCampos(data.registro, campos);
@@ -68,6 +77,81 @@ if (condicionSelect) {
         });
 }
 
+// Rellenar el campo de monedas al cargar la página
+const userSelect = document.getElementById('solicito');
+if (userSelect) {
+    fetch('/api/almacen/x/user')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+
+            }
+            return response.json();
+        })
+        .then(data => {
+            userSelect.innerHTML = '<option value="" selected disabled>Seleccione un Usuario</option>';
+            data.forEach(users => {
+                const option = document.createElement('option');
+                option.value = users.id; // Guardamos el idMoneda como valor
+                option.textContent = users.username; // Mostramos el nombre de la moneda
+                userSelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error al obtener los usuarios:', error);
+        });
+}
+
+// Rellenar el campo de monedas al cargar la página
+const userSelect1 = document.getElementById('recibio');
+if (userSelect1) {
+    fetch('/api/almacen/id/user')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+
+            }
+            return response.json();
+        })
+        .then(data => {
+            userSelect1.innerHTML = '<option value="" selected disabled>Seleccione un Usuario</option>';
+            data.forEach(users => {
+                const option = document.createElement('option');
+                option.value = users.id; // Guardamos el idMoneda como valor
+                option.textContent = users.username; // Mostramos el nombre de la moneda
+                userSelect1.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error al obtener los usuarios:', error);
+        });
+}
+
+// Rellenar el campo de monedas al cargar la página
+const otSelect = document.getElementById('servicio');
+if (otSelect) {
+    fetch('/api/almacen/ot/id')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+
+            }
+            return response.json();
+        })
+        .then(data => {
+            otSelect.innerHTML = '<option value="" selected disabled>Seleccione una OT</option>';
+            data.forEach(registros => {
+                const option = document.createElement('option');
+                option.value = registros.id; // Guardamos el idMoneda como valor
+                option.textContent = registros.clave; // Mostramos el nombre de la moneda
+                otSelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error al obtener las OT:', error);
+        });
+}
+
 // Validar el campo ctd_salidas para que no exceda el stock disponible
 document.getElementById('ctd_salidas').addEventListener('input', () => {
     const ctdSalidasInput = document.getElementById('ctd_salidas');
@@ -87,61 +171,47 @@ document.getElementById('guardarRegistro').addEventListener('click', function ()
 });
 
 // Evento para registrar salida
-document.getElementById('formRegistroAlmacen').addEventListener('submit', async function (event) {
-    event.preventDefault();
-    if (!this.checkValidity()) {
-        event.stopPropagation();
-        this.classList.add('was-validated');
-        return;
-    }
-    const idMov = document.getElementById('idMov').value.trim();
-
-    if (!idMov) {
-        showModal('Por favor, ingrese un ID Mov antes de registrar la salida.', false);
-        return;
-    }
-
-    const salidaData = {
-        folio_vale_salida: document.getElementById('folio_vale_salida').value.trim(),
-        ctd_salidas: document.getElementById('ctd_salidas').value.trim(),
-        precio_salidas: document.getElementById('precio_salidas').value.trim(),
-        solicito: document.getElementById('solicito').value.trim(),
-        cliente: document.getElementById('cliente').value.trim(),
-        servicio: document.getElementById('servicio').value.trim(),
-        aplicacion: document.getElementById('aplicacion').value.trim(),
-        uso_en: document.getElementById('uso_en').value.trim(),
-        recibio: document.getElementById('recibio').value.trim(),
-        condicion: document.getElementById('condicion').value.trim(),
-    };
-
+document.getElementById('formRegistroAlmacen').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
     try {
-        // Obtener el botón de guardar fuera del formulario
+        const idAlmacen = document.getElementById('idAlmacen').value.trim();
+        if (!idAlmacen) throw new Error('ID de almacén requerido');
+
+        const datos = {
+            folio_vale_salida: document.getElementById('folio_vale_salida').value.trim(),
+            ctd_salidas: document.getElementById('ctd_salidas').value.trim(),
+            precio_salidas: document.getElementById('precio_salidas').value.trim(),
+            solicito: document.getElementById('solicito').value,
+            servicio: document.getElementById('servicio').value,
+            aplicacion: document.getElementById('aplicacion').value.trim(),
+            uso_en: document.getElementById('uso_en').value.trim(),
+            recibio: document.getElementById('recibio').value,
+            condicion: document.getElementById('condicion').value
+        };
+
         const guardarBtn = document.getElementById('guardarRegistro');
         guardarBtn.disabled = true;
-        guardarBtn.textContent = 'Registrando...';
+        guardarBtn.textContent = 'Guardando...';
 
-        const response = await fetch(`/api/almacen/${idMov}/salida`, {
+        const response = await fetch(`/api/almacen/${idAlmacen}/salida`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(salidaData),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datos)
         });
 
-        guardarBtn.disabled = false;
-        guardarBtn.textContent = 'Guardar';
+        const resultado = await response.json();
+        if (!response.ok) throw new Error(resultado.mensaje || 'Error al guardar');
 
-        const result = await response.json();
-
-        if (!response.ok) {
-            throw new Error(result.mensaje || 'Error al registrar la salida.');
-        }
-
-        // Dentro del bloque que maneja el éxito de registro
-        showModal('¡Salida registrada correctamente! Puedes continuar con otro registro.', true, true);
-
+        showModal('Salida registrada!', true, true);
     } catch (error) {
-        showModal(`Error al registrar la salida: ${error.message}`, false);
+        showModal(error.message, false);
+    } finally {
+        const guardarBtn = document.getElementById('guardarRegistro');
+        if (guardarBtn) {
+            guardarBtn.disabled = false;
+            guardarBtn.textContent = 'Guardar';
+        }
     }
 });
 
@@ -170,10 +240,43 @@ function showModal(message, success, redirect = false) {
         // Si es un mensaje de éxito y se debe redirigir
         if (success && redirect) {
             // Redirigir a la página del almacén general después de cerrar el modal
-            window.location.href = '/vistaAlmacen.html';  // Aquí debes poner la URL de tu almacén general
+            window.location.href = '/adminVistaAlmacen.html';  // Aquí debes poner la URL de tu almacén general
         }
     };
 
     // Mostrar el modal
     modal.show();
 }
+
+// Función idéntica a la que ya usas en adminEntradaAlmacen.js
+function actualizarSelect(url, selectId, valorCampo = 'id', textoCampo = 'condiciones') {
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById(selectId);
+            const selectedValue = select.value; // Guardamos la selección actual
+            
+            select.innerHTML = `<option value="" selected disabled>Seleccione...</option>`;
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item[valorCampo];
+                option.textContent = item[textoCampo] || item.codigo;
+                select.appendChild(option);
+            });
+            
+            // Restaurar selección si existe en las nuevas opciones
+            if (selectedValue && [...select.options].some(opt => opt.value == selectedValue)) {
+                select.value = selectedValue;
+            }
+        });
+} 
+
+// Escucha de mensajes (igual que en adminEntradaAlmacen)
+window.addEventListener('message', (event) => {
+    switch (event.data) {
+        case 'actualizarCondicion':
+            actualizarSelect('/api/almacen/condiciones/id', 'condicion');
+            break;
+        // Mantén tus otros casos aquí...
+    }
+});

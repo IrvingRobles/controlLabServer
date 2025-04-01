@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 document.getElementById('formRegistroProveedor').addEventListener('submit', async (e) => {
     e.preventDefault();
-
     const nombre = document.getElementById('nombre').value.trim();
 
     if (!nombre) {
@@ -16,7 +15,7 @@ document.getElementById('formRegistroProveedor').addEventListener('submit', asyn
         const response = await fetch('/api/almacen/proveedor', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nombre }),
+            body: JSON.stringify({ nombre })
         });
 
         if (!response.ok) {
@@ -25,7 +24,16 @@ document.getElementById('formRegistroProveedor').addEventListener('submit', asyn
         }
 
         showModal('¡Proveedor registrado correctamente!', true);
-        cargarProveedores(); // Recargar la lista de proveedores
+        document.getElementById('formRegistroProveedor').reset();
+        cargarProveedores();
+        
+        // 🔥 Notificar para actualizar (igual que en otros modales)
+        window.parent.postMessage('actualizarProveedores', '*');
+         
+        // Cerrar modal (Bootstrap 5)
+        setTimeout(() => {
+            window.parent.bootstrap.Modal.getInstance(window.parent.document.getElementById('modalProveedor')).hide();
+        }, 2000);
 
     } catch (error) {
         showModal(`Error: ${error.message}`, false);
@@ -56,13 +64,7 @@ async function eliminarProveedor(id) {
         showModal('Por favor, ingresa un ID válido.', false);
         return;
     }
-    // Mostrar modal de confirmación antes de eliminar
-    showModal('¿Estás seguro de que deseas eliminar este proveedor?', true);
-    // Modificar el botón del modal para ejecutar la eliminación al confirmar
-    const modalButton = document.getElementById('modalButton');
-    modalButton.textContent = "Eliminar";
-    modalButton.className = "btn btn-danger";
-    modalButton.onclick = async () => {
+    showModalConfirm('¿Estás seguro de eliminar este proveedor?', async () => {
         try {
             const response = await fetch(`/api/almacen/proveedor/${id}`, { method: 'DELETE' });
             if (!response.ok) {
@@ -70,14 +72,13 @@ async function eliminarProveedor(id) {
                 throw new Error(errorData.message || 'Error al eliminar el proveedor.');
             }
             showModal('Proveedor eliminado correctamente.', true);
-            // Limpiar el campo de búsqueda
             document.getElementById('idProveedor').value = '';
             document.getElementById('nombre').value = '';
-            cargarProveedores(); // Recargar lista
+            cargarProveedores();
         } catch (error) {
             showModal(`Error: ${error.message}`, false);
         }
-    };
+    });
 }
 
 async function cargarProveedores() {
@@ -87,12 +88,10 @@ async function cargarProveedores() {
             throw new Error(`Error HTTP: ${response.status}`);
         }
         const proveedores = await response.json();
+        const listaProveedores = document.getElementById('listaProveedores');
+        listaProveedores.innerHTML = '';
 
-        // Verifica si la respuesta es un arreglo de proveedores
         if (Array.isArray(proveedores) && proveedores.length > 0) {
-            const listaProveedores = document.getElementById('listaProveedores');
-            listaProveedores.innerHTML = ''; // Limpiar tabla
-
             proveedores.forEach(proveedor => {
                 const fila = document.createElement('tr');
                 fila.innerHTML = `
@@ -101,16 +100,12 @@ async function cargarProveedores() {
                 `;
                 listaProveedores.appendChild(fila);
             });
-        } else {
-            console.error("No se encontraron proveedores en la estructura esperada.");
         }
-
     } catch (error) {
         console.error('Error al cargar proveedores:', error);
     }
 }
 
-// Función para mostrar el modal personalizado
 function showModal(message, success) {
     const modalTitle = document.getElementById('modalTitle');
     const modalBody = document.getElementById('modalBody');
@@ -121,17 +116,34 @@ function showModal(message, success) {
     modalBody.textContent = message;
     modalButton.textContent = "Cerrar";
     modalButton.className = success ? "btn btn-primary" : "btn btn-secondary";
-
-    // Evento de cierre sin reemplazar el botón
+    
     modalButton.onclick = () => {
-        if (success) {
-            document.getElementById('formRegistroProveedor').reset();
-            cargarProveedores();
-        }
+        if (success) cargarProveedores();
         const modalInstance = bootstrap.Modal.getInstance(document.getElementById('customModal'));
         modalInstance.hide();
     };
+    
+    const modal = new bootstrap.Modal(document.getElementById('customModal'));
+    modal.show();
+}
 
+function showModalConfirm(message, onConfirm) {
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const modalButton = document.getElementById('modalButton');
+
+    modalTitle.textContent = "Confirmación";
+    modalTitle.className = "text-warning";
+    modalBody.textContent = message;
+    modalButton.textContent = "Confirmar";
+    modalButton.className = "btn btn-danger";
+    
+    modalButton.onclick = () => {
+        onConfirm();
+        const modalInstance = bootstrap.Modal.getInstance(document.getElementById('customModal'));
+        modalInstance.hide();
+    };
+    
     const modal = new bootstrap.Modal(document.getElementById('customModal'));
     modal.show();
 }
