@@ -562,9 +562,9 @@ exports.registrarCondicion = async (req, res) => {
 };
 
 // Obtener todas las condiciones
-exports. obtenerCondiciones = async (req, res) => {
+exports.obtenerCondiciones = async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT * FROM condicion');
+        const [rows] = await db.query('SELECT idCondicion, condiciones FROM condicion');
         res.json(rows);
     } catch (error) {
         console.error(error);

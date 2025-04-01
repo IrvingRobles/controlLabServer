@@ -20,9 +20,16 @@ document.getElementById('formRegistroCondicion').addEventListener('submit', asyn
             throw new Error(errorData.message || 'Error al registrar la condición.');
         }
         showModal('¡Condición registrada correctamente!', true);
+        document.getElementById('formRegistroCondicion').reset();
         cargarCondiciones();
 
-        document.getElementById('formRegistroCondicion').reset();
+        // 🔥 Notificar para actualizar (igual que en otros modales)
+        window.parent.postMessage('actualizarCondicion', '*');
+         
+        // Cerrar modal (Bootstrap 5)
+        setTimeout(() => {
+            window.parent.bootstrap.Modal.getInstance(window.parent.document.getElementById('modalCondicion')).hide();
+        }, 2000);
 
     } catch (error) {
         showModal(`Error: ${error.message}`, false);

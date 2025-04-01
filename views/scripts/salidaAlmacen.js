@@ -275,7 +275,7 @@ function actualizarSelect(url, selectId, valorCampo = 'id', textoCampo = 'condic
 window.addEventListener('message', (event) => {
     switch (event.data) {
         case 'actualizarCondicion':
-            actualizarSelect('/api/almacen/condiciones/id', 'idCondicion', 'idProveedor', 'nombre');
+            actualizarSelect('/api/almacen/condiciones/id', 'condicion');
             break;
         // Mantén tus otros casos aquí...
     }
