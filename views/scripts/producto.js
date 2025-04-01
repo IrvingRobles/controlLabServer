@@ -245,7 +245,7 @@ function actualizarSelect(url, selectId, valorCampo = 'id', textoCampo = 'nombre
                 select.value = selectedValue;
             }
         });
-}
+} 
 
 // Escucha de mensajes (igual que en adminEntradaAlmacen)
 window.addEventListener('message', (event) => {

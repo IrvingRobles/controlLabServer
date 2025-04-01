@@ -29,7 +29,7 @@ document.getElementById('formRegistroProveedor').addEventListener('submit', asyn
         
         // 🔥 Notificar para actualizar (igual que en otros modales)
         window.parent.postMessage('actualizarProveedores', '*');
-        
+         
         // Cerrar modal (Bootstrap 5)
         setTimeout(() => {
             window.parent.bootstrap.Modal.getInstance(window.parent.document.getElementById('modalProveedor')).hide();

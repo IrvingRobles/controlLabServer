@@ -21,7 +21,7 @@ document.getElementById('buscarRegistro').addEventListener('click', async () => 
         buscarBtn.textContent = 'Cargando...';
         const response = await fetch(`/api/almacen/${idAlmacen}`);
         buscarBtn.disabled = false;
-        buscarBtn.textContent = 'Buscar Registro';
+        buscarBtn.textContent = 'Registro obtenido';
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.mensaje || 'Registro no encontrado.');
@@ -247,3 +247,36 @@ function showModal(message, success, redirect = false) {
     // Mostrar el modal
     modal.show();
 }
+
+// Función idéntica a la que ya usas en adminEntradaAlmacen.js
+function actualizarSelect(url, selectId, valorCampo = 'id', textoCampo = 'condiciones') {
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById(selectId);
+            const selectedValue = select.value; // Guardamos la selección actual
+            
+            select.innerHTML = `<option value="" selected disabled>Seleccione...</option>`;
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item[valorCampo];
+                option.textContent = item[textoCampo] || item.codigo;
+                select.appendChild(option);
+            });
+            
+            // Restaurar selección si existe en las nuevas opciones
+            if (selectedValue && [...select.options].some(opt => opt.value == selectedValue)) {
+                select.value = selectedValue;
+            }
+        });
+} 
+
+// Escucha de mensajes (igual que en adminEntradaAlmacen)
+window.addEventListener('message', (event) => {
+    switch (event.data) {
+        case 'actualizarCondicion':
+            actualizarSelect('/api/almacen/condiciones/id', 'idCondicion', 'idProveedor', 'nombre');
+            break;
+        // Mantén tus otros casos aquí...
+    }
+});
