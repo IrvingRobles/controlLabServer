@@ -1,19 +1,18 @@
 let datosCargados = false; // 🔥 Variable de control para evitar duplicados 
-
 document.addEventListener('DOMContentLoaded', async () => {
-    if (datosCargados) return; // 🔥 Evita ejecución repetida
+    if (window.datosCargados) return; // 🔥 Evita ejecución repetida
 
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get('id');
 
     if (!id) {
-        alert('No se ha proporcionado un ID.');
+        alert('❌ No se ha proporcionado un ID.');
         return;
     }
 
     try {
         const response = await fetch(`/api/registro/otc/${id}`);
-        if (!response.ok) throw new Error('Error al obtener los datos');
+        if (!response.ok) throw new Error('⚠️ Error al obtener los datos');
 
         const data = await response.json();
         console.log("🚀 Datos recibidos:", data);
@@ -21,33 +20,45 @@ document.addEventListener('DOMContentLoaded', async () => {
         const { ordenTrabajo, cotizaciones, materiales } = data;
 
         function formatDate(isoDate) {
+            if (!isoDate) return ''; // Si la fecha es nula, retorna vacío
             const date = new Date(isoDate);
-            return date.toISOString().split('T')[0];
+            return isNaN(date) ? '' : date.toISOString().split('T')[0];
         }
 
-        // Rellenar los campos del formulario con la información obtenida
-        document.getElementById('cliente').value = ordenTrabajo.cliente || '';
-        document.getElementById('referencia').value = cotizaciones.length > 0 ? cotizaciones[0].referencia : '';
-        document.getElementById('direccion').value = ordenTrabajo.lugar || '';
-        document.getElementById('cotizacionNo').value = cotizaciones.length > 0 ? cotizaciones[0].num_cotizacion : '';
-        document.getElementById('fecha').value = ordenTrabajo.fecha_envio ? formatDate(ordenTrabajo.fecha_envio) : '';
-        document.getElementById('fechaExpiracion').value = cotizaciones.length > 0 ? formatDate(cotizaciones[0].fecha_expiracion) : '';
-        document.getElementById('metodoEmbarque').value = cotizaciones.length > 0 ? cotizaciones[0].metodo_embarque : '';
-        document.getElementById('empleado_asignado').value = ordenTrabajo.empleado_asignado || '';
+        const setValue = (id, value) => {
+            const element = document.getElementById(id);
+            if (element) element.value = value ?? ''; // Si no existe, evita errores
+        };
 
+        // 🟢 Asignación de valores a los campos del formulario
+        setValue('cliente', ordenTrabajo.nombre_cliente); // Ahora sí obtiene el nombre del cliente
+        setValue('referencia', cotizaciones.length > 0 ? cotizaciones[0].referencia : '');
+        setValue('direccion', ordenTrabajo.lugar);
+        setValue('cotizacionNo', cotizaciones.length > 0 ? cotizaciones[0].num_cotizacion : '');
+        setValue('fecha', formatDate(ordenTrabajo.fecha_envio));
+        setValue('fechaExpiracion', cotizaciones.length > 0 ? formatDate(cotizaciones[0].fecha_expiracion) : '');
+        setValue('metodoEmbarque', cotizaciones.length > 0 ? cotizaciones[0].metodo_embarque : '');
+        setValue('empleado_asignado', ordenTrabajo.empleado_asignado);
+
+        // 🟢 Llenar la tabla con los materiales obtenidos
         rellenarTablaMateriales(materiales);
-        datosCargados = true; // 🔥 Marcar que ya se cargaron los datos
+
+        window.datosCargados = true; // 🔥 Marcar que ya se cargaron los datos
 
     } catch (error) {
-        console.error(error);
-        alert('Hubo un error al cargar los datos');
+        console.error("❌ Error:", error);
+        alert('⚠️ Hubo un error al cargar los datos');
     }
 
     // Asociar el evento click al botón para agregar filas
-    document.getElementById('btnAgregarFila').addEventListener('click', () => {
-        agregarFila(); // Llama a la función para agregar una fila vacía
-    });
+    const btnAgregarFila = document.getElementById('btnAgregarFila');
+    if (btnAgregarFila) {
+        btnAgregarFila.addEventListener('click', () => {
+            agregarFila(); // Llama a la función para agregar una fila vacía
+        });
+    }
 });
+
 
 function rellenarTablaMateriales(materiales) {
     const tablaMateriales = document.getElementById('tablaMateriales').getElementsByTagName('tbody')[0];
@@ -336,6 +347,7 @@ async function subirPDFAlServidor(formData) {
         alert("Hubo un error al subir el PDF.");
     }
 }
+
 function generarTablaMateriales(doc, marginLeft) {
     const margenSuperior = 80;
     const anchoTabla = 190;

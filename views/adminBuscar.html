@@ -4,13 +4,208 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buscar Solicitud</title>
+
+    <!-- Estilos -->
     <link rel="stylesheet" href="/styles/styles.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
     <script>
+        // Asegura que el usuario esté autenticado
         document.addEventListener('DOMContentLoaded', () => {
             const user = localStorage.getItem('user');
             if (!user) {
                 window.location.href = "login.html";
+            } else {
+                cargarMenu();
+            }
+        });
+
+        // Función para cargar el menú
+        function cargarMenu() {
+            const menuData = [
+                {
+                    name: "Solicitud",
+                    submodules: [
+                        { name: "Crear", link: "adminRegistro.html" },
+                        { name: "Buscar", link: "adminBuscar.html" },
+                        { name: "Registro de cotizaciones", link: "adminBusquedaPdf.html" },
+                        { name: "Registro de Equipos Ajenos", link: "adminIngresoEgresoDeEquiposAjenos.html" }
+                    ]
+                },
+                {
+                    name: "Personal",
+                    submodules: [
+                        { name: "Lista de empleados", link: "adminPersonal.html" },
+                        { name: "Registrar nuevo empleado", link: "adminRegistroPersonal.html" },
+                        { name: "Registrar nuevo cliente", link: "adminRegistrarClientes.html" }
+                    ]
+                },
+                {
+                    name: "Almacen",
+                    submodules: [
+                        { name: "Almacen general", link: "vistaAlmacen.html" }
+                    ]
+                }
+            ];
+
+            const menuList = document.getElementById('menu-list');
+            menuData.forEach(module => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('nav-item', 'dropdown');
+                listItem.innerHTML = `
+                    <a class="nav-link dropdown-toggle" href="#" id="${module.name}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        ${module.name}
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="${module.name}">
+                        ${module.submodules.map(submodule => `
+                            <li><a class="dropdown-item" href="${submodule.link}">${submodule.name}</a></li>
+                        `).join('')}
+                    </ul>
+                `;
+                menuList.appendChild(listItem);
+            });
+        }
+
+        // Función para cerrar sesión
+        function cerrarSesion() {
+            localStorage.removeItem('user');
+            window.location.href = "login.html";
+        }
+    </script>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="inicioAdmin.html">
+                <i class="bi bi-house-door"></i> Menú Principal
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul id="menu-list" class="navbar-nav"></ul>
+            </div>
+
+            <div class="d-flex align-items-center ms-auto">
+                <i class="bi bi-person-circle text-light me-2"></i>
+                <span id="perfil-nombre" class="text-light me-3">Cargando...</span>
+                <button onclick="cerrarSesion()" class="btn btn-danger btn-sm">
+                    <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido -->
+    <div class="container mt-4">
+        <h2 class="mb-4 text-center">Buscar Solicitud</h2>
+
+        <div class="accordion" id="acordeonSolicitudes">
+            <!-- Sección de Tarjetas -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTarjetas">
+                        📋 Ver Solicitudes en Tarjetas
+                    </button>
+                </h2>
+                <div id="collapseTarjetas" class="accordion-collapse collapse show">
+                    <div class="mb-3">
+                        <input type="text" id="buscarInputTarjetas" class="form-control" placeholder="Buscar por empresa o clave..." aria-label="Buscar solicitudes">
+                    </div>
+                    <div class="accordion-body">
+                        <div class="row" id="contenedorSolicitudes"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Tabla -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTabla">
+                        📊 Ver Solicitudes en Tabla
+                    </button>
+                </h2>
+                <div id="collapseTabla" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        <div class="mb-3">
+                            <input type="text" id="buscarInputTabla" class="form-control" placeholder="Buscar por empresa o clave...">
+                        </div>
+                        <div class="d-flex justify-content-end mb-3">
+                            <button id="exportPDF" class="btn btn-success">Exportar a PDF</button>
+                        </div>
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-striped" id="tablaSolicitudes">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Clave</th>
+                                        <th>OT</th>
+                                        <th>Empresa</th>
+                                        <th>Fecha Envío</th>
+                                        <th>Descripción</th>
+                                        <th>Contacto</th>
+                                        <th>Importe Cotizado</th>
+                                        <th>Resultado</th>
+                                        <th>Personal Asignado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr id="noResults" style="display: none;">
+                                        <td colspan="10" class="text-center text-muted">No se encontraron registros.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para asignar personal -->
+    <div id="modalAsignarPersonal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Asignar Personal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="selectPersonal">Seleccione el personal:</label>
+                    <select id="selectPersonal" class="form-control"></select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button id="btnConfirmarAsignacion" class="btn btn-primary">Asignar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/scriptsAdmin/adminBuscar.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const perfilNombre = document.getElementById('perfil-nombre');
+            const usuario = JSON.parse(localStorage.getItem('user'));
+
+            if (usuario) {
+                perfilNombre.textContent = usuario.username || 'Usuario';
+            } else {
+                perfilNombre.textContent = 'Invitado';
+                setTimeout(() => {
+                    window.location.href = "login.html";
+                }, 2000);
             }
         });
 
@@ -19,140 +214,6 @@
             window.location.href = "login.html";
         }
     </script>
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="inicioAdmin.html">Menú Principal</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link" href="adminRegistro.html">Crear Solicitud</a></li>
-                    <li class="nav-item"><a class="nav-link" href="adminBuscar.html">Buscar Solicitud</a></li>
-                    <li class="nav-item"><a class="nav-link" href="adminBusquedaPdf.html">Registro de cotizaciones</a></li>
-                    <li class="nav-item"><a class="nav-link" href="adminPersonal.html">Lista de empleados</a></li>
-                    <li class="nav-item"><a class="nav-link" href="adminRegistroPersonal.html">Registrar nuevo</a></li>
-                </ul>
-                <span id="perfil-nombre" class="text-light ms-auto">Cargando...</span>
-                <button onclick="cerrarSesion()" class="btn btn-danger btn-sm ms-2">Cerrar Sesión</button>
-            </div>
-        </div>
-    </nav>
-    <div class="container mt-4">
-        <h2>Buscar Solicitud</h2>
 
-        <!-- Campo de búsqueda -->
-        <div class="mb-3">
-            <input type="text" id="buscarInput" class="form-control" placeholder="Buscar por empresa o clave..." aria-label="Buscar solicitudes">
-        </div>
-
-        <!-- Botón para exportar PDF -->
-        <div class="d-flex justify-content-end mb-3">
-            <button id="exportPDF" class="btn btn-success">Exportar a PDF</button>
-        </div>
-
-        <!-- Tabla con scroll -->
-        <div class="table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 5px;">
-            <table class="table table-striped mt-3 mb-3" id="tablaSolicitudes">
-                <thead class="table-dark">
-                    <tr>
-                        <th>ID</th>
-                        <th>Clave</th>
-                        <th>OT</th>
-                        <th>Empresa</th>
-                        <th>Fecha Envío</th>
-                        <th>Descripción</th>
-                        <th>Contacto</th>
-                        <th>Importe Cotizado</th>
-                        <th>Resultado</th>
-                        <th>Personal Asignado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr id="noResults" style="display: none;">
-                        <td colspan="11" class="text-center text-muted">No se encontraron registros.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/scriptsAdmin/adminBuscar.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const buscarInput = document.getElementById('buscarInput');
-            const tabla = document.getElementById('tablaSolicitudes');
-            const tbody = tabla.querySelector('tbody');
-            const noResults = document.getElementById('noResults');
-    
-            // Función para filtrar filas
-            buscarInput.addEventListener('input', () => {
-                const searchValue = buscarInput.value.toLowerCase();
-                let visibleRows = 0;
-    
-                Array.from(tbody.querySelectorAll('tr')).forEach(row => {
-                    const cells = Array.from(row.querySelectorAll('td'));
-                    const matches = cells.some(cell => 
-                        cell.textContent.toLowerCase().includes(searchValue)
-                    );
-                    row.style.display = matches ? '' : 'none';
-                    if (matches) visibleRows++;
-                });
-    
-                noResults.style.display = visibleRows > 0 ? 'none' : '';
-            });
-    
-            // Ordenar columnas
-            tabla.querySelectorAll('th').forEach((header, index) => {
-                header.style.cursor = 'pointer';
-                header.addEventListener('click', () => {
-                    const rows = Array.from(tbody.querySelectorAll('tr'));
-                    const isAscending = header.classList.contains('asc');
-                    header.classList.toggle('asc', !isAscending);
-                    header.classList.toggle('desc', isAscending);
-    
-                    rows.sort((rowA, rowB) => {
-                        const cellA = rowA.children[index].textContent.trim();
-                        const cellB = rowB.children[index].textContent.trim();
-    
-                        return isAscending 
-                            ? cellA.localeCompare(cellB, undefined, { numeric: true })
-                            : cellB.localeCompare(cellA, undefined, { numeric: true });
-                    });
-    
-                    rows.forEach(row => tbody.appendChild(row));
-                });
-            });
-        });
-    </script>
- <!-- Script para manejar sesión y perfil -->
- <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const perfilNombre = document.getElementById('perfil-nombre');
-        const usuario = JSON.parse(localStorage.getItem('user'));
-
-        if (usuario) {
-            perfilNombre.textContent = usuario.username || 'Usuario';
-        } else {
-            perfilNombre.textContent = 'Invitado';
-            setTimeout(() => {
-                window.location.href = "login.html"; // Redirigir al login si no hay usuario
-            }, 2000);
-        }
-    });
-
-    function cerrarSesion() {
-        localStorage.removeItem('user'); // Borrar datos del usuario
-        window.location.href = "login.html"; // Redirigir al login
-    }
-</script>
 </body>
 </html>

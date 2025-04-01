@@ -5,36 +5,100 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Registro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const user = localStorage.getItem('user');
-    
             if (!user) {
                 window.location.href = "login.html";
+            } else {
+                cargarMenu();
+                actualizarPerfil();
             }
         });
+
+        function cargarMenu() {
+            const menuData = [
+                {
+                    name: "Solicitud",
+                    submodules: [
+                        { name: "Crear", link: "adminRegistro.html" },
+                        { name: "Buscar", link: "adminBuscar.html" },
+                        { name: "Registro de cotizaciones", link: "adminBusquedaPdf.html" },
+                        { name: "Registro de Equipos Ajenos", link: "adminIngresoEgresoDeEquiposAjenos.html" }
+                    ]
+                },
+                {
+                    name: "Personal",
+                    submodules: [
+                        { name: "Lista de empleados", link: "adminPersonal.html" },
+                        { name: "Registrar nuevo empleado", link: "adminRegistroPersonal.html" },
+                        { name: "Registrar nuevo cliente", link: "adminRegistrarClientes.html" }
+                    ]
+                },
+                {
+                    name: "Almacen",
+                    submodules: [
+                        { name: "Almacen general", link: "vistaAlmacen.html" }
+                    ]
+                }
+            ];
+
+            const menuList = document.getElementById('menu-list');
+            if (!menuList) return;
+
+            menuData.forEach(module => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('nav-item', 'dropdown');
+                listItem.innerHTML = `
+                    <a class="nav-link dropdown-toggle" href="#" id="${module.name}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        ${module.name}
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="${module.name}">
+                        ${module.submodules.map(submodule => `
+                            <li><a class="dropdown-item" href="${submodule.link}">${submodule.name}</a></li>
+                        `).join('')}
+                    </ul>
+                `;
+                menuList.appendChild(listItem);
+            });
+        }
+
+        function actualizarPerfil() {
+            const perfilNombre = document.getElementById('perfil-nombre');
+            if (!perfilNombre) return;
+
+            const usuario = JSON.parse(localStorage.getItem('user'));
+            perfilNombre.textContent = usuario?.username || 'Usuario';
+        }
+
+        function cerrarSesion() {
+            localStorage.removeItem('user');
+            window.location.href = "login.html";
+        }
     </script>
-       
-    <link rel="stylesheet" href="styles/styles.css">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="inicioAdmin.html">Menú Principal</a>
+            <a class="navbar-brand" href="inicioAdmin.html">
+                <i class="bi bi-house-door"></i> Menú Principal
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link" href="adminRegistro.html">Crear Solicitud</a></li>
-                    <li class="nav-item"><a class="nav-link" href="adminBuscar.html">Buscar Solicitud</a></li>
-                    <li class="nav-item"><a class="nav-link" href="adminBusquedaPdf.html">Registro de cotizaciones</a></li>
-                    <li class="nav-item"><a class="nav-link" href="adminPersonal.html">Lista de empleados</a></li>
-                    <li class="nav-item"><a class="nav-link" href="adminRegistroPersonal.html">Registrar nuevo</a></li>
-                </ul>
-                <span id="perfil-nombre" class="text-light ms-auto">Cargando...</span>
-                <button onclick="cerrarSesion()" class="btn btn-danger btn-sm ms-2">Cerrar Sesión</button>
+                <ul id="menu-list" class="navbar-nav"></ul>
+            </div>
+
+            <div class="d-flex align-items-center ms-auto">
+                <i class="bi bi-person-circle text-light me-2"></i>
+                <span id="perfil-nombre" class="text-light me-3">Cargando...</span>
+                <button onclick="cerrarSesion()" class="btn btn-danger btn-sm">
+                    <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                </button>
             </div>
         </div>
     </nav>
@@ -42,9 +106,15 @@
     <div class="container mt-5">
         <h2>Formulario de Registro</h2>
         <form id="crearRegistroForm">
-            <div class="mb-3">
-                <label for="cliente" class="form-label">Cliente:</label>
-                <input type="text" class="form-control" id="cliente" required>
+            <div class="mb-3 d-flex align-items-center">
+                <label for="clienteSelect" class="form-label me-2">Cliente:</label>
+                <select class="form-control me-2" id="clienteSelect" required>
+                    <option value="">Seleccione un cliente</option>
+                </select>
+                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal"
+                    data-bs-target="#modalNuevoCliente">
+                    Añadir Nuevo Cliente
+                </button>
             </div>
             <div class="mb-3">
                 <label for="empresa" class="form-label">Empresa:</label>
@@ -70,47 +140,153 @@
         </form>
     </div>
 
+    <!-- Modal para Añadir Cliente -->
+    <div class="modal fade" id="modalNuevoCliente" tabindex="-1" aria-labelledby="modalNuevoClienteLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Añadir Nuevo Cliente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="crearClienteForm">
+                        <div class="mb-3">
+                            <label for="nombre_cliente" class="form-label">Nombre del Cliente:</label>
+                            <input type="text" class="form-control" id="nombre_cliente" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="razon_social" class="form-label">Razón Social:</label>
+                            <input type="text" class="form-control" id="razon_social">
+                        </div>
+                        <div class="mb-3">
+                            <label for="rfc" class="form-label">RFC:</label>
+                            <input type="text" class="form-control" id="rfc" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="correo_electronico" class="form-label">Correo Electrónico:</label>
+                            <input type="email" class="form-control" id="correo_electronico">
+                        </div>
+                        <div class="mb-3">
+                            <label for="telefono_contacto" class="form-label">Teléfono:</label>
+                            <input type="text" class="form-control" id="telefono_contacto">
+                        </div>
+                        <div class="mb-3">
+                            <label for="calle" class="form-label">Calle:</label>
+                            <input type="text" class="form-control" id="calle">
+                        </div>
+                        <div class="mb-3">
+                            <label for="ciudad" class="form-label">Ciudad:</label>
+                            <input type="text" class="form-control" id="ciudad">
+                        </div>
+                        <div class="mb-3">
+                            <label for="estado" class="form-label">Estado:</label>
+                            <input type="text" class="form-control" id="estado">
+                        </div>
+                        <div class="mb-3">
+                            <label for="pais" class="form-label">País:</label>
+                            <input type="text" class="form-control" id="pais">
+                        </div>
+                        <div class="mb-3">
+                            <label for="codigo_postal" class="form-label">Código Postal:</label>
+                            <input type="text" class="form-control" id="codigo_postal">
+                        </div>
+                        <button type="submit" class="btn btn-success">Guardar Cliente</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script para manejar la lógica -->
     <script>
-        function cerrarSesion() {
-            localStorage.removeItem('user');
-            window.location.href = "login.html";
+        document.addEventListener("DOMContentLoaded", function () {
+            obtenerClientes(); // Cargar clientes en el select al iniciar
+        });
+
+        async function obtenerClientes() {
+            try {
+                const response = await fetch("/api/registro/listaClientes");
+                const clientes = await response.json();
+                const select = document.getElementById("clienteSelect");
+                select.innerHTML = '<option value="">Seleccione un cliente</option>';
+
+                clientes.forEach(cliente => {
+                    const option = document.createElement("option");
+                    option.value = cliente.id_cliente;
+                    option.textContent = cliente.nombre_cliente;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error al obtener clientes:", error);
+                alert("No se pudo obtener la lista de clientes.");
+            }
         }
-    </script>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const usuario = JSON.parse(localStorage.getItem('user'));
-    
-            if (!usuario) {
-                setTimeout(() => {
-                    window.location.href = "login.html";
-                }, 2000);
+
+        document.getElementById("crearClienteForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const clienteData = {
+                nombre_cliente: document.getElementById("nombre_cliente").value.trim().toUpperCase(),
+                razon_social: document.getElementById("razon_social").value.trim().toUpperCase(),
+                rfc: document.getElementById("rfc").value.trim().toUpperCase(),
+                correo_electronico: document.getElementById("correo_electronico").value.trim(),
+                telefono_contacto: document.getElementById("telefono_contacto").value.trim(),
+                calle: document.getElementById("calle").value.trim(),
+                ciudad: document.getElementById("ciudad").value.trim(),
+                estado: document.getElementById("estado").value.trim(),
+                pais: document.getElementById("pais").value.trim(),
+                codigo_postal: document.getElementById("codigo_postal").value.trim(),
+            };
+
+            if (!clienteData.nombre_cliente || !clienteData.rfc) {
+                alert("El nombre del cliente y el RFC son obligatorios.");
+                return;
+            }
+
+            try {
+                const response = await fetch("/api/registro/crearCliente", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(clienteData)
+                });
+
+                const result = await response.json();
+                alert(result.mensaje);
+
+                if (response.ok) {
+                    document.getElementById("crearClienteForm").reset();
+                    obtenerClientes();
+                    new bootstrap.Modal(document.getElementById("modalNuevoCliente")).hide();
+                }
+            } catch (error) {
+                console.error("Error al crear cliente:", error);
+                alert("Error en el servidor.");
             }
         });
     </script>
 
-     <!-- Script para manejar sesión y perfil -->
-     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const perfilNombre = document.getElementById('perfil-nombre');
-            const usuario = JSON.parse(localStorage.getItem('user'));
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const perfilNombre = document.getElementById('perfil-nombre');
+        const usuario = JSON.parse(localStorage.getItem('user'));
 
-            if (usuario) {
-                perfilNombre.textContent = usuario.username || 'Usuario';
-            } else {
-                perfilNombre.textContent = 'Invitado';
-                setTimeout(() => {
-                    window.location.href = "login.html"; // Redirigir al login si no hay usuario
-                }, 2000);
-            }
-        });
-
-        function cerrarSesion() {
-            localStorage.removeItem('user'); // Borrar datos del usuario
-            window.location.href = "login.html"; // Redirigir al login
+        if (usuario) {
+            perfilNombre.textContent = usuario.username || 'Usuario';
+        } else {
+            perfilNombre.textContent = 'Invitado';
+            setTimeout(() => {
+                window.location.href = "login.html";
+            }, 2000);
         }
-    </script>
-    <script src="/scripts/registro.js"></script>
+    });
+
+    function cerrarSesion() {
+        localStorage.removeItem('user');
+        window.location.href = "login.html";
+    }
+</script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
