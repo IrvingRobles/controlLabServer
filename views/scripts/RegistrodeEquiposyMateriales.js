@@ -217,6 +217,9 @@ async function cargarDatosEnFormulario(id) {
         document.getElementById("referencia").value = registro.referencia || "";
         document.getElementById("observaciones").value = registro.observaciones || "";
 
+        // Guardamos el 'id' real en un campo oculto para usarlo en la actualización
+        document.getElementById("idReal").value = registro.id;
+
         mostrarMensaje("Registro cargado en el formulario.", "success");
     } catch (error) {
         console.error("Error al cargar los datos en el formulario:", error);
@@ -224,17 +227,19 @@ async function cargarDatosEnFormulario(id) {
     }
 }
 
+
 async function actualizarRegistro() {
     try {
-        const id = document.getElementById("folio").value; // Suponiendo que el folio es el identificador único
-        if (!id) {
+        const idReal = document.getElementById("idReal").value; // Usamos el ID real
+
+        if (!idReal) {
             mostrarMensaje("No se puede actualizar sin un ID válido.", "warning");
             return;
         }
 
         // Obtener los valores del formulario
         const datosActualizados = {
-            folio: id,
+            folio: document.getElementById("folio").value,
             fecha_ingreso: document.getElementById("fechaIngreso").value,
             responsable_ingreso: document.getElementById("responsableIngreso").value,
             nombre_cliente: document.getElementById("nombreCliente").value,
@@ -261,7 +266,8 @@ async function actualizarRegistro() {
 
         console.log("Enviando datos actualizados:", datosActualizados); // Depuración
 
-        const response = await fetch(`/api/registro/actualizarMaterial/${id}`, {
+        // Usamos el 'idReal' para actualizar el registro
+        const response = await fetch(`/api/registro/actualizarMaterial/${idReal}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(datosActualizados),
