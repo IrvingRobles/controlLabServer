@@ -210,8 +210,8 @@ async function cargarDatosEnFormulario(id) {
         document.getElementById("referencia").value = registro.referencia || "";
         document.getElementById("observaciones").value = registro.observaciones || "";
 
-        // Guardar el ID en un campo oculto del formulario
-        document.getElementById("registroId").value = registro.id; // Este es el ID del registro
+        // Guardamos el 'id' real en un campo oculto para usarlo en la actualización
+        document.getElementById("idReal").value = registro.id;
 
         mostrarMensaje("Registro cargado en el formulario.", "success");
     } catch (error) {
@@ -220,10 +220,12 @@ async function cargarDatosEnFormulario(id) {
     }
 }
 
+
 async function actualizarRegistro() {
     try {
-        const id = document.getElementById("registroId").value; // Obtener el ID del campo oculto
-        if (!id) {
+        const idReal = document.getElementById("idReal").value; // Usamos el ID real
+
+        if (!idReal) {
             mostrarMensaje("No se puede actualizar sin un ID válido.", "warning");
             return;
         }
@@ -257,7 +259,8 @@ async function actualizarRegistro() {
 
         console.log("Enviando datos actualizados:", datosActualizados);
 
-        const response = await fetch(`/api/registro/actualizarMaterial/${id}`, {
+        // Usamos el 'idReal' para actualizar el registro
+        const response = await fetch(`/api/registro/actualizarMaterial/${idReal}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(datosActualizados),

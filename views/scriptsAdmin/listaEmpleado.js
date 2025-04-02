@@ -34,6 +34,9 @@ function mostrarEmpleadosEnCards(empleados) {
         let card = document.createElement('div');
         card.className = 'col-md-4 mb-3';
 
+        // Formatear la fecha correctamente
+        const fechaIngreso = empleado.ingreso ? new Date(empleado.ingreso).toLocaleDateString("es-ES") : 'N/A';
+
         card.innerHTML = `
             <div class="card shadow-sm">
                 <div class="card-body">
@@ -52,7 +55,7 @@ function mostrarEmpleadosEnCards(empleados) {
                         <p class="card-text"><strong>Jornada:</strong> ${empleado.jornada}</p>
                         <p class="card-text"><strong>Domicilio:</strong> ${empleado.domicilio}</p>
                         <p class="card-text"><strong>NSS:</strong> ${empleado.nss}</p>
-                        <p class="card-text"><strong>Fecha de Ingreso:</strong> ${empleado.ingreso}</p>
+                        <p class="card-text"><strong>Fecha de Ingreso:</strong> ${fechaIngreso}</p>
                         <p class="card-text"><strong>Teléfono:</strong> ${empleado.telefono}</p>
                         <p class="card-text"><strong>Correo:</strong> ${empleado.correo}</p>
                         <p class="card-text"><strong>Rol:</strong> ${empleado.role}</p>
@@ -71,6 +74,7 @@ function mostrarEmpleadosEnCards(empleados) {
 
 // Cargar la lista al iniciar
 cargarListaEmpleados();
+
 // Llamar la función para cargar empleados
 async function mostrarFormulario(id = null) { 
     const formulario = document.getElementById('modalEmpleado');
