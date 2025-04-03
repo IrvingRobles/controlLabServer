@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
             showModal('❌ Error al registrar la solicitud', false);
         }
     });
-});
+}); 
 
 // Función showModal (COPIADA DE TU EJEMPLO SIN CAMBIOS)
 function showModal(message, success) {
