@@ -109,4 +109,10 @@ router.get('/user/actual', almacenController.obtenerUsuarioActual);
 
 router.get('/ot/id', almacenController.obtenerOT);
 
+// Ruta para registrar una nueva solicitud (POST)
+router.post('/solicitudes/registrar', almacenController.registrarSolicitud );
+
+// Otras rutas relacionadas (podemos agregarlas después)
+// Ej: router.get('/solicitudes/listar', listarSolicitudes);
+
 module.exports = router;

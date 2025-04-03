@@ -1026,3 +1026,41 @@ exports.obtenerOT = async (req, res) => {
         res.status(500).json({ mensaje: 'Error al obtener los registros', error });
     }
 };
+
+exports.registrarSolicitud = async (req, res) => {
+    try {
+        const { idUsuario, idOt, idProductos, fecha, unidades, nota } = req.body;
+
+        // Validación: idUsuario y unidades son obligatorios, PERO si no hay idProductos, debe haber nota.
+        if (!idUsuario || !unidades) {
+            return res.status(400).json({ error: 'Faltan campos obligatorios: idUsuario y unidades.' });
+        }
+
+        if (!idProductos && !nota) {
+            return res.status(400).json({ error: 'Debe proporcionar al menos un producto (idProductos) o una descripción (nota).' });
+        }
+
+        // Insertar en la DB
+        const query = `
+            INSERT INTO solicitudalmacen (idUsuario, idOt, idProductos, fecha, unidades, nota)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+        const [result] = await db.execute(query, [
+            idUsuario,
+            idOt, // Opcional
+            idProductos || null, // Opcional (pero validamos que haya nota si no está)
+            fecha || new Date(), // Fecha actual por defecto
+            unidades,
+            nota || null // Opcional (pero validamos que haya idProductos si no está)
+        ]);
+
+        res.status(201).json({
+            mensaje: 'Solicitud registrada correctamente',
+            idSoli: result.insertId // Retorna el ID generado
+        });
+
+    } catch (error) {
+        console.error('Error al registrar solicitud:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+};
