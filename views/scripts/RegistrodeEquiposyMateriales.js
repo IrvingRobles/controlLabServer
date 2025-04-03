@@ -1,6 +1,23 @@
+function actualizarEstadoBotones() {
+    const btnRegistrar = document.getElementById("btnRegistrar");
+    const btnActualizar = document.getElementById("btnActualizar");
+    const idReal = document.getElementById("idReal").value.trim();
+
+    if (idReal === "") {
+        // Si no hay ID, es un nuevo registro
+        btnRegistrar.disabled = false;  // Habilitar botón Registrar
+        btnActualizar.disabled = true;  // Deshabilitar botón Actualizar
+    } else {
+        // Si hay ID, es una actualización
+        btnRegistrar.disabled = true;   // Deshabilitar botón Registrar
+        btnActualizar.disabled = false; // Habilitar botón Actualizar
+    }
+}
 document.addEventListener("DOMContentLoaded", async function () {
     await cargarRegistros();
     await autocompletarCampos();
+    actualizarEstadoBotones();
+
 });
 
 // 🔹 Obtener valores de los inputs
@@ -176,14 +193,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// ✅ Cargar los datos de un registro en el formulario al hacer clic en una fila
+// Después de cargar datos en el formulario
 async function cargarDatosEnFormulario(id) {
     try {
         const response = await fetch(`/api/registro/obtenerMaterial/${id}`);
-        if (!response.ok) throw new Error(`Error en la respuesta de la API: ${response.status}`);
+        if (!response.ok) throw new Error(`Error en la API: ${response.status}`);
 
-        const data = await response.json();
-        const registro = data.registro;
+        const { registro } = await response.json();
+        if (!registro) throw new Error("Datos no encontrados.");
 
         // Llenar los campos del formulario con los datos obtenidos
         document.getElementById("folio").value = registro.folio || "";
@@ -210,16 +227,22 @@ async function cargarDatosEnFormulario(id) {
         document.getElementById("referencia").value = registro.referencia || "";
         document.getElementById("observaciones").value = registro.observaciones || "";
 
-        // Guardamos el 'id' real en un campo oculto para usarlo en la actualización
+        // Guardamos el 'id' real en un campo oculto
         document.getElementById("idReal").value = registro.id;
 
-        mostrarMensaje("Registro cargado en el formulario.", "success");
+        // 🔹 Actualizar estado de botones
+        actualizarEstadoBotones();
     } catch (error) {
         console.error("Error al cargar los datos en el formulario:", error);
         mostrarMensaje("No se pudieron cargar los datos del registro.", "danger");
     }
 }
-
+// 🔹 Al limpiar el formulario, volvemos a la opción de registrar
+function limpiarFormulario() {
+    document.getElementById("crearRegistroForm").reset();
+    document.getElementById("idReal").value = ""; // Borrar ID real
+    actualizarEstadoBotones(); // 🔹 Asegurar que el botón de registrar se habilita
+}
 
 async function actualizarRegistro() {
     try {
