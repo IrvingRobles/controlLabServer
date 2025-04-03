@@ -221,7 +221,7 @@ async function cargarRegistros() {
     }
 }
 
-cargarRegistros();
+    cargarRegistros();
 
 
 

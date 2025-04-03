@@ -149,24 +149,33 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
     }
 });
 
-// 🔹 Función para mostrar alertas con Bootstrap
 function mostrarMensaje(mensaje, tipo) {
-    const alertContainer = document.getElementById("alertContainer");
-    const alert = document.createElement("div");
-    alert.className = `alert alert-${tipo} alert-dismissible fade show`;
-    alert.role = "alert";
-    alert.innerHTML = `
-        ${mensaje}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    alertContainer.appendChild(alert);
+    const alertContainer = document.getElementById('alertContainer');
+    const alertDiv = document.createElement('div');
+    alertDiv.classList.add('alert');
     
+    // Define el tipo de alerta según el tipo que se pase
+    if (tipo === 'success') {
+        alertDiv.classList.add('alert-success');
+    } else if (tipo === 'danger') {
+        alertDiv.classList.add('alert-danger');
+    } else if (tipo === 'warning') {
+        alertDiv.classList.add('alert-warning');
+    }
+
+    // Contenido de la alerta
+    alertDiv.textContent = mensaje;
+    
+    // Añadir la alerta al contenedor
+    alertContainer.appendChild(alertDiv);
+
+    // Ocultar la alerta después de 3 segundos
     setTimeout(() => {
-        alert.classList.remove("show");
-        alert.classList.add("fade");
-        setTimeout(() => alert.remove(), 500);
+        alertDiv.remove();
     }, 3000);
 }
+
+
 
 // ✅ Agregar eventos a las filas dinámicamente
 document.addEventListener("DOMContentLoaded", () => {
@@ -235,6 +244,9 @@ async function cargarDatosEnFormulario(id) {
         document.getElementById("referencia").value = registro.referencia || "";
         document.getElementById("observaciones").value = registro.observaciones || "";
 
+        // Guardamos el 'id' real en un campo oculto para usarlo en la actualización
+        document.getElementById("idReal").value = registro.id;
+
         mostrarMensaje("Registro cargado en el formulario.", "success");
     } catch (error) {
         console.error("Error al cargar los datos en el formulario:", error);
@@ -242,17 +254,19 @@ async function cargarDatosEnFormulario(id) {
     }
 }
 
+
 async function actualizarRegistro() {
     try {
-        const id = document.getElementById("folio").value; // Suponiendo que el folio es el identificador único
-        if (!id) {
+        const idReal = document.getElementById("idReal").value; // Usamos el ID real
+
+        if (!idReal) {
             mostrarMensaje("No se puede actualizar sin un ID válido.", "warning");
             return;
         }
 
         // Obtener los valores del formulario
         const datosActualizados = {
-            folio: id,
+            folio: document.getElementById("folio").value,
             fecha_ingreso: document.getElementById("fechaIngreso").value,
             responsable_ingreso: document.getElementById("responsableIngreso").value,
             nombre_cliente: document.getElementById("nombreCliente").value,
@@ -279,7 +293,8 @@ async function actualizarRegistro() {
 
         console.log("Enviando datos actualizados:", datosActualizados); // Depuración
 
-        const response = await fetch(`/api/registro/actualizarMaterial/${id}`, {
+        // Usamos el 'idReal' para actualizar el registro
+        const response = await fetch(`/api/registro/actualizarMaterial/${idReal}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(datosActualizados),
