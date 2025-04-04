@@ -48,7 +48,7 @@ const enviarCorreoValidacion = async (correo, nombre, username, rfc, curp, depar
                     </table>
 
                     <p style="margin-top: 20px; font-size: 16px; color: #666;">Para verificar tu cuenta, haz clic en el siguiente botón:</p>
-                    <a href="http://localhost:3000//api/login/validar/${token}" style="display: inline-block; padding: 10px 20px; background-color: #28a745; color: #fff; text-decoration: none; font-weight: bold; border-radius: 5px;">Verificar cuenta</a>
+                    <a href="https://controllabserver.onrender.com/api/login/validar/${token}" style="display: inline-block; padding: 10px 20px; background-color: #28a745; color: #fff; text-decoration: none; font-weight: bold; border-radius: 5px;">Verificar cuenta</a>
                     
                     <p style="margin-top: 20px; font-size: 14px; color: #999;">Si no solicitaste este registro, ignora este correo.</p>
                 </div>
