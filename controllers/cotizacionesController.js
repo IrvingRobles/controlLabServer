@@ -1,6 +1,49 @@
 const db = require('../model/db'); // Configuración de la base de datos
 
 // Obtener los datos de la Orden de Trabajo y sus cotizaciones
+// exports.obtenerOTC = async (req, res) => {
+//     const { id } = req.params; // Obtener el ID de la OT
+//     if (!id) {
+//         return res.status(400).json({ mensaje: "El parámetro 'id' es requerido" });
+//     }
+
+//     try {
+//         // Obtener la orden de trabajo por ID
+//         const [ordenTrabajo] = await db.query(`
+//             SELECT id, clave, OT, empresa, fecha_envio, descripcion, contacto, importe_cotizado,
+//                    resultado, creadoPor, empleado_asignado, fecha_inicio, fecha_termino, contrato_pedido,
+//                    lugar, observaciones, facturas, cliente, tipo_servicio
+//             FROM registros WHERE id = ?`, [id]);
+
+//         if (ordenTrabajo.length === 0) {
+//             return res.status(404).json({ mensaje: "Orden de trabajo no encontrada" });
+//         }
+
+//         // Obtener las cotizaciones relacionadas con la OT
+//         const [cotizaciones] = await db.query(`
+//             SELECT id, referencia, num_cotizacion, fecha_expiracion, metodo_embarque, realizado_por
+//             FROM cotizaciones WHERE id_ot = ?`, [id]);
+
+//         let materiales = [];
+//         if (cotizaciones.length > 0) {
+//             const cotizacionIds = cotizaciones.map(cot => cot.id);
+//             [materiales] = await db.query(`
+//                 SELECT id, id_cotizacion, pda, cantidad, unidad, descripcion, precio_unitario, importe_total
+//                 FROM materiales WHERE id_cotizacion IN (?)`, [cotizacionIds]);
+//         }
+
+//         res.json({
+//             ordenTrabajo: ordenTrabajo[0],
+//             cotizaciones: cotizaciones,
+//             materiales: materiales
+//         });
+
+//     } catch (error) {
+//         console.error("Error al obtener la OT, cotizaciones y materiales:", error);
+//         res.status(500).json({ mensaje: "Error en el servidor" });
+//     }
+// };
+// Obtener los datos de la Orden de Trabajo y sus cotizaciones 
 exports.obtenerOTC = async (req, res) => {
     const { id } = req.params; // Obtener el ID de la OT
     if (!id) {
@@ -8,43 +51,62 @@ exports.obtenerOTC = async (req, res) => {
     }
 
     try {
-        // Obtener la orden de trabajo por ID
-        const [ordenTrabajo] = await db.query(`
-            SELECT id, clave, OT, empresa, fecha_envio, descripcion, contacto, importe_cotizado,
-                   resultado, creadoPor, empleado_asignado, fecha_inicio, fecha_termino, contrato_pedido,
-                   lugar, observaciones, facturas, cliente, tipo_servicio
-            FROM registros WHERE id = ?`, [id]);
+        // Obtener la Orden de Trabajo junto con los datos del cliente
+        const [ordenTrabajo] = await db.query(
+            `SELECT 
+                r.id, r.clave, r.OT, r.empresa, r.fecha_envio, r.descripcion, r.contacto, 
+                r.importe_cotizado, r.resultado, r.creadoPor, r.empleado_asignado, 
+                r.fecha_inicio, r.fecha_termino, r.contrato_pedido, r.lugar, 
+                r.observaciones, r.facturas, r.id_cliente, r.tipo_servicio,
+                c.nombre_cliente, c.razon_social, c.rfc, c.correo_electronico, 
+                c.telefono_contacto, c.calle, c.ciudad, c.estado, c.pais, c.codigo_postal
+            FROM registros r
+            LEFT JOIN cliente c ON r.id_cliente = c.id_cliente
+            WHERE r.id = ?`, 
+            [id]
+        );
 
         if (ordenTrabajo.length === 0) {
             return res.status(404).json({ mensaje: "Orden de trabajo no encontrada" });
         }
 
         // Obtener las cotizaciones relacionadas con la OT
-        const [cotizaciones] = await db.query(`
-            SELECT id, referencia, num_cotizacion, fecha_expiracion, metodo_embarque, realizado_por
-            FROM cotizaciones WHERE id_ot = ?`, [id]);
+        const [cotizaciones] = await db.query(
+            `SELECT id, referencia, num_cotizacion, fecha_expiracion, metodo_embarque, realizado_por
+            FROM cotizaciones WHERE id_ot = ?`, 
+            [id]
+        );
 
         let materiales = [];
         if (cotizaciones.length > 0) {
             const cotizacionIds = cotizaciones.map(cot => cot.id);
-            [materiales] = await db.query(`
-                SELECT id, id_cotizacion, pda, cantidad, unidad, descripcion, precio_unitario, importe_total
-                FROM materiales WHERE id_cotizacion IN (?)`, [cotizacionIds]);
+            [materiales] = await db.query(
+                `SELECT id, id_cotizacion, pda, cantidad, unidad, descripcion, precio_unitario, importe_total
+                FROM materiales WHERE id_cotizacion IN (?)`, 
+                [cotizacionIds]
+            );
         }
+
+        // Mostrar en consola los resultados para depuración
+        console.log("🔍 Datos consultados:", {
+            ordenTrabajo: ordenTrabajo[0],
+            cotizaciones,
+            materiales
+        });
 
         res.json({
             ordenTrabajo: ordenTrabajo[0],
-            cotizaciones: cotizaciones,
-            materiales: materiales
+            cotizaciones,
+            materiales
         });
 
     } catch (error) {
-        console.error("Error al obtener la OT, cotizaciones y materiales:", error);
+        console.error("❌ Error al obtener la OT, cotizaciones y materiales:", error);
         res.status(500).json({ mensaje: "Error en el servidor" });
     }
 };
 
-// Eliminar un material por ID
+
 // Eliminar un material por ID
 exports.eliminarMaterial = async (req, res) => {
     const { id } = req.params;

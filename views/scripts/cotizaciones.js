@@ -1,19 +1,18 @@
 let datosCargados = false; // 🔥 Variable de control para evitar duplicados 
-
 document.addEventListener('DOMContentLoaded', async () => {
-    if (datosCargados) return; // 🔥 Evita ejecución repetida
+    if (window.datosCargados) return; // 🔥 Evita ejecución repetida
 
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get('id');
 
     if (!id) {
-        alert('No se ha proporcionado un ID.');
+        alert('❌ No se ha proporcionado un ID.');
         return;
     }
 
     try {
         const response = await fetch(`/api/registro/otc/${id}`);
-        if (!response.ok) throw new Error('Error al obtener los datos');
+        if (!response.ok) throw new Error('⚠️ Error al obtener los datos');
 
         const data = await response.json();
         console.log("🚀 Datos recibidos:", data);
@@ -21,33 +20,45 @@ document.addEventListener('DOMContentLoaded', async () => {
         const { ordenTrabajo, cotizaciones, materiales } = data;
 
         function formatDate(isoDate) {
+            if (!isoDate) return ''; // Si la fecha es nula, retorna vacío
             const date = new Date(isoDate);
-            return date.toISOString().split('T')[0];
+            return isNaN(date) ? '' : date.toISOString().split('T')[0];
         }
 
-        // Rellenar los campos del formulario con la información obtenida
-        document.getElementById('cliente').value = ordenTrabajo.cliente || '';
-        document.getElementById('referencia').value = cotizaciones.length > 0 ? cotizaciones[0].referencia : '';
-        document.getElementById('direccion').value = ordenTrabajo.lugar || '';
-        document.getElementById('cotizacionNo').value = cotizaciones.length > 0 ? cotizaciones[0].num_cotizacion : '';
-        document.getElementById('fecha').value = ordenTrabajo.fecha_envio ? formatDate(ordenTrabajo.fecha_envio) : '';
-        document.getElementById('fechaExpiracion').value = cotizaciones.length > 0 ? formatDate(cotizaciones[0].fecha_expiracion) : '';
-        document.getElementById('metodoEmbarque').value = cotizaciones.length > 0 ? cotizaciones[0].metodo_embarque : '';
-        document.getElementById('empleado_asignado').value = ordenTrabajo.empleado_asignado || '';
+        const setValue = (id, value) => {
+            const element = document.getElementById(id);
+            if (element) element.value = value ?? ''; // Si no existe, evita errores
+        };
 
+        // 🟢 Asignación de valores a los campos del formulario
+        setValue('cliente', ordenTrabajo.nombre_cliente); // Ahora sí obtiene el nombre del cliente
+        setValue('referencia', cotizaciones.length > 0 ? cotizaciones[0].referencia : '');
+        setValue('direccion', ordenTrabajo.lugar);
+        setValue('cotizacionNo', cotizaciones.length > 0 ? cotizaciones[0].num_cotizacion : '');
+        setValue('fecha', formatDate(ordenTrabajo.fecha_envio));
+        setValue('fechaExpiracion', cotizaciones.length > 0 ? formatDate(cotizaciones[0].fecha_expiracion) : '');
+        setValue('metodoEmbarque', cotizaciones.length > 0 ? cotizaciones[0].metodo_embarque : '');
+        setValue('empleado_asignado', ordenTrabajo.empleado_asignado);
+
+        // 🟢 Llenar la tabla con los materiales obtenidos
         rellenarTablaMateriales(materiales);
-        datosCargados = true; // 🔥 Marcar que ya se cargaron los datos
+
+        window.datosCargados = true; // 🔥 Marcar que ya se cargaron los datos
 
     } catch (error) {
-        console.error(error);
-        alert('Hubo un error al cargar los datos');
+        console.error("❌ Error:", error);
+        alert('⚠️ Hubo un error al cargar los datos');
     }
 
     // Asociar el evento click al botón para agregar filas
-    document.getElementById('btnAgregarFila').addEventListener('click', () => {
-        agregarFila(); // Llama a la función para agregar una fila vacía
-    });
+    const btnAgregarFila = document.getElementById('btnAgregarFila');
+    if (btnAgregarFila) {
+        btnAgregarFila.addEventListener('click', () => {
+            agregarFila(); // Llama a la función para agregar una fila vacía
+        });
+    }
 });
+
 
 function rellenarTablaMateriales(materiales) {
     const tablaMateriales = document.getElementById('tablaMateriales').getElementsByTagName('tbody')[0];
@@ -339,19 +350,18 @@ async function subirPDFAlServidor(formData) {
 
 function generarTablaMateriales(doc, marginLeft) {
     const margenSuperior = 80;
-    const margenLateral = marginLeft;
     const anchoTabla = 190;
     const altoFila = 8;
     const maxAltoPagina = doc.internal.pageSize.height - 30;
     let y = margenSuperior + 5;
 
     doc.setFontSize(10);
-    doc.text("Materiales:", margenLateral, margenSuperior);
+    doc.text("Materiales:", marginLeft, margenSuperior);
 
     const filas = document.querySelectorAll("#tablaMateriales tbody tr");
 
     if (filas.length === 0) {
-        doc.text("No hay materiales registrados.", margenLateral, margenSuperior + 5);
+        doc.text("No hay materiales registrados.", marginLeft, margenSuperior + 5);
         return;
     }
 
@@ -359,7 +369,7 @@ function generarTablaMateriales(doc, marginLeft) {
     const encabezados = ["PDA", "Cantidad", "Unidad", "Descripción", "Precio Unitario", "Importe Total"];
     const anchosColumnas = [20, 20, 20, 80, 25, 25];
 
-    let x = margenLateral;
+    let x = marginLeft;
 
     // Encabezados con fondo negro
     doc.setFillColor(0, 0, 0);
@@ -375,16 +385,14 @@ function generarTablaMateriales(doc, marginLeft) {
     doc.setTextColor(0, 0, 0);
     y += altoFila;
 
-    // Variable para almacenar el total de importes
     let totalImporte = 0;
 
-    // Dibujar filas
     filas.forEach(row => {
-        let x = margenLateral;
+        let x = marginLeft;
 
         const getValue = (index) => {
             const input = row.cells[index]?.querySelector("input");
-            return input ? input.value : "-";
+            return input && input.value.trim() !== "" ? input.value : "-";
         };
 
         let filaDatos = [
@@ -392,15 +400,13 @@ function generarTablaMateriales(doc, marginLeft) {
             getValue(1), 
             getValue(2), 
             doc.splitTextToSize(getValue(3), anchosColumnas[3] - 5), // Descripción ajustada
-            `$${parseFloat(getValue(4)).toFixed(2)}`, 
-            `$${parseFloat(getValue(5)).toFixed(2)}`
+            `$${parseFloat(getValue(4) || 0).toFixed(2)}`, 
+            `$${parseFloat(getValue(5) || 0).toFixed(2)}`
         ];
 
-        // Sumar el importe total
         totalImporte += parseFloat(getValue(5)) || 0;
 
-        let maxLineas = filaDatos.slice(0, 3).map(txt => txt.length > 20 ? 2 : 1);
-        let altoDinamico = Math.max(...maxLineas) * altoFila;
+        let altoDinamico = altoFila;
 
         // Verificar si se necesita una nueva página
         if (y + altoDinamico > maxAltoPagina) {
@@ -423,16 +429,12 @@ function generarTablaMateriales(doc, marginLeft) {
         y += altoDinamico;
     });
 
-    // Dibujar línea divisoria antes del total
-    doc.setLineWidth(0.5);
-    doc.line(margenLateral, y, margenLateral + anchoTabla, y);
-
-    // Dibujar fila del total
+    // Fila del total sin línea divisoria previa
     y += altoFila;
     doc.setFont("helvetica", "bold");
-    doc.text("TOTAL:", margenLateral + anchoTabla - anchosColumnas[5] - anchosColumnas[4] / 2, y + altoFila - 3, { align: "center" });
-    doc.text(`$${totalImporte.toFixed(2)}`, margenLateral + anchoTabla - anchosColumnas[5] / 2, y + altoFila - 3, { align: "center" });
+    doc.text("TOTAL:", marginLeft + anchoTabla - anchosColumnas[5] - anchosColumnas[4] / 2, y + altoFila - 3, { align: "center" });
+    doc.text(`$${totalImporte.toFixed(2)}`, marginLeft + anchoTabla - anchosColumnas[5] / 2, y + altoFila - 3, { align: "center" });
 
-    // Dibujar el borde exterior de la tabla
-    doc.rect(margenLateral, margenSuperior + 5, anchoTabla, y - margenSuperior - 5);
+    // Dibujar borde de la tabla
+    doc.rect(marginLeft, margenSuperior + 5, anchoTabla, y - margenSuperior - 5);
 }
