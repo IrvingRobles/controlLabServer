@@ -288,7 +288,7 @@ exports.obtenerRegistroPorId2 = async (req, res) => {
             factura: rows[0].factura,
             ctd_entradas: rows[0].ctd_entradas,
             pu_entrada: rows[0].pu_entrada,
-            cant_mal: rows[0].cant_mal, 
+            cant_mal: rows[0].cant_mal,
             cant_bien: rows[0].cant_bien,
             concepto: rows[0].concepto,
             anaquel: rows[0].anaquel,
@@ -469,7 +469,7 @@ exports.editarRegistroAlmacen = async (req, res) => {
             anaquel = ?, seccion = ?, caja = ?, observaciones = ?
                 WHERE idAlmacen = ?
                     `, [
-            idUsuario, idEmpresa, idMovimiento, fecha, idProducto, factura, idMoneda, 
+            idUsuario, idEmpresa, idMovimiento, fecha, idProducto, factura, idMoneda,
             ctd_entradas, pu_entrada, cant_mal, cant_bien, concepto, anaquel, seccion, caja, observaciones, idAlmacen
         ]);
 
@@ -815,7 +815,7 @@ exports.obtenerProductoPorId = async (req, res) => {
 
 exports.obtenerProducto = async (req, res) => {
     const { id } = req.params;
-    
+
     try {
         const [producto] = await db.query(
             'SELECT inicial, precio_inicial FROM producto WHERE idProducto = ?',
@@ -959,7 +959,7 @@ exports.obtenerUsers = async (req, res) => {
         res.status(500).json({ mensaje: 'Error al obtener los users', error });
     }
 };
- 
+
 // Ruta para obtener el usuario actual (Versión final con sesiones)
 exports.obtenerUsuarioActual = async (req, res) => {
     try {
@@ -967,13 +967,13 @@ exports.obtenerUsuarioActual = async (req, res) => {
         if (!req.session.user) {
             return res.status(401).json({ mensaje: 'No hay sesión activa' });
         }
-        
+
         // Devolver los datos del usuario de la sesión
         res.status(200).json({
             id: req.session.user.id,
             username: req.session.user.username
         });
-        
+
     } catch (error) {
         res.status(500).json({ mensaje: 'Error al obtener usuario', error });
     }
@@ -1014,7 +1014,7 @@ exports.obtenerUsuarioPorId = async (req, res) => {
     }
 };
 
-// Ruta para obtener las OT
+// Ruta para obte ner las OT
 exports.obtenerOT = async (req, res) => {
     try {
         // Consulta para obtener los nombres de los users y guardar el id
@@ -1029,38 +1029,214 @@ exports.obtenerOT = async (req, res) => {
 
 exports.registrarSolicitud = async (req, res) => {
     try {
-        const { idUsuario, idOt, idProductos, fecha, unidades, nota } = req.body;
+        const { idUsuario, idOt, productos, fecha, unidades, nota } = req.body;
 
-        // Validación: idUsuario y unidades son obligatorios, PERO si no hay idProductos, debe haber nota.
-        if (!idUsuario || !unidades) {
-            return res.status(400).json({ error: 'Faltan campos obligatorios: idUsuario y unidades.' });
+        // Validación mejorada
+        if ((!productos || JSON.parse(productos).length === 0) && !nota) {
+            return res.status(400).json({
+                error: "Debe proporcionar al menos un producto o una nota"
+            });
         }
 
-        if (!idProductos && !nota) {
-            return res.status(400).json({ error: 'Debe proporcionar al menos un producto (idProductos) o una descripción (nota).' });
-        }
+        // Convertir productos de JSON a array
+        const productosArray = productos ? JSON.parse(productos) : [];
 
-        // Insertar en la DB
-        const query = `
-            INSERT INTO solicitudalmacen (idUsuario, idOt, idProductos, fecha, unidades, nota)
-            VALUES (?, ?, ?, ?, ?, ?)
-        `;
-        const [result] = await db.execute(query, [
-            idUsuario,
-            idOt, // Opcional
-            idProductos || null, // Opcional (pero validamos que haya nota si no está)
-            fecha || new Date(), // Fecha actual por defecto
-            unidades,
-            nota || null // Opcional (pero validamos que haya idProductos si no está)
-        ]);
+        // Insertar en la tabla
+        const [result] = await db.query(
+            `INSERT INTO solicitudalmacen 
+             (idUsuario, idOt, idProductos, fecha, unidades, nota, productos)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+                idUsuario,
+                idOt || null,
+                productosArray.length > 0 ? productosArray[0].id : null, // Primer producto para compatibilidad
+                fecha || new Date().toISOString().split('T')[0],
+                unidades,
+                nota || null,
+                productos || null // Guardamos el JSON completo
+            ]
+        );
 
         res.status(201).json({
-            mensaje: 'Solicitud registrada correctamente',
-            idSoli: result.insertId // Retorna el ID generado
+            idSoli: result.insertId,
+            mensaje: productosArray.length > 0
+                ? `Solicitud con ${productosArray.length} productos registrada`
+                : "Solicitud con nota registrada"
         });
 
     } catch (error) {
-        console.error('Error al registrar solicitud:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        console.error('Error al registrar:', error);
+        res.status(500).json({
+            error: "Error al registrar la solicitud",
+            detalles: error.message
+        });
+    }
+};
+
+exports.getSolicitudes = async (req, res) => {
+    try {
+        const query = `
+      SELECT 
+        s.idSoli,
+        s.idUsuario,
+        u.username,
+        s.idOt,
+        r.clave,
+        s.fecha,
+        s.nota,
+        s.productos,
+        s.estado 
+    FROM 
+        solicitudalmacen s
+    LEFT JOIN 
+        users u ON s.idUsuario = u.id
+    LEFT JOIN 
+        registros r ON s.idOt = r.id
+`;
+
+        const [solicitudes] = await db.query(query);
+
+        if (!solicitudes || solicitudes.length === 0) {
+            return res.status(404).json({ mensaje: "No hay solicitudes registradas" });
+        }
+
+        // Formateamos los datos correctamente
+        const solicitudesFormateadas = solicitudes.map(solicitud => {
+            let productos = [];
+            try {
+                productos = solicitud.productos ? JSON.parse(solicitud.productos) : [];
+            } catch (error) {
+                console.error('Error al parsear productos:', error);
+            }
+        
+            return {
+                idSoli: solicitud.idSoli,
+                usuario: {
+                    id: solicitud.idUsuario,
+                    username: solicitud.username || 'Sin usuario'
+                },
+                ot: {
+                    id: solicitud.idOt,
+                    clave: solicitud.clave
+                },
+                fecha: solicitud.fecha,
+                nota: solicitud.nota || 'Sin nota',
+                productos: productos,
+                estado: solicitud.estado || 'pendiente'  // Usar el valor real de la BD
+            };
+        });
+
+        res.status(200).json({
+            success: true,
+            data: solicitudesFormateadas
+        });
+
+    } catch (error) {
+        console.error("Error en getSolicitudes:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error en la base de datos",
+            error: error.message
+        });
+    }
+};
+
+exports.completarSolicitud = async (req, res) => {
+    const { idSoli } = req.params; // Asegúrate que coincida con el nombre en la ruta
+
+    // Validar que el ID sea un número
+    if (isNaN(idSoli)) {
+        return res.status(400).json({
+            success: false,
+            message: "ID de solicitud inválido"
+        });
+    }
+
+    try {
+        // 1. Verificar que la solicitud existe
+        const [solicitud] = await db.query(`
+            SELECT idSoli, estado 
+            FROM solicitudalmacen 
+            WHERE idSoli = ?
+        `, [idSoli]); // Usar idSoli aquí
+
+        if (!solicitud || solicitud.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Solicitud no encontrada"
+            });
+        }
+
+        // 2. Verificar que no esté ya completada
+        if (solicitud[0].estado === 'completado') {
+            return res.status(400).json({
+                success: false,
+                message: "La solicitud ya está completada"
+            });
+        }
+
+        // 3. Actualizar estado
+        const [result] = await db.query(`
+            UPDATE solicitudalmacen 
+            SET estado = 'completado'
+            WHERE idSoli = ?
+        `, [idSoli]); // Usar idSoli aquí también
+
+        if (result.affectedRows === 0) {
+            return res.status(500).json({
+                success: false,
+                message: "No se pudo actualizar la solicitud"
+            });
+        }
+
+        // 4. Obtener la solicitud actualizada para devolverla
+        const [solicitudActualizada] = await db.query(`
+            SELECT idSoli, estado 
+            FROM solicitudalmacen 
+            WHERE idSoli = ?
+        `, [idSoli]); // Y aquí también
+
+        res.status(200).json({
+            success: true,
+            message: "Solicitud marcada como completada",
+            data: solicitudActualizada[0]
+        });
+
+    } catch (error) {
+        console.error("Error en completarSolicitud:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error al completar la solicitud",
+            error: error.message
+        });
+    }
+};
+
+// Eliminar una solicitud por ID
+exports.eliminarSolicitud = async (req, res) => {
+    const { idSoli } = req.params;
+
+    try {
+        // Aquí iría tu lógica para eliminar la solicitud de la base de datos
+        // Ejemplo con MySQL:
+        const [result] = await db.query('DELETE FROM solicitudalmacen WHERE idSoli = ?', [idSoli]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Solicitud no encontrada'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Solicitud eliminada correctamente'
+        });
+    } catch (error) {
+        console.error('Error al eliminar solicitud:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor'
+        });
     }
 };

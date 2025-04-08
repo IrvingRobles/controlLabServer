@@ -112,7 +112,11 @@ router.get('/ot/id', almacenController.obtenerOT);
 // Ruta para registrar una nueva solicitud (POST)
 router.post('/solicitudes/registrar', almacenController.registrarSolicitud );
 
-// Otras rutas relacionadas (podemos agregarlas después)
-// Ej: router.get('/solicitudes/listar', listarSolicitudes);
+// Ruta GET para obtener todas las solicitudes (con username y clave)
+router.get('/x/solicitudes', almacenController.getSolicitudes);
+
+router.delete('/x/solicitudes/:idSoli', almacenController.eliminarSolicitud)
+
+router.put('/x/solicitudes/:idSoli/completar', almacenController.completarSolicitud);
 
 module.exports = router;
