@@ -70,7 +70,7 @@ function mostrarPagina(pagina) {
 // Función para redirigir a entradaAlmacen con el id
 function verMasDetalles(idAlmacen) {
     // Redirigir a la página de entradaAlmacen y pasar el id como parámetro en la URL
-    window.location.href = `/adminEntradaAlmacen.html?id=${idAlmacen}`;
+    window.location.href = `/verMas.html?id=${idAlmacen}`;
 }
 
 // Eventos de los botones de paginación
