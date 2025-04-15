@@ -1,23 +1,59 @@
 const db = require('../model/db'); // Configuración de la base de datos
 const { format } = require('date-fns');
 
+// Función para obtener el último OT del año actual y generar el siguiente
+async function generarOT() {
+    const anioActual = new Date().getFullYear();
+
+    const [result] = await db.query(
+        'SELECT MAX(CAST(SUBSTRING(OT, 4, 3) AS UNSIGNED)) AS ultimoNumero FROM registros WHERE YEAR(fecha_envio) = ?',
+        [anioActual]
+    );
+
+    let siguienteNumero = 1;
+
+    if (result[0].ultimoNumero) {
+        siguienteNumero = result[0].ultimoNumero + 1;
+    }
+
+    const otGenerada = `CT-${String(siguienteNumero).padStart(3, "0")}/${anioActual}`;
+    return otGenerada;
+}
+
 exports.crearRegistro = async (req, res) => {
     try {
-        const { clave, empresa, fechaEnvio, descripcion, contacto, lugar, id_cliente, creadoPor } = req.body;
+        const {
+            clave,
+            empresa,
+            fechaEnvio,
+            descripcion = "",
+            contacto = "",
+            lugar = "",
+            id_cliente,
+            creadoPor = "DESCONOCIDO"
+        } = req.body;
 
         if (!empresa || !fechaEnvio || !id_cliente) {
             return res.status(400).json({ mensaje: "Empresa, fecha de envío y cliente son obligatorios" });
         }
 
-        const claveGenerada = clave || generarClave(empresa, fechaEnvio);
-        const resultado = descripcion || "Sin descripción";
+        const claveGenerada = clave || `CL-${id_cliente}-${Date.now()}`;
+        const otGenerada = await generarOT();
+        const resultado = descripcion.trim() === "" ? "Sin descripción" : descripcion;
 
         const [result] = await db.query(
-            'INSERT INTO registros (clave, empresa, fecha_envio, descripcion, resultado, contacto, lugar, id_cliente, creadoPor) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [claveGenerada, empresa, fechaEnvio, descripcion, resultado, contacto, lugar, id_cliente, creadoPor]
+            `INSERT INTO registros 
+                (clave, OT, empresa, fecha_envio, descripcion, resultado, contacto, lugar, id_cliente, creadoPor) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [claveGenerada, otGenerada, empresa, fechaEnvio, descripcion, resultado, contacto, lugar, id_cliente, creadoPor]
         );
 
-        res.status(201).json({ mensaje: "Registro creado exitosamente", id: result.insertId, clave: claveGenerada });
+        res.status(201).json({
+            mensaje: "Registro creado exitosamente",
+            id: result.insertId,
+            clave: claveGenerada,
+            OT: otGenerada
+        });
     } catch (error) {
         console.error("Error al crear el registro:", error);
         res.status(500).json({ mensaje: "Error en el servidor" });
@@ -26,31 +62,63 @@ exports.crearRegistro = async (req, res) => {
 // Función para crear un nuevo cliente
 exports.crearCliente = async (req, res) => {
     try {
-        const { nombre_cliente, razon_social, rfc, correo_electronico, telefono_contacto, calle, ciudad, estado, pais, codigo_postal } = req.body;
+        const {
+            nombre_cliente,
+            empresa,
+            razon_social,
+            rfc,
+            correo_electronico,
+            telefono_contacto,
+            calle,
+            ciudad,
+            estado,
+            pais,
+            codigo_postal
+        } = req.body;
 
-        // Validar que los campos obligatorios estén presentes
+        console.log("Datos recibidos en el servidor:", req.body);  // Verificar los datos recibidos
+
         if (!nombre_cliente || !rfc) {
-            return res.status(400).json({ mensaje: "El nombre del cliente y el RFC son obligatorios." });
+            return res.status(400).json({
+                mensaje: "El nombre del cliente y el RFC son obligatorios."
+            });
         }
 
-        // Verificar si el cliente con ese nombre ya existe
         const [existingClient] = await db.query(
             `SELECT * FROM cliente WHERE nombre_cliente = ?`,
             [nombre_cliente]
         );
 
         if (existingClient.length > 0) {
-            return res.status(400).json({ mensaje: "Ya existe un cliente con este nombre. Por favor, elige otro." });
+            return res.status(400).json({
+                mensaje: "Ya existe un cliente con este nombre. Por favor, elige otro."
+            });
         }
 
-        // Insertar el nuevo cliente en la base de datos
         const [result] = await db.query(
-            `INSERT INTO cliente (nombre_cliente, razon_social, rfc, correo_electronico, telefono_contacto, calle, ciudad, estado, pais, codigo_postal) 
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [nombre_cliente, razon_social, rfc, correo_electronico, telefono_contacto, calle, ciudad, estado, pais, codigo_postal]
+            `INSERT INTO cliente 
+            (nombre_cliente, empresa, razon_social, rfc, correo_electronico, telefono_contacto, calle, ciudad, estado, pais, codigo_postal) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                nombre_cliente,
+                empresa,  // Asegúrate de que este campo se esté enviando correctamente
+                razon_social,
+                rfc,
+                correo_electronico,
+                telefono_contacto,
+                calle,
+                ciudad,
+                estado,
+                pais,
+                codigo_postal
+            ]
         );
 
-        res.status(201).json({ mensaje: "Cliente creado exitosamente.", id_cliente: result.insertId });
+        res.status(201).json({
+            mensaje: "Cliente creado exitosamente.",
+            id_cliente: result.insertId
+        });
+
     } catch (error) {
         console.error("Error al crear cliente:", error);
         res.status(500).json({ mensaje: "Error en el servidor." });
@@ -71,7 +139,7 @@ exports.listarClientes = async (req, res) => {
 exports.actualizarCliente = async (req, res) => {
     try {
         const { id_cliente } = req.params;
-        const { nombre_cliente, razon_social, rfc, correo_electronico, telefono_contacto, calle, ciudad, estado, pais, codigo_postal } = req.body;
+        const { nombre_cliente, razon_social, rfc, correo_electronico, telefono_contacto, calle, ciudad, estado, pais, codigo_postal, empresa } = req.body;
 
         // Validar que el ID y al menos un campo a actualizar estén presentes
         if (!id_cliente) {
@@ -89,9 +157,10 @@ exports.actualizarCliente = async (req, res) => {
                 ciudad = ?, 
                 estado = ?, 
                 pais = ?, 
-                codigo_postal = ? 
+                codigo_postal = ?, 
+                empresa = ? 
             WHERE id_cliente = ?`,
-            [nombre_cliente, razon_social, rfc, correo_electronico, telefono_contacto, calle, ciudad, estado, pais, codigo_postal, id_cliente]
+            [nombre_cliente, razon_social, rfc, correo_electronico, telefono_contacto, calle, ciudad, estado, pais, codigo_postal, empresa, id_cliente]
         );
 
         if (result.affectedRows === 0) {
@@ -104,6 +173,7 @@ exports.actualizarCliente = async (req, res) => {
         res.status(500).json({ mensaje: "Error en el servidor." });
     }
 };
+
 
 exports.eliminarCliente = async (req, res) => {
     try {
@@ -124,23 +194,58 @@ exports.eliminarCliente = async (req, res) => {
 
 // Función para obtener un cliente por su ID
 exports.obtenerCliente = async (req, res) => {
+    const { id_cliente } = req.params;
     try {
-        const { id_cliente } = req.params;
+        const [cliente] = await db.query(`
+            SELECT id_cliente, nombre_cliente, empresa 
+            FROM cliente 
+            WHERE id_cliente = ?
+        `, [id_cliente]);
 
-        // Consultar en la base de datos
-        const [rows] = await db.query("SELECT * FROM cliente WHERE id_cliente = ?", [id_cliente]);
-
-        // Verificar si existe el cliente
-        if (rows.length === 0) {
-            return res.status(404).json({ mensaje: "Cliente no encontrado." });
+        if (cliente.length === 0) {
+            return res.status(404).json({ mensaje: "Cliente no encontrado" });
         }
 
-        res.status(200).json(rows[0]); // Devolver el primer resultado (debe ser único)
+        res.json(cliente[0]);
     } catch (error) {
         console.error("Error al obtener cliente:", error);
-        res.status(500).json({ mensaje: "Error en el servidor." });
+        res.status(500).json({ mensaje: "Error en el servidor" });
     }
 };
+
+// Función para obtener todos los datos de un cliente por su ID
+exports.obtenerTodosLosDatosCliente = async (req, res) => {
+    const { id_cliente } = req.params;
+    try {
+        const [resultado] = await db.query(`
+            SELECT 
+                id_cliente,
+                nombre_cliente,
+                empresa,
+                razon_social,
+                rfc,
+                correo_electronico,
+                telefono_contacto,
+                calle,
+                ciudad,
+                estado,
+                pais,
+                codigo_postal
+            FROM cliente 
+            WHERE id_cliente = ?
+        `, [id_cliente]);
+
+        if (resultado.length === 0) {
+            return res.status(404).json({ mensaje: "Cliente no encontrado" });
+        }
+
+        res.json(resultado[0]);
+    } catch (error) {
+        console.error("Error al obtener todos los datos del cliente:", error);
+        res.status(500).json({ mensaje: "Error en el servidor" });
+    }
+};
+
 
 exports.obtenerClientes = async (req, res) => {
     try {

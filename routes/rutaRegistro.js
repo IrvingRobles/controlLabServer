@@ -18,6 +18,8 @@ router.post('/crearCliente', registroController.crearCliente);
 router.get('/obtenerClientes', registroController.obtenerClientes);
 router.get('/listaClientes', registroController.listarClientes);
 router.get("/obtenerCliente/:id_cliente", registroController.obtenerCliente);
+router.get('/clienteDetalles/:id_cliente', registroController.obtenerTodosLosDatosCliente);
+
 
 router.put("/actualizarCliente/:id_cliente", registroController.actualizarCliente);
 router.delete("/eliminarCliente/:id_cliente", registroController.eliminarCliente);
