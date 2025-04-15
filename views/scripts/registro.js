@@ -1,86 +1,99 @@
-// Función para generar la clave automáticamente con un folio continuo
 function generarClave(idCliente, fecha) {
     if (!idCliente || !fecha) return "";
 
-    // Obtener el último folio de localStorage (o iniciar en 1000 si no existe)
     let folio = parseInt(localStorage.getItem("ultimoFolio")) || 1000;
-
-    // Incrementar el folio
     folio++;
-
-    // Guardar el nuevo folio en localStorage para la siguiente vez
     localStorage.setItem("ultimoFolio", folio.toString());
 
-    // Retornar la clave generada con el folio continuo y el id_cliente
     return `CL-${idCliente}-${folio}-${fecha}`;
 }
 
-// Función para convertir la fecha de YYYY-MM-DD a DDMMYYYY solo para la clave
 function formatearFechaParaClave(fecha) {
     const partes = fecha.split("-");
     if (partes.length !== 3) return fecha;
-    return `${partes[2]}${partes[1]}${partes[0]}`; // Convertir YYYY-MM-DD a DDMMYYYY
+    return `${partes[2]}${partes[1]}${partes[0]}`; // DDMMYYYY
 }
 
-// Capturar la fecha actual en formato YYYY-MM-DD para MySQL
 let fechaISO;
-document.addEventListener("DOMContentLoaded", async function () {
+document.addEventListener("DOMContentLoaded", async () => {
     const hoy = new Date();
-    fechaISO = hoy.toISOString().split("T")[0]; // YYYY-MM-DD
+    fechaISO = hoy.toISOString().split("T")[0];
     document.getElementById("fechaEnvio").value = fechaISO;
-
-    // Cargar clientes en el select
     await cargarClientes();
 });
 
-// Función para obtener clientes desde el backend y llenar el select
+function mostrarCargando(mostrar) {
+    const cargandoElemento = document.getElementById("cargando");
+    if (cargandoElemento) {
+        cargandoElemento.style.display = mostrar ? "block" : "none";
+    }
+}
+
 async function cargarClientes() {
+    mostrarCargando(true);
     try {
-        const response = await fetch("/api/registro/obtenerClientes"); // Ajusta la ruta según tu API
+        const response = await fetch("/api/registro/obtenerClientes");
         const clientes = await response.json();
-        
+
         const select = document.getElementById("clienteSelect");
-        select.innerHTML = '<option value="">Seleccione un cliente</option>'; // Opción por defecto
+        select.innerHTML = '<option value="">Seleccione un cliente</option>';
 
         clientes.forEach(cliente => {
             const option = document.createElement("option");
-            option.value = cliente.id_cliente; // Usar id_cliente
+            option.value = cliente.id_cliente;
             option.textContent = cliente.nombre_cliente;
             select.appendChild(option);
         });
     } catch (error) {
         console.error("Error al cargar clientes:", error);
         alert("No se pudieron cargar los clientes.");
+    } finally {
+        mostrarCargando(false);
     }
 }
 
-// Evento para manejar el envío del formulario
+document.getElementById("clienteSelect").addEventListener("change", async function () {
+    const clienteId = this.value;
+    const empresaInput = document.getElementById("empresa");
+
+    if (!clienteId) {
+        empresaInput.value = "";
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/registro/obtenerCliente/${clienteId}`);
+        const cliente = await response.json();
+        empresaInput.value = cliente && cliente.empresa ? cliente.empresa : '';
+    } catch (error) {
+        console.error("Error al obtener datos del cliente:", error);
+        empresaInput.value = "";
+    }
+});
+
+window.addEventListener("load", cargarClientes);
+
 document.getElementById("crearRegistroForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
     const getValue = (id) => document.getElementById(id)?.value.trim().toUpperCase() || "";
 
-    let idCliente = document.getElementById("clienteSelect").value; // Obtener id_cliente del select
-    let fechaEnvio = document.getElementById("fechaEnvio").value;
-    let empresa = getValue("empresa");
-    let descripcion = getValue("descripcion");
-    let contacto = getValue("contacto");
-    let lugar = getValue("lugar");
+    const idCliente = document.getElementById("clienteSelect").value;
+    const fechaEnvio = document.getElementById("fechaEnvio").value;
+    const empresa = getValue("empresa");
+    const descripcion = getValue("descripcion");
+    const contacto = getValue("contacto");
+    const lugar = getValue("lugar");
 
-    // Validar los campos obligatorios
     if (!idCliente || !fechaEnvio || !empresa) {
         alert("Cliente, empresa y fecha de envío son obligatorios.");
         return;
     }
 
-    // Generar la clave con id_cliente en lugar de iniciales
     const claveGenerada = generarClave(idCliente, formatearFechaParaClave(fechaEnvio));
-
-    // Obtener el usuario desde localStorage
     const usuario = JSON.parse(localStorage.getItem("user"));
-    const creadoPor = usuario ? usuario.username.toUpperCase() : "DESCONOCIDO";
+    const creadoPor = usuario?.username?.toUpperCase() || "DESCONOCIDO";
 
-    // Crear objeto con los datos del formulario
     const data = {
         clave: claveGenerada,
         empresa,
@@ -88,7 +101,7 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
         descripcion,
         contacto,
         lugar,
-        id_cliente: idCliente, // Enviar el ID del cliente en lugar del nombre
+        id_cliente: idCliente,
         creadoPor
     };
 
@@ -99,17 +112,24 @@ document.getElementById("crearRegistroForm").addEventListener("submit", async fu
             body: JSON.stringify(data)
         });
 
+        const result = await response.json();
+
         if (!response.ok) {
-            const error = await response.json();
-            alert(`Error: ${error.mensaje}`);
+            alert(`Error: ${result.mensaje}`);
         } else {
-            const result = await response.json();
-            alert(result.mensaje);
+            alert(`✅ Registro creado con éxito.\n\n🔑 Clave: ${result.clave}\n📄 OT: ${result.OT}`);
+
+            // Mostrar clave y OT debajo del formulario si deseas
+            const infoDiv = document.getElementById("infoClaveOt");
+            if (infoDiv) {
+                infoDiv.innerHTML = `<strong>Clave:</strong> ${result.clave}<br><strong>OT:</strong> ${result.OT}`;
+            }
+
             document.getElementById("crearRegistroForm").reset();
             document.getElementById("fechaEnvio").value = fechaISO;
         }
     } catch (error) {
         alert("Error de red o del servidor.");
-        console.error(error);
+        console.error("Error:", error);
     }
 });

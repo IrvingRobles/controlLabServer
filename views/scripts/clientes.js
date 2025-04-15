@@ -1,130 +1,146 @@
 document.addEventListener("DOMContentLoaded", function () {
-    obtenerClientes(); // Cargar clientes al cargar la página
-});
+    obtenerClientes();
 
-document.getElementById("crearClienteForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    // Función para obtener valores en mayúsculas
-    const getValue = (id) => document.getElementById(id)?.value.trim().toUpperCase() || "";
-
-    const clienteData = {
-        nombre_cliente: getValue("nombre_cliente"),
-        razon_social: getValue("razon_social"),
-        rfc: getValue("rfc"),
-        correo_electronico: getValue("correo_electronico"),
-        telefono_contacto: getValue("telefono_contacto"),
-        calle: getValue("calle"),
-        ciudad: getValue("ciudad"),
-        estado: getValue("estado"),
-        pais: getValue("pais"),
-        codigo_postal: getValue("codigo_postal"),
-    };
-
-    // Validar campos obligatorios
-    if (!clienteData.nombre_cliente || !clienteData.rfc) {
-        alert("El nombre del cliente y el RFC son obligatorios.");
-        return;
-    }
-
-    try {
-        const response = await fetch("/api/registro/crearCliente", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(clienteData),
-        });
-
-        const result = await response.json();
-
-        // Manejo de la respuesta dependiendo de la existencia del cliente
-        if (response.ok) {
-            alert(result.mensaje || "Cliente creado exitosamente.");
-            document.getElementById("crearClienteForm").reset();
-            obtenerClientes(); // Actualizar la lista de clientes
-        } else {
-            if (result.mensaje.includes("Ya existe un cliente con este nombre")) {
-                alert("¡Error! Ya existe un cliente con este nombre. Por favor, elige otro.");
-            } else {
-                alert(result.mensaje || "Hubo un error al crear el cliente.");
+    const crearForm = document.getElementById("crearClienteForm");
+    if (crearForm) {
+        crearForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+        
+            const getValue = (id) => document.getElementById(id)?.value.trim().toUpperCase() || "";
+        
+            const clienteData = {
+                nombre_cliente: getValue("nombre_cliente"),
+                empresa: getValue("empresa_Cliente"),
+                razon_social: getValue("razon_socialCliente"),
+                rfc: getValue("rfc"),
+                correo_electronico: getValue("correo_electronico"),
+                telefono_contacto: getValue("telefono_contacto"),
+                calle: getValue("calle"),
+                ciudad: getValue("ciudad"),
+                estado: getValue("estado"),
+                pais: getValue("pais"),
+                codigo_postal: getValue("codigo_postal"),
+            };
+        
+            if (!clienteData.nombre_cliente || !clienteData.rfc) {
+                return Swal.fire("Campos obligatorios", "El nombre del cliente y el RFC son obligatorios.", "warning");
             }
-        }
-    } catch (error) {
-        console.error("Error al crear cliente:", error);
-        alert("Error en el servidor.");
+        
+            try {
+                const response = await fetch("/api/registro/crearCliente", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(clienteData),
+                });
+        
+                const result = await response.json();
+        
+                if (response.ok) {
+                    Swal.fire("Éxito", result.mensaje || "Cliente creado exitosamente.", "success");
+        
+                    // ✅ Cierra el modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById("modalNuevoCliente"));
+                    modal.hide();
+        
+                    crearForm.reset();
+                    obtenerClientes();
+                } else {
+                    Swal.fire("Error", result.mensaje || "Hubo un error al crear el cliente.", "error");
+                }
+            } catch (error) {
+                console.error("Error al crear cliente:", error);
+                Swal.fire("Error del servidor", "No se pudo crear el cliente.", "error");
+            }
+        });
+        
     }
 });
 
-// Función para obtener los datos de los clientes
 async function obtenerClientes() {
     try {
         const response = await fetch("/api/registro/listaClientes");
         const clientes = await response.json();
 
-        const clientesContainer = document.getElementById("clientesContainer");
-        clientesContainer.innerHTML = ""; // Limpiar el contenedor
+        const container = document.getElementById("clientesContainer");
+        if (!container) return;
+
+        container.innerHTML = "";
 
         clientes.forEach(cliente => {
-            // Crear tarjeta de cliente
             const tarjeta = document.createElement("div");
-            tarjeta.classList.add("col-md-4", "mb-4"); // Columna Bootstrap
+            tarjeta.classList.add("col");
+
             tarjeta.innerHTML = `
-                <div class="card">
-                    <div class="card-header">
-                        <h5>${cliente.nombre_cliente}</h5>
-                    </div>
-                    <div class="card-body">
-                        <p><strong>RFC:</strong> ${cliente.rfc}</p>
-                        <p><strong>Correo:</strong> ${cliente.correo_electronico || "N/A"}</p>
-                        <p><strong>Teléfono:</strong> ${cliente.telefono_contacto || "N/A"}</p>
-                        <p><strong>Dirección:</strong> ${cliente.calle}, ${cliente.ciudad}, ${cliente.estado}, ${cliente.pais}, ${cliente.codigo_postal}</p>
-                    </div>
-                    <div class="card-footer text-end">
-                        <button class="btn btn-warning btn-sm" onclick="editarCliente(${cliente.id_cliente})">Editar</button>
-                        <button class="btn btn-danger btn-sm" onclick="eliminarCliente(${cliente.id_cliente})">Eliminar</button>
+                <div class="card h-100 shadow-sm rounded-3xl border-0">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title d-flex align-items-center gap-2 text-primary">
+                            <i data-lucide="user-round"></i> ${cliente.nombre_cliente}
+                        </h5>
+                        <p class="card-text text-muted"><strong>Empresa:</strong> ${cliente.empresa || "N/A"}</p>
+                        <p class="card-text text-muted"><strong>RFC:</strong> ${cliente.rfc}</p>
+                        <p class="card-text text-muted"><strong>Correo:</strong> ${cliente.correo_electronico || "N/A"}</p>
+                        <p class="card-text text-muted"><strong>Teléfono:</strong> ${cliente.telefono_contacto || "N/A"}</p>
+                        <p class="card-text text-muted"><strong>Dirección:</strong> ${cliente.calle}, ${cliente.ciudad}, ${cliente.estado}, ${cliente.pais}, ${cliente.codigo_postal}</p>
+
+                        <div class="d-flex justify-content-end gap-2 mt-3">
+                            <button onclick="editarCliente(${cliente.id_cliente})" class="btn btn-warning btn-sm d-flex align-items-center gap-1">
+                                <i data-lucide="pencil-line" class="w-4 h-4"></i> Editar
+                            </button>
+                            <button onclick="eliminarCliente(${cliente.id_cliente})" class="btn btn-danger btn-sm d-flex align-items-center gap-1">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i> Eliminar
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
-            clientesContainer.appendChild(tarjeta);
+
+            container.appendChild(tarjeta);
         });
+
+        lucide.createIcons(); // iconos dinámicos
     } catch (error) {
         console.error("Error al obtener clientes:", error);
-        alert("No se pudo obtener la lista de clientes.");
+        Swal.fire("Error", "No se pudo obtener la lista de clientes.", "error");
     }
 }
 
-// Función para editar un cliente
-// Función para abrir el modal con los datos actuales del cliente
 function editarCliente(id_cliente) {
-    fetch(`/api/registro/obtenerCliente/${id_cliente}`)
-        .then(response => response.json())
+    fetch(`/api/registro/clienteDetalles/${id_cliente}`)
+        .then(res => res.json())
         .then(cliente => {
-            // Llenar los campos del modal con los datos del cliente
-            document.getElementById("edit_id_cliente").value = id_cliente;
-            document.getElementById("edit_nombre_cliente").value = cliente.nombre_cliente;
-            document.getElementById("edit_rfc").value = cliente.rfc;
-            document.getElementById("edit_correo").value = cliente.correo_electronico || "";
-            document.getElementById("edit_telefono").value = cliente.telefono_contacto || "";
-            document.getElementById("edit_calle").value = cliente.calle || "";
-            document.getElementById("edit_ciudad").value = cliente.ciudad || "";
-            document.getElementById("edit_estado").value = cliente.estado || "";
-            document.getElementById("edit_pais").value = cliente.pais || "";
-            document.getElementById("edit_codigo_postal").value = cliente.codigo_postal || "";
+            const set = (id, val) => document.getElementById(id).value = val || "";
 
-            // Abrir el modal
-            let modal = new bootstrap.Modal(document.getElementById("editarClienteModal"));
+            set("edit_id_cliente", cliente.id_cliente);
+            set("edit_nombre_cliente", cliente.nombre_cliente);
+            set("edit_empresa", cliente.empresa);
+            set("edit_razon_social", cliente.razon_social);
+            set("edit_rfc", cliente.rfc);
+            set("edit_correo", cliente.correo_electronico);
+            set("edit_telefono", cliente.telefono_contacto);
+            set("edit_calle", cliente.calle);
+            set("edit_ciudad", cliente.ciudad);
+            set("edit_estado", cliente.estado);
+            set("edit_pais", cliente.pais);
+            set("edit_codigo_postal", cliente.codigo_postal);
+
+            const modal = new bootstrap.Modal(document.getElementById("editarClienteModal"));
             modal.show();
         })
         .catch(error => {
             console.error("Error al obtener datos del cliente:", error);
-            alert("No se pudieron cargar los datos.");
+            Swal.fire("Error", "No se pudieron cargar los datos del cliente.", "error");
         });
 }
+
 async function guardarCambiosCliente() {
     const id_cliente = document.getElementById("edit_id_cliente").value;
-    
+
+    const getValue = (id) => document.getElementById(id)?.value.trim().toUpperCase() || "";
+
     const clienteData = {
-        nombre_cliente: document.getElementById("edit_nombre_cliente").value.trim().toUpperCase(),
-        rfc: document.getElementById("edit_rfc").value.trim().toUpperCase(),
+        nombre_cliente: getValue("edit_nombre_cliente"),
+        empresa: getValue("edit_empresa"),
+        rfc: getValue("edit_rfc"),
         correo_electronico: document.getElementById("edit_correo").value.trim(),
         telefono_contacto: document.getElementById("edit_telefono").value.trim(),
         calle: document.getElementById("edit_calle").value.trim(),
@@ -134,10 +150,8 @@ async function guardarCambiosCliente() {
         codigo_postal: document.getElementById("edit_codigo_postal").value.trim(),
     };
 
-    // Validar que el nombre y el RFC no estén vacíos
     if (!clienteData.nombre_cliente || !clienteData.rfc) {
-        alert("El nombre y el RFC son obligatorios.");
-        return;
+        return Swal.fire("Campos obligatorios", "El nombre y el RFC son obligatorios.", "warning");
     }
 
     try {
@@ -148,37 +162,42 @@ async function guardarCambiosCliente() {
         });
 
         const result = await response.json();
-        alert(result.mensaje);
+        Swal.fire("Resultado", result.mensaje, response.ok ? "success" : "error");
 
         if (response.ok) {
-            obtenerClientes(); // Refrescar la lista
-            document.getElementById("editarClienteModal").querySelector(".btn-close").click(); // Cerrar modal
+            obtenerClientes();
+            document.querySelector("#editarClienteModal .btn-close").click();
         }
     } catch (error) {
         console.error("Error al actualizar cliente:", error);
-        alert("No se pudo actualizar el cliente.");
+        Swal.fire("Error", "No se pudo actualizar el cliente.", "error");
     }
 }
 
-
-// Función para eliminar un cliente
 async function eliminarCliente(id_cliente) {
-    const confirmacion = confirm("¿Está seguro de que desea eliminar este cliente?");
-    if (!confirmacion) return;
+    const { isConfirmed } = await Swal.fire({
+        title: "¿Estás seguro?",
+        text: "No podrás revertir esto",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar"
+    });
+
+    if (!isConfirmed) return;
 
     try {
         const response = await fetch(`/api/registro/eliminarCliente/${id_cliente}`, {
             method: "DELETE",
         });
 
-        const textResponse = await response.text(); // Obtiene la respuesta en texto
-        console.log("Respuesta del servidor:", textResponse); // Muestra la respuesta en consola
-
-        const result = JSON.parse(textResponse); // Intenta convertirla en JSON
-        alert(result.mensaje);
-        obtenerClientes(); // Refrescar la lista de clientes
+        const result = await response.json();
+        Swal.fire("Eliminado", result.mensaje, "success");
+        obtenerClientes();
     } catch (error) {
         console.error("Error al eliminar cliente:", error);
-        alert("No se pudo eliminar el cliente.");
+        Swal.fire("Error", "No se pudo eliminar el cliente.", "error");
     }
 }

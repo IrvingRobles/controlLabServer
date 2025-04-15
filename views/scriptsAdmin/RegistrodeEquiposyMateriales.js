@@ -313,7 +313,7 @@ async function actualizarRegistro() {
             observaciones: document.getElementById("observaciones").value
         };
 
-        console.log("Enviando datos actualizados:", datosActualizados); // Depuración
+        console.log("Enviando datos actualizados:", datosActualizados);
 
         // Usamos el 'idReal' para actualizar el registro
         const response = await fetch(`/api/registro/actualizarMaterial/${idReal}`, {

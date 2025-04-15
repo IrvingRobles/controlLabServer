@@ -8,261 +8,259 @@
     <link rel="stylesheet" href="/styles/styles.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
+     <!-- Tailwind CSS -->
+      
+     <!-- Lucide Icons -->
+     <script src="https://unpkg.com/lucide@latest"></script>
+     <!-- SweetAlert2 -->
+     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const user = localStorage.getItem('user');
-            if (!user) {
-                window.location.href = "login.html";
-            } else {
-                cargarMenu();
-                actualizarPerfil();
-            }
-        });
-
-        function cargarMenu() {
-            const menuData = [
-                {
-                    name: "Solicitud",
-                    submodules: [
-                        { name: "Crear", link: "adminRegistro.html" },
-                        { name: "Buscar", link: "adminBuscar.html" },
-                        { name: "Registro de cotizaciones", link: "adminBusquedaPdf.html" },
-                        { name: "Registro de Equipos Ajenos", link: "adminIngresoEgresoDeEquiposAjenos.html" }
-                    ]
-                },
-                {
-                    name: "Personal",
-                    submodules: [
-                        { name: "Lista de empleados", link: "adminPersonal.html" },
-                        { name: "Registrar nuevo empleado", link: "adminRegistroPersonal.html" },
-                        { name: "Registrar nuevo cliente", link: "adminRegistrarClientes.html" }
-                    ]
-                },
-                {
-                    name: "Almacen",
-                    submodules: [
-                        { name: "Almacen general", link: "vistaAlmacen.html" }
-                    ]
-                }
-            ];
-
-            const menuList = document.getElementById('menu-list');
-            if (!menuList) return;
-
-            menuData.forEach(module => {
-                const listItem = document.createElement('li');
-                listItem.classList.add('nav-item', 'dropdown');
-                listItem.innerHTML = `
-                    <a class="nav-link dropdown-toggle" href="#" id="${module.name}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        ${module.name}
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="${module.name}">
-                        ${module.submodules.map(submodule => ` 
-                            <li><a class="dropdown-item" href="${submodule.link}">${submodule.name}</a></li>
-                        `).join('')}
-                    </ul>
-                `;
-                menuList.appendChild(listItem);
-            });
-        }
-
-        function actualizarPerfil() {
-            const perfilNombre = document.getElementById('perfil-nombre');
-            if (!perfilNombre) return;
-
-            const usuario = JSON.parse(localStorage.getItem('user'));
-            perfilNombre.textContent = usuario?.username || 'Usuario';
-        }
-
-        function cerrarSesion() {
-            localStorage.removeItem('user');
+          const user = localStorage.getItem('user');
+          if (!user) {
             window.location.href = "login.html";
+          } else {
+            cargarMenu();
+            actualizarPerfil();
+          }
+        });
+      
+        function cargarMenu() {
+          const menuData = [
+            {
+              name: "Solicitud",
+              submodules: [
+                { name: "Crear", link: "adminRegistro.html" },
+                { name: "Buscar", link: "adminBuscar.html" },
+                { name: "Registro de cotizaciones", link: "adminBusquedaPdf.html" },
+                { name: "Registro de Equipos Ajenos", link: "adminIngresoEgresoDeEquiposAjenos.html" }
+              ]
+            },
+            {
+              name: "Personal",
+              submodules: [
+                { name: "Lista de empleados", link: "adminPersonal.html" },
+                { name: "Registrar nuevo empleado", link: "adminRegistroPersonal.html" },
+                { name: "Registrar nuevo cliente", link: "adminRegistrarClientes.html" }
+              ]
+            },
+            {
+              name: "Almacen",
+              submodules: [
+                { name: "Almacen general", link: "vistaAlmacen.html" }
+              ]
+            }
+          ];
+      
+          const menuList = document.getElementById('menu-list');
+          if (!menuList) return;
+      
+          menuData.forEach(module => {
+            const listItem = document.createElement('li');
+            listItem.classList.add('nav-item', 'dropdown');
+            listItem.innerHTML = `
+              <a class="nav-link dropdown-toggle" href="#" id="${module.name}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                ${module.name}
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="${module.name}">
+                ${module.submodules.map(sub => `<li><a class="dropdown-item" href="${sub.link}">${sub.name}</a></li>`).join('')}
+              </ul>
+            `;
+            menuList.appendChild(listItem);
+          });
         }
-    </script>
+      
+        function actualizarPerfil() {
+          const perfilNombre = document.getElementById('perfil-nombre');
+          const usuario = JSON.parse(localStorage.getItem('user'));
+          perfilNombre.textContent = usuario?.username || 'Usuario';
+        }
+      
+        function cerrarSesion() {
+          localStorage.removeItem('user');
+          window.location.href = "login.html";
+        }
+      </script>
+      
 </head>
-
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
         <div class="container-fluid">
-            <a class="navbar-brand" href="inicioAdmin.html">
-                <i class="bi bi-house-door"></i> Menú Principal
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+          <!-- Logo / Inicio -->
+          <a class="navbar-brand d-flex align-items-center gap-2" href="inicioAdmin.html">
+            <i class="bi bi-house-door-fill"></i> Menú Principal
+          </a>
+      
+          <!-- Botón para menú móvil -->
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+      
+          <!-- Menú -->
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul id="menu-list" class="navbar-nav me-auto"></ul>
+      
+            <!-- Perfil y cerrar sesión -->
+            <div class="d-flex align-items-center text-white">
+              <i class="bi bi-person-circle me-2"></i>
+              <span id="perfil-nombre" class="me-3">Cargando...</span>
+              <button onclick="cerrarSesion()" class="btn btn-danger btn-sm">
+                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+      
+      <div class="max-w-7xl mx-auto bg-white shadow-2xl rounded-3xl p-10 mt-12 border border-gray-100">
+        <h1 class="text-4xl font-extrabold mb-10 text-center text-blue-700 flex items-center justify-center gap-3">
+          <i data-lucide="users" class="w-7 h-7"></i> Gestión de Clientes
+        </h1>
+      
+        <div class="d-flex justify-content-end mb-4">
+            <button type="button" class="btn btn-primary d-flex align-items-center gap-2"
+              onclick="bootstrap.Modal.getOrCreateInstance(document.getElementById('modalNuevoCliente')).show()">
+              <i data-lucide="plus-circle" class="w-5 h-5"></i> Nuevo Cliente
             </button>
-
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul id="menu-list" class="navbar-nav"></ul>
-            </div>
-
-            <div class="d-flex align-items-center ms-auto">
-                <i class="bi bi-person-circle text-light me-2"></i>
-                <span id="perfil-nombre" class="text-light me-3">Cargando...</span>
-                <button onclick="cerrarSesion()" class="btn btn-danger btn-sm">
-                    <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
-                </button>
-            </div>
+          </div>
+          
+      
+        <div id="clientesContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Tarjetas se insertan dinámicamente -->
         </div>
-    </nav>
-
-    <div class="container mt-4">
-        <h2>Gestión de Clientes</h2>
-
-        <!-- Formulario para crear cliente -->
-        <div class="accordion" id="accordionClientes">
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#collapseCrearCliente">
-                        Crear Cliente
-                    </button>
-                </h2>
-                <div id="collapseCrearCliente" class="accordion-collapse collapse show"
-                    data-bs-parent="#accordionClientes">
-                    <div class="accordion-body">
-                        <form id="crearClienteForm">
-                            <div class="mb-3">
-                                <label for="nombre_cliente" class="form-label">Nombre del Cliente:</label>
-                                <input type="text" class="form-control" id="nombre_cliente" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="razon_social" class="form-label">Razón Social:</label>
-                                <input type="text" class="form-control" id="razon_social">
-                            </div>
-                            <div class="mb-3">
-                                <label for="rfc" class="form-label">RFC:</label>
-                                <input type="text" class="form-control" id="rfc" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="correo_electronico" class="form-label">Correo Electrónico:</label>
-                                <input type="email" class="form-control" id="correo_electronico">
-                            </div>
-                            <div class="mb-3">
-                                <label for="telefono_contacto" class="form-label">Teléfono de Contacto:</label>
-                                <input type="text" class="form-control" id="telefono_contacto">
-                            </div>
-
-                            <!-- Campos de dirección -->
-                            <div class="mb-3">
-                                <label for="calle" class="form-label">Calle:</label>
-                                <input type="text" class="form-control" id="calle">
-                            </div>
-                            <div class="mb-3">
-                                <label for="ciudad" class="form-label">Ciudad:</label>
-                                <input type="text" class="form-control" id="ciudad">
-                            </div>
-                            <div class="mb-3">
-                                <label for="estado" class="form-label">Estado:</label>
-                                <input type="text" class="form-control" id="estado">
-                            </div>
-                            <div class="mb-3">
-                                <label for="pais" class="form-label">País:</label>
-                                <input type="text" class="form-control" id="pais">
-                            </div>
-                            <div class="mb-3">
-                                <label for="codigo_postal" class="form-label">Código Postal:</label>
-                                <input type="text" class="form-control" id="codigo_postal">
-                            </div>
-
-                            <button type="submit" class="btn btn-primary">Registrar Cliente</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sección de Lista de Clientes -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#collapseListaClientes">
-                        Lista de Clientes
-                    </button>
-                </h2>
-                <div id="collapseListaClientes" class="accordion-collapse collapse" data-bs-parent="#accordionClientes">
-                    <div class="accordion-body">
-                        <div id="clientesContainer" class="row">
-                            <!-- Aquí se cargarán las tarjetas de clientes dinámicamente -->
-                        </div>
-                    </div>
-                </div>
-            </div>
+      </div>
+      
+      
+    
+      
+<!-- Modal: Nuevo Cliente -->
+<div class="modal fade" id="modalNuevoCliente" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content shadow">
+        <div class="modal-header">
+          <h5 class="modal-title">Nuevo Cliente</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
+        <form id="crearClienteForm">
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="nombre_cliente" placeholder="Nombre del cliente" required>
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="empresa_Cliente" placeholder="Empresa">
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="razon_socialCliente" placeholder="Razón Social">
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="rfc" placeholder="RFC" required>
+              </div>
+              <div class="col-md-6">
+                <input type="email" class="form-control" id="correo_electronico" placeholder="Correo electrónico">
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="telefono_contacto" placeholder="Teléfono">
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="calle" placeholder="Calle">
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="ciudad" placeholder="Ciudad">
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="estado" placeholder="Estado">
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="pais" placeholder="País">
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="codigo_postal" placeholder="Código Postal">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success d-flex align-items-center gap-2">
+              <i data-lucide="save"></i> Guardar Cliente
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-
-    <!-- Modal para Editar Cliente -->
-    <div class="modal fade" id="editarClienteModal" tabindex="-1" aria-labelledby="editarClienteLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editarClienteLabel">Editar Cliente</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="edit_id_cliente">
-
-                    <div class="mb-3">
-                        <label for="edit_nombre_cliente" class="form-label">Nombre del Cliente</label>
-                        <input type="text" class="form-control" id="edit_nombre_cliente" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="edit_rfc" class="form-label">RFC</label>
-                        <input type="text" class="form-control" id="edit_rfc" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="edit_correo" class="form-label">Correo Electrónico</label>
-                        <input type="email" class="form-control" id="edit_correo">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="edit_telefono" class="form-label">Teléfono</label>
-                        <input type="text" class="form-control" id="edit_telefono">
-                    </div>
-
-                    <h5>Dirección</h5>
-
-                    <div class="mb-3">
-                        <label for="edit_calle" class="form-label">Calle</label>
-                        <input type="text" class="form-control" id="edit_calle">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="edit_ciudad" class="form-label">Ciudad</label>
-                        <input type="text" class="form-control" id="edit_ciudad">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="edit_estado" class="form-label">Estado</label>
-                        <input type="text" class="form-control" id="edit_estado">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="edit_pais" class="form-label">País</label>
-                        <input type="text" class="form-control" id="edit_pais">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="edit_codigo_postal" class="form-label">Código Postal</label>
-                        <input type="text" class="form-control" id="edit_codigo_postal">
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="guardarCambiosCliente()">Guardar
-                        Cambios</button>
-                </div>
-            </div>
+  </div>
+  
+      
+<!-- Modal: Editar Cliente -->
+<div class="modal fade" id="editarClienteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content shadow">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Cliente</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
+        <form id="editarClienteForm">
+          <input type="hidden" id="edit_id_cliente">
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="edit_nombre_cliente" placeholder="Nombre del cliente" required>
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="edit_empresa" placeholder="Empresa">
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="edit_razon_social" placeholder="Razón Social">
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="edit_rfc" placeholder="RFC" required>
+              </div>
+              <div class="col-md-6">
+                <input type="email" class="form-control" id="edit_correo" placeholder="Correo electrónico">
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="edit_telefono" placeholder="Teléfono">
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="edit_calle" placeholder="Calle">
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="edit_ciudad" placeholder="Ciudad">
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="edit_estado" placeholder="Estado">
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="edit_pais" placeholder="País">
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="edit_codigo_postal" placeholder="Código Postal">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary d-flex align-items-center gap-2"
+              onclick="guardarCambiosCliente()">
+              <i data-lucide="save"></i> Guardar Cambios
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
+  
+      
+      <script>
+        lucide.createIcons();
+      </script>
+      
+      
 
+    
     <script src="/scripts/clientes.js"></script>
+    
+    
 </body>
 
 </html>

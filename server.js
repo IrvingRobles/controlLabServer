@@ -107,24 +107,36 @@ app.get('/listar-pdfs', (req, res) => {
         res.status(200).json(files); // Devolver la lista de archivos como JSON
     });
 });
-
-// Ruta para eliminar un PDF de cotización
-app.delete('/PDFCotizacion/:fileName', (req, res) => {
-    const fileName = req.params.fileName;
+// Eliminar PDF de Cotización
+app.delete('/eliminar-pdf', (req, res) => {
+    const fileName = req.body.fileName;
     const filePath = path.join(__dirname, 'views', 'PDFCotizacion', fileName);
-  
-    // Validar si el archivo existe
+
     if (!fs.existsSync(filePath)) {
         return res.status(404).json({ message: 'Archivo de cotización no encontrado.' });
     }
-  
+
     fs.unlink(filePath, (err) => {
-        if (err) {
-            return res.status(500).json({ message: 'Error al eliminar el archivo de cotización.' });
-        }
+        if (err) return res.status(500).json({ message: 'Error al eliminar archivo.' });
         res.status(200).json({ message: 'Archivo de cotización eliminado correctamente.' });
     });
 });
+
+// Eliminar PDF de OT
+app.delete('/eliminar-pdf-ot', (req, res) => {
+    const fileName = req.body.fileName;
+    const filePath = path.join(__dirname, 'views', 'PDFOt', fileName);
+
+    if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: 'Archivo de OT no encontrado.' });
+    }
+
+    fs.unlink(filePath, (err) => {
+        if (err) return res.status(500).json({ message: 'Error al eliminar archivo.' });
+        res.status(200).json({ message: 'Archivo de OT eliminado correctamente.' });
+    });
+});
+
 
 // Configuración de multer para guardar PDFs en la carpeta PDFOt
 const storageOt = multer.diskStorage({
@@ -162,23 +174,7 @@ app.get('/listar-pdfs-ot', (req, res) => {
     });
 });
 
-// Ruta para eliminar un PDF de OT
-app.delete('/PDFOt/:fileName', (req, res) => {
-    const fileName = req.params.fileName;
-    const filePath = path.join(__dirname, 'views', 'PDFOt', fileName);
-  
-    // Validar si el archivo existe
-    if (!fs.existsSync(filePath)) {
-        return res.status(404).json({ message: 'Archivo de OT no encontrado.' });
-    }
-  
-    fs.unlink(filePath, (err) => {
-        if (err) {
-            return res.status(500).json({ message: 'Error al eliminar el archivo de OT.' });
-        }
-        res.status(200).json({ message: 'Archivo de OT eliminado correctamente.' });
-    });
-});
+
 
 app.use('/PDFCotizacion', express.static(path.join(__dirname, 'views', 'PDFCotizacion')));
 app.use('/PDFOt', express.static(path.join(__dirname, 'views', 'PDFOt')));
