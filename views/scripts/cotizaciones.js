@@ -238,7 +238,7 @@ async function generarPDF() {
             doc.text("REG. FED. CTES.: CTM-050602-332", 105, 20, { align: "center" });
             doc.text("Servicios de mantenimiento, calibración y evaluación de equipos analíticos", 105, 25, { align: "center" });
             doc.text("Calle 18 de Marzo No. 85, Col. Obrera, C.P. 96740, Minatitlán, Ver., México.", 105, 30, { align: "center" });
-            doc.text("Tel. / Fax: (01) 923 223 0870    E-mail: caltecmex@gmail.com", 105, 35, { align: "center" });
+            doc.text("Tel. / Fax:  923 223 0870    E-mail: caltecmex@gmail.com", 105, 35, { align: "center" });
 
             // Línea horizontal
             doc.line(marginLeft, 40, 200, 40);
@@ -280,7 +280,12 @@ async function generarPDF() {
             doc.text(revision, 180, 38, { align: "right" });
 
             // Generar tabla de materiales
-            generarTablaMateriales(doc, marginLeft);
+            const yFinal = generarTablaMateriales(doc, marginLeft);
+
+            // Si el espacio restante es menor a 100, hacer salto de página
+            if (yFinal + 20 > doc.internal.pageSize.height) {
+                doc.addPage();
+            }
 
             // Firmas y otros datos
             const cuadroYPos = doc.internal.pageSize.height - 90;
@@ -347,7 +352,6 @@ async function subirPDFAlServidor(formData) {
         alert("Hubo un error al subir el PDF.");
     }
 }
-
 function generarTablaMateriales(doc, marginLeft) {
     const margenSuperior = 80;
     const anchoTabla = 190;
@@ -362,28 +366,27 @@ function generarTablaMateriales(doc, marginLeft) {
 
     if (filas.length === 0) {
         doc.text("No hay materiales registrados.", marginLeft, margenSuperior + 5);
-        return;
+        return y;
     }
 
-    // Definir encabezados y anchos
     const encabezados = ["PDA", "Cantidad", "Unidad", "Descripción", "Precio Unitario", "Importe Total"];
     const anchosColumnas = [20, 20, 20, 80, 25, 25];
 
-    let x = marginLeft;
+    const imprimirEncabezados = () => {
+        let x = marginLeft;
+        doc.setFillColor(0, 0, 0);
+        doc.setTextColor(255, 255, 255);
+        doc.rect(x, y, anchoTabla, altoFila, "F");
+        doc.setFontSize(9);
+        encabezados.forEach((text, index) => {
+            doc.text(text, x + anchosColumnas[index] / 2, y + altoFila - 3, { align: "center" });
+            x += anchosColumnas[index];
+        });
+        doc.setTextColor(0, 0, 0);
+        y += altoFila;
+    };
 
-    // Encabezados con fondo negro
-    doc.setFillColor(0, 0, 0);
-    doc.setTextColor(255, 255, 255);
-    doc.rect(x, y, anchoTabla, altoFila, "F");
-    doc.setFontSize(9);
-
-    encabezados.forEach((text, index) => {
-        doc.text(text, x + anchosColumnas[index] / 2, y + altoFila - 3, { align: "center" });
-        x += anchosColumnas[index];
-    });
-
-    doc.setTextColor(0, 0, 0);
-    y += altoFila;
+    imprimirEncabezados();
 
     let totalImporte = 0;
 
@@ -395,24 +398,28 @@ function generarTablaMateriales(doc, marginLeft) {
             return input && input.value.trim() !== "" ? input.value : "-";
         };
 
-        let filaDatos = [
-            getValue(0), 
-            getValue(1), 
-            getValue(2), 
-            doc.splitTextToSize(getValue(3), anchosColumnas[3] - 5), // Descripción ajustada
-            `$${parseFloat(getValue(4) || 0).toFixed(2)}`, 
-            `$${parseFloat(getValue(5) || 0).toFixed(2)}`
-        ];
+        let descripcion = getValue(3) || "-";
+        let descripcionFormateada = doc.splitTextToSize(descripcion, anchosColumnas[3] - 5);
+        let numLineasDescripcion = descripcionFormateada.length;
+        let altoDinamico = altoFila * numLineasDescripcion;
 
-        totalImporte += parseFloat(getValue(5)) || 0;
-
-        let altoDinamico = altoFila;
-
-        // Verificar si se necesita una nueva página
         if (y + altoDinamico > maxAltoPagina) {
             doc.addPage();
             y = 20;
+            imprimirEncabezados();
         }
+
+        let filaDatos = [
+            getValue(0),
+            getValue(1),
+            getValue(2),
+            descripcionFormateada,
+            `$${parseFloat(getValue(4) || 0).toFixed(2)}`,
+            `$${parseFloat(getValue(5) || 0).toFixed(2)}`
+        ];
+
+        let importe = parseFloat(getValue(5));
+        if (!isNaN(importe)) totalImporte += importe;
 
         filaDatos.forEach((dato, index) => {
             doc.rect(x, y, anchosColumnas[index], altoDinamico);
@@ -429,12 +436,14 @@ function generarTablaMateriales(doc, marginLeft) {
         y += altoDinamico;
     });
 
-    // Fila del total sin línea divisoria previa
+    // Fila del total
     y += altoFila;
     doc.setFont("helvetica", "bold");
     doc.text("TOTAL:", marginLeft + anchoTabla - anchosColumnas[5] - anchosColumnas[4] / 2, y + altoFila - 3, { align: "center" });
     doc.text(`$${totalImporte.toFixed(2)}`, marginLeft + anchoTabla - anchosColumnas[5] / 2, y + altoFila - 3, { align: "center" });
 
-    // Dibujar borde de la tabla
     doc.rect(marginLeft, margenSuperior + 5, anchoTabla, y - margenSuperior - 5);
+
+    return y + altoFila * 2; // Devolver coordenada final
 }
+
