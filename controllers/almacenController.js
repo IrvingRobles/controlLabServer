@@ -1240,3 +1240,56 @@ exports.eliminarSolicitud = async (req, res) => {
         });
     }
 };
+
+exports.getSolicitudesByUser = async (req, res) => {
+    try {
+        const userId = req.params.idSoli; // Cambiado para coincidir con tu ruta
+        
+        // Consulta corregida con WHERE
+        const query = `
+            SELECT 
+                s.*, 
+                u.username, 
+                ot.clave,
+                s.estado,
+                s.fecha,
+                s.nota,
+                s.idSoli
+            FROM solicitudalmacen s
+            LEFT JOIN users u ON s.idUsuario = u.id
+            LEFT JOIN registros ot ON s.idOt = ot.id
+            WHERE s.idUsuario = ?  
+            ORDER BY s.fecha DESC
+        `;
+        
+        const result = await db.query(query, [userId]);
+        
+        // Asegurando el formato que espera el frontend
+        const solicitudes = result.rows.map(row => ({
+            idSoli: row.idSoli || row.id,
+            usuario: {
+                id: row.idUsuario,
+                username: row.username
+            },
+            ot: {
+                id: row.idOt,
+                clave: row.clave
+            },
+            productos: row.productos || [], // Asegúrate que esto viene de la DB
+            nota: row.nota,
+            estado: row.estado,
+            fecha: row.fecha
+        }));
+
+        res.json({
+            success: true,
+            data: solicitudes
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener solicitudes'
+        });
+    }
+};

@@ -119,4 +119,7 @@ router.delete('/x/solicitudes/:idSoli', almacenController.eliminarSolicitud)
 
 router.put('/x/solicitudes/:idSoli/completar', almacenController.completarSolicitud);
 
+// Otras rutas que ya tengas...
+router.get('/solicitudes/usuario/:id', almacenController.getSolicitudesByUser);
+
 module.exports = router;
