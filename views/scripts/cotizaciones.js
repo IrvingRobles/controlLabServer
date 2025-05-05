@@ -1,6 +1,7 @@
-let datosCargados = false; // 🔥 Variable de control para evitar duplicados 
+let datosCargados = false;
+
 document.addEventListener('DOMContentLoaded', async () => {
-    if (window.datosCargados) return; // 🔥 Evita ejecución repetida
+    if (datosCargados) return;
 
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get('id');
@@ -17,53 +18,55 @@ document.addEventListener('DOMContentLoaded', async () => {
         const data = await response.json();
         console.log("🚀 Datos recibidos:", data);
 
-        const { ordenTrabajo, cotizaciones, materiales } = data;
+        const { ordenTrabajo, cotizaciones, materiales, nuevoNumeroCotizacion } = data;
 
         function formatDate(isoDate) {
-            if (!isoDate) return ''; // Si la fecha es nula, retorna vacío
+            if (!isoDate) return '';
             const date = new Date(isoDate);
             return isNaN(date) ? '' : date.toISOString().split('T')[0];
         }
 
         const setValue = (id, value) => {
             const element = document.getElementById(id);
-            if (element) element.value = value ?? ''; // Si no existe, evita errores
+            if (element) element.value = value ?? '';
         };
 
-        // 🟢 Asignación de valores a los campos del formulario
-        setValue('cliente', ordenTrabajo.nombre_cliente); // Ahora sí obtiene el nombre del cliente
+        // 🟢 Asignar datos
+        setValue('cliente', ordenTrabajo.nombre_cliente);
         setValue('referencia', cotizaciones.length > 0 ? cotizaciones[0].referencia : '');
         setValue('direccion', ordenTrabajo.lugar);
-        setValue('cotizacionNo', cotizaciones.length > 0 ? cotizaciones[0].num_cotizacion : '');
+        setValue('cotizacionNo', cotizaciones.length > 0 ? cotizaciones[0].num_cotizacion : nuevoNumeroCotizacion);
         setValue('fecha', formatDate(ordenTrabajo.fecha_envio));
         setValue('fechaExpiracion', cotizaciones.length > 0 ? formatDate(cotizaciones[0].fecha_expiracion) : '');
         setValue('metodoEmbarque', cotizaciones.length > 0 ? cotizaciones[0].metodo_embarque : '');
         setValue('empleado_asignado', ordenTrabajo.empleado_asignado);
 
-        // 🟢 Llenar la tabla con los materiales obtenidos
+        // 🟢 Guardar id de cotización en campo oculto
+        const idCotizacion = cotizaciones.length > 0 ? cotizaciones[0].id : '';
+        document.getElementById('idCotizacion').value = idCotizacion;
+
+        // 🟢 Cargar materiales
         rellenarTablaMateriales(materiales);
 
-        window.datosCargados = true; // 🔥 Marcar que ya se cargaron los datos
+        datosCargados = true;
 
     } catch (error) {
         console.error("❌ Error:", error);
         alert('⚠️ Hubo un error al cargar los datos');
     }
 
-    // Asociar el evento click al botón para agregar filas
+    // 🟢 Botón para agregar fila
     const btnAgregarFila = document.getElementById('btnAgregarFila');
     if (btnAgregarFila) {
         btnAgregarFila.addEventListener('click', () => {
-            agregarFila(); // Llama a la función para agregar una fila vacía
+            agregarFila();
         });
     }
 });
 
-
 function rellenarTablaMateriales(materiales) {
     const tablaMateriales = document.getElementById('tablaMateriales').getElementsByTagName('tbody')[0];
 
-    // 💡 Limpia la tabla completamente antes de agregar nuevas filas
     while (tablaMateriales.firstChild) {
         tablaMateriales.removeChild(tablaMateriales.firstChild);
     }
@@ -74,21 +77,38 @@ function rellenarTablaMateriales(materiales) {
         agregarFila(material.id, material.pda, material.cantidad, material.unidad, material.descripcion, material.precio_unitario, material.importe_total);
     });
 
-    recalcularTotales(); // Recalcular los totales al cargar los datos
+    recalcularTotales();
 }
 
 function agregarFila(id = '', pda = '', cantidad = '', unidad = '', descripcion = '', precio_unitario = '', importe_total = '') {
     const tablaMateriales = document.getElementById('tablaMateriales').getElementsByTagName('tbody')[0];
 
-    // 💡 Evita agregar filas duplicadas verificando por PDA
+    if (!pda) {
+        const pdasExistentes = Array.from(tablaMateriales.rows).map(row => {
+            const inputPda = row.cells[0].querySelector('input');
+            return inputPda ? parseInt(inputPda.value.trim(), 10) : NaN;
+        }).filter(n => !isNaN(n));
+
+        const maxPda = pdasExistentes.length > 0 ? Math.max(...pdasExistentes) : 0;
+        const nuevoPda = String(maxPda + 1).padStart(2, '0');
+        pda = nuevoPda;
+    }
+
     const existe = Array.from(tablaMateriales.rows).some(row => row.cells[0].querySelector('input').value === pda);
     if (existe) return;
 
     const row = tablaMateriales.insertRow();
     row.innerHTML = `
-        <td><input type="text" value="${pda}" class="form-control"></td>
+        <td><input type="text" value="${pda}" class="form-control" readonly></td>
         <td><input type="number" value="${cantidad}" class="form-control cantidad" onchange="recalcularFila(this)"></td>
-        <td><input type="text" value="${unidad}" class="form-control"></td>
+        <td>
+            <select class="form-control">
+                <option value="unidad" ${unidad === 'unidad' ? 'selected' : ''}>unidad</option>
+                <option value="servicio" ${unidad === 'servicio' ? 'selected' : ''}>servicio</option>
+                <option value="pieza" ${unidad === 'pieza' ? 'selected' : ''}>pieza</option>
+                <option value="lote" ${unidad === 'lote' ? 'selected' : ''}>lote</option>
+            </select>
+        </td>
         <td><input type="text" value="${descripcion}" class="form-control"></td>
         <td><input type="number" value="${precio_unitario}" class="form-control precio_unitario" step="0.01" onchange="recalcularFila(this)"></td>
         <td><input type="number" value="${importe_total}" class="form-control importe_total" readonly></td>
@@ -98,7 +118,6 @@ function agregarFila(id = '', pda = '', cantidad = '', unidad = '', descripcion 
 
 async function eliminarFila(button, id) {
     if (!id || id === 'undefined' || id === 'null') {
-        console.warn('Intentando eliminar un material sin ID válido.');
         const row = button.closest('tr');
         row.remove();
         recalcularTotales();
@@ -106,15 +125,13 @@ async function eliminarFila(button, id) {
     }
 
     try {
-        const response = await fetch(`/api/registro/material/${id}`, {
-            method: 'DELETE',
-        });
+        const response = await fetch(`/api/registro/material/${id}`, { method: 'DELETE' });
 
         if (!response.ok) throw new Error(`Error al eliminar el material (ID: ${id})`);
 
         const row = button.closest('tr');
         row.remove();
-        recalcularTotales(); // Recalcular totales después de eliminar una fila
+        recalcularTotales();
     } catch (error) {
         console.error(error);
         alert(`Hubo un error al eliminar el material: ${error.message}`);
@@ -128,7 +145,7 @@ function recalcularFila(input) {
     const importe_total = cantidad * precio_unitario;
 
     row.querySelector('.importe_total').value = importe_total.toFixed(2);
-    recalcularTotales(); // Recalcular los totales generales
+    recalcularTotales();
 }
 
 function recalcularTotales() {
@@ -140,7 +157,7 @@ function recalcularTotales() {
         total += importe_total;
     });
 
-    document.getElementById('totalGeneral').textContent = total.toFixed(2); // Mostrar el total general
+    document.getElementById('totalGeneral').textContent = total.toFixed(2);
 }
 
 async function guardarCotizacion() {
@@ -152,6 +169,7 @@ async function guardarCotizacion() {
         return;
     }
 
+    const id = document.getElementById('idCotizacion').value || null;
     const referencia = document.getElementById('referencia').value;
     const num_cotizacion = document.getElementById('cotizacionNo').value;
     const fecha_expiracion = document.getElementById('fechaExpiracion').value;
@@ -159,24 +177,23 @@ async function guardarCotizacion() {
     const realizado_por = document.getElementById('empleado_asignado').value;
 
     const materiales = [];
-    let totalImporteCotizado = 0; // 🔥 Inicializamos la variable para el total
-
-    const pdaSet = new Set(); // 🔥 Para evitar duplicados
+    let totalImporteCotizado = 0;
+    const pdaSet = new Set();
 
     const filas = document.querySelectorAll('#tablaMateriales tbody tr');
     filas.forEach(row => {
         const pda = row.cells[0].querySelector('input').value.trim();
         const cantidad = parseInt(row.cells[1].querySelector('input').value) || 0;
-        const unidad = row.cells[2].querySelector('input').value.trim();
+        const unidad = row.cells[2].querySelector('select').value.trim();
         const descripcion = row.cells[3].querySelector('input').value.trim();
         const precio_unitario = parseFloat(row.cells[4].querySelector('input').value) || 0;
         const importe_total = parseFloat(row.cells[5].querySelector('input').value) || 0;
 
-        if (!pda || pdaSet.has(pda)) return; // 🔥 Si ya existe, lo ignora
-        pdaSet.add(pda); // 🔥 Agregar al Set para evitar futuros duplicados
+        if (!pda || pdaSet.has(pda)) return;
+        pdaSet.add(pda);
 
         materiales.push({ pda, cantidad, unidad, descripcion, precio_unitario, importe_total });
-        totalImporteCotizado += importe_total; // 🔥 Sumar al total de importe_cotizado
+        totalImporteCotizado += importe_total;
     });
 
     if (materiales.length === 0) {
@@ -185,6 +202,7 @@ async function guardarCotizacion() {
     }
 
     const datosCotizacion = { 
+        id,    // 👈 Enviamos el ID aquí
         id_ot, 
         referencia, 
         num_cotizacion, 
@@ -192,7 +210,7 @@ async function guardarCotizacion() {
         metodo_embarque, 
         realizado_por, 
         materiales,
-        importe_cotizado: totalImporteCotizado // 🔥 Incluir el total calculado
+        importe_cotizado: totalImporteCotizado
     };
 
     try {
@@ -202,13 +220,18 @@ async function guardarCotizacion() {
             body: JSON.stringify(datosCotizacion)
         });
 
-        if (response.ok) alert('Cotización y materiales guardados exitosamente');
-        else throw new Error('Error al guardar la cotización');
+        if (response.ok) {
+            alert('Cotización y materiales guardados exitosamente');
+            location.reload(); // Opcional: recargar para actualizar datos
+        } else {
+            throw new Error('Error al guardar la cotización');
+        }
     } catch (error) {
         console.error(error);
         alert('Hubo un error al guardar la cotización');
     }
 }
+
 
 document.getElementById("generarPDF").addEventListener("click", generarPDF);
 

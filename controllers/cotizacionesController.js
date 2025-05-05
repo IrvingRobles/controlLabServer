@@ -45,13 +45,13 @@ const db = require('../model/db'); // Configuración de la base de datos
 // };
 // Obtener los datos de la Orden de Trabajo y sus cotizaciones 
 exports.obtenerOTC = async (req, res) => {
-    const { id } = req.params; // Obtener el ID de la OT
+    const { id } = req.params;
     if (!id) {
         return res.status(400).json({ mensaje: "El parámetro 'id' es requerido" });
     }
 
     try {
-        // Obtener la Orden de Trabajo junto con los datos del cliente
+        // 🟢 Obtener OT y cliente
         const [ordenTrabajo] = await db.query(
             `SELECT 
                 r.id, r.clave, r.OT, r.empresa, r.fecha_envio, r.descripcion, r.contacto, 
@@ -70,34 +70,49 @@ exports.obtenerOTC = async (req, res) => {
             return res.status(404).json({ mensaje: "Orden de trabajo no encontrada" });
         }
 
-        // Obtener las cotizaciones relacionadas con la OT
+        // 🟢 Obtener cotizaciones relacionadas
         const [cotizaciones] = await db.query(
             `SELECT id, referencia, num_cotizacion, fecha_expiracion, metodo_embarque, realizado_por
-            FROM cotizaciones WHERE id_ot = ?`, 
+             FROM cotizaciones WHERE id_ot = ?`, 
             [id]
         );
 
+        // 🟢 Obtener materiales si hay cotizaciones
         let materiales = [];
         if (cotizaciones.length > 0) {
             const cotizacionIds = cotizaciones.map(cot => cot.id);
             [materiales] = await db.query(
                 `SELECT id, id_cotizacion, pda, cantidad, unidad, descripcion, precio_unitario, importe_total
-                FROM materiales WHERE id_cotizacion IN (?)`, 
+                 FROM materiales WHERE id_cotizacion IN (?)`, 
                 [cotizacionIds]
             );
         }
 
-        // Mostrar en consola los resultados para depuración
-        console.log("🔍 Datos consultados:", {
-            ordenTrabajo: ordenTrabajo[0],
-            cotizaciones,
-            materiales
-        });
+        // 🔢 Generar número de cotización sugerido
+        let nuevoNumeroCotizacion = '';
+        const ot = ordenTrabajo[0];
+        if (ot) {
+            const añoActual = new Date().getFullYear();
+            const empleado = ot.empleado_asignado || 'SINEMP';
 
+            const numeros = cotizaciones
+                .map(c => c.num_cotizacion)
+                .filter(n => /^C\d{3}/.test(n))
+                .map(n => parseInt(n.slice(1, 4)))
+                .filter(n => !isNaN(n));
+
+            const ultimoConsecutivo = numeros.length > 0 ? Math.max(...numeros) : 0;
+            const nuevoConsecutivo = String(ultimoConsecutivo + 1).padStart(3, '0');
+
+            nuevoNumeroCotizacion = `C-${nuevoConsecutivo}-${añoActual}-${empleado.toUpperCase()}`;
+        }
+
+        // 🟢 Respuesta al frontend
         res.json({
-            ordenTrabajo: ordenTrabajo[0],
+            ordenTrabajo: ot,
             cotizaciones,
-            materiales
+            materiales,
+            nuevoNumeroCotizacion
         });
 
     } catch (error) {
