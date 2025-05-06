@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
 
           try {
-              const response = await fetch('/api/login/registroUsusario', { // Ruta corregida
+              const response = await fetch('/api/login/registroUsuario', { // Ruta corregida
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(formData),
