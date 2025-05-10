@@ -19,7 +19,7 @@ async function generarOT() {
     const otGenerada = `CT-${String(siguienteNumero).padStart(3, "0")}/${anioActual}`;
     return otGenerada;
 }
-
+const { enviarCorreoCreacion } = require('../services/enviarCorreoCreacion');
 exports.crearRegistro = async (req, res) => {
     try {
         const {
@@ -33,14 +33,17 @@ exports.crearRegistro = async (req, res) => {
             creadoPor = "DESCONOCIDO"
         } = req.body;
 
+        // 🚫 Validación de campos obligatorios
         if (!empresa || !fechaEnvio || !id_cliente) {
             return res.status(400).json({ mensaje: "Empresa, fecha de envío y cliente son obligatorios" });
         }
 
+        // 🛠️ Generación de valores
         const claveGenerada = clave || `CL-${id_cliente}-${Date.now()}`;
         const otGenerada = await generarOT();
         const resultado = descripcion.trim() === "" ? "Sin descripción" : descripcion;
 
+        // 📥 Insertar registro en la base de datos
         const [result] = await db.query(
             `INSERT INTO registros 
                 (clave, OT, empresa, fecha_envio, descripcion, resultado, contacto, lugar, id_cliente, creadoPor) 
@@ -48,14 +51,43 @@ exports.crearRegistro = async (req, res) => {
             [claveGenerada, otGenerada, empresa, fechaEnvio, descripcion, resultado, contacto, lugar, id_cliente, creadoPor]
         );
 
+        // ✅ CONSULTAR ADMINISTRADORES
+        const [admins] = await db.query(`
+            SELECT username, correo, empresa, nombre 
+            FROM users 
+            WHERE role = 'admin' AND verificado = 1
+        `);
+
+        // 📨 DATOS DEL REGISTRO PARA EL CORREO
+        const datosRegistro = {
+            registroId: result.insertId,
+            clave: claveGenerada,
+            empresa,
+            descripcion,
+            contacto,
+            username: creadoPor
+        };
+
+        // 🟢 ENVIAR CORREO A CADA ADMINISTRADOR (Correo de creación)
+        for (const admin of admins) {
+            try {
+                await enviarCorreoCreacion(admin.correo, { ...datosRegistro, nombre: admin.nombre });
+            } catch (error) {
+                console.error(`❌ No se pudo enviar correo de creación a ${admin.correo}:`, error.message);
+                // Continuamos con los demás
+            }
+        }
+
+        // ✅ RESPUESTA EXITOSA
         res.status(201).json({
-            mensaje: "Registro creado exitosamente",
+            mensaje: "Registro creado exitosamente y notificación enviada a los administradores",
             id: result.insertId,
             clave: claveGenerada,
             OT: otGenerada
         });
+
     } catch (error) {
-        console.error("Error al crear el registro:", error);
+        console.error("❌ Error al crear el registro:", error);
         res.status(500).json({ mensaje: "Error en el servidor" });
     }
 };
