@@ -97,3 +97,82 @@ exports.obtenerEmpleadoPorId = async (req, res) => {
     }
 }; 
 
+exports.getUsuario = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const query = `
+            SELECT 
+                id,
+                empresa,
+                nombre,
+                rfc,
+                curp,
+                departamento,
+                puesto,
+                contrato,
+                jornada,
+                domicilio,
+                nss,
+                ingreso,
+                telefono
+            FROM users 
+            WHERE id = ?
+        `;
+        
+        const [user] = await db.query(query, [id]);
+        
+        if (!user) {
+            return res.status(404).json({ 
+                success: false,
+                message: "Usuario no encontrado" 
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: user
+        });
+
+    } catch (error) {
+        console.error("Error en getUsuario:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error en la base de datos",
+            error: error.message
+        });
+    }
+};
+
+exports.updateUsuario = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updates = req.body;
+
+        // Verificar si el usuario existe antes de actualizar (opcional pero recomendado)
+        const [user] = await db.query('SELECT id FROM users WHERE id = ?', [id]);
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "Usuario no encontrado" 
+            });
+        }
+
+        // Actualizar todos los campos, incluida 'empresa' si viene en el body
+        await db.query('UPDATE users SET ? WHERE id = ?', [updates, id]);
+        
+        res.status(200).json({ 
+            success: true, 
+            message: "Usuario actualizado correctamente",
+            data: updates // Opcional: devolver los cambios aplicados
+        });
+
+    } catch (error) {
+        console.error("Error en updateUsuario:", error);
+        res.status(500).json({ 
+            success: false,
+            message: "Error al actualizar el usuario",
+            error: error.message 
+        });
+    }
+};

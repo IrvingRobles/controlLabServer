@@ -20,5 +20,7 @@ router.put('/actualizarEmpleado/:id', personalController.actualizarEmpleado);
 // Eliminar un empleado
 router.delete('/eliminarEmpleado/:id', personalController.eliminarEmpleado);
 
+router.get('/users/:id', personalController.getUsuario);
+router.put('/users/:id', personalController.updateUsuario);
 
 module.exports = router;
