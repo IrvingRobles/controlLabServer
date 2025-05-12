@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -94,18 +95,20 @@
         }
     </style>
 </head>
+
 <body class="bg-light">
 
     <!-- Barra de Perfil -->
     <header>
         <div class="perfil-container">
-            <div class="perfil-info">
-                <i class="bi bi-person-circle"></i>
-                <span id="perfil-nombre">Cargando...</span>
-            </div>
+            <a href="miPerfil.html" class="text-white text-decoration-none d-flex align-items-center">
+                <i class="bi bi-person-circle fs-3 me-2"></i>
+                <span id="perfil-nombre" class="fw-bold">Cargando...</span>
+            </a>
             <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
         </div>
     </header>
+
 
     <!-- Contenedor del Menú -->
     <div class="container mt-4">
@@ -129,7 +132,7 @@
             } else {
                 perfilNombre.textContent = 'Invitado';
                 setTimeout(() => {
-                    window.location.href = "login.html"; 
+                    window.location.href = "login.html";
                 }, 2000);
             }
         });
@@ -151,7 +154,7 @@
                     { name: "Buscar", link: "adminBuscar.html" },
                     { name: "Registro de cotizaciones", link: "adminBusquedaPdf.html" },
                     { name: "Registro de Equipos Ajenos", link: "adminIngresoEgresoDeEquiposAjenos.html" }
-                ]                
+                ]
             },
             {
                 name: "Personal",
@@ -211,4 +214,5 @@
     </script>
 
 </body>
+
 </html>
