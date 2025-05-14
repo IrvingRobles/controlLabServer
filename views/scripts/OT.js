@@ -95,93 +95,111 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     
     function guardarOT() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF("portrait", "mm", "a4");
-    
-        // Logo y encabezado
-        const logo = new Image();
-        logo.src = "./img/logo.jpg";
-    
-        logo.onload = function () {
-            doc.rect(10, 10, 190, 30);
-            doc.addImage(logo, "JPEG", 12, 12, 26, 26);
-    
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF("portrait", "mm", "a4");
+
+    // 🔹 Logo y encabezado adaptable
+    const logo = new Image();
+    logo.src = "./img/logo.jpg";
+
+    logo.onload = function () {
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 10;
+        const headerHeight = 30;
+        const logoWidth = 26;
+        const logoHeight = 26;
+        const textX = margin + logoWidth + 5;
+
+        // 🔹 Dibujar rectángulo del encabezado
+        doc.rect(margin, margin, pageWidth - 2 * margin, headerHeight);
+
+        // 🔹 Agregar logo
+        doc.addImage(logo, "JPEG", margin + 2, margin + 2, logoWidth, logoHeight);
+
+        // 🔹 Texto adaptable al centro de la hoja
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        const titulo = "CALIBRACIONES TECNICAS DE MEXICO, S.A. DE C.V.";
+        const tituloX = (pageWidth - doc.getTextWidth(titulo)) / 2;
+        doc.text(titulo, tituloX, margin + 8);
+
+  
+    // 🔹 Subtítulo dividido en dos líneas
+doc.setFont("helvetica", "normal");
+doc.setFontSize(10);
+
+const subtitulo1 = "SERVICIO DE MANTENIMIENTO Y CALIBRACIÓN";
+const subtitulo2 = "EVALUACIÓN DE EQUIPOS ANALÍTICOS";
+
+const subtitulo1X = (pageWidth - doc.getTextWidth(subtitulo1)) / 2;
+const subtitulo2X = (pageWidth - doc.getTextWidth(subtitulo2)) / 2;
+
+doc.text(subtitulo1, subtitulo1X, margin + 14);
+doc.text(subtitulo2, subtitulo2X, margin + 19);
+
+    const rfc = "R.F.C.: CTM-050602-332";
+    const rfcX = (pageWidth - doc.getTextWidth(rfc)) / 2;
+    doc.text(rfc, rfcX, margin + 24);
+
+        // 🔹 Título del PDF
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(0, 153, 76);
+        doc.text("Orden de Trabajo", margin, margin + headerHeight + 10);
+        doc.setTextColor(0, 0, 0);
+
+        // 🔹 Tabla de datos
+        let y = margin + headerHeight + 20;
+        const columnWidths = [50, 140];
+        const rowHeight = 7;
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "bold");
+        doc.text("Datos de la Orden de Trabajo:", margin, y);
+        y += 5;
+        doc.setFont("helvetica", "normal");
+
+        campos.forEach((campo) => {
+            let valorCampo = campo === "tipo_servicio" ? getValue("tipo_servicio") : getValue(campo);
+            if (Array.isArray(valorCampo)) valorCampo = valorCampo.join(", ");
+            if (valorCampo === null || valorCampo === undefined || String(valorCampo).trim() === "") return;
+            valorCampo = String(valorCampo).trim();
+
+            if (y > 270) {
+                doc.addPage();
+                y = margin;
+            }
+
+            doc.rect(margin, y, columnWidths[0], rowHeight);
+            doc.rect(margin + columnWidths[0], y, columnWidths[1], rowHeight);
+
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(14);
-            doc.text("CALIBRACIONES TECNICAS DE MEXICO, S.A. DE C.V.", 50, 18);
-            doc.setFontSize(10);
-            doc.text("SERVICIO DE MANTENIMIENTO, CALIBRACION Y EVALUACION DE EQUIPOS ANALITICOS.", 50, 23);
-            doc.text("R.F.C.: CTM-050602-332", 50, 28);
-    
-            doc.setFontSize(12);
-            doc.setTextColor(0, 153, 76);
-            doc.text("Orden de Trabajo", 10, 50);
-            doc.setTextColor(0, 0, 0);
-    
-            // Diseño de tabla
-            let y = 60;
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(10);
-            doc.text("Datos de la Orden de Trabajo:", 10, y);
-            y += 5;
-    
+            doc.text(`${campo.replace(/_/g, " ").toUpperCase()}:`, margin + 2, y + 5);
             doc.setFont("helvetica", "normal");
-            const columnWidths = [50, 140];
-            const rowHeight = 7;
-    
-            campos.forEach((campo) => {
-                let valorCampo = campo === "tipo_servicio" ? getValue("tipo_servicio") : getValue(campo);
-    
-                if (Array.isArray(valorCampo)) {
-                    valorCampo = valorCampo.join(", ");
-                } else if (valorCampo === null || valorCampo === undefined) {
-                    return;
-                } else {
-                    valorCampo = String(valorCampo).trim();
-                }
-    
-                if (!valorCampo) return;
-    
-                if (y > 270) {
-                    doc.addPage();
-                    y = 20;
-                }
-    
-                doc.rect(10, y, columnWidths[0], rowHeight);
-                doc.rect(60, y, columnWidths[1], rowHeight);
-    
-                doc.setFont("helvetica", "bold");
-                doc.text(`${campo.replace(/_/g, " ").toUpperCase()}:`, 12, y + 5);
-                doc.setFont("helvetica", "normal");
-    
-                doc.text(valorCampo, 62, y + 5);
-    
-                y += rowHeight;
-            });
-    
-            // 🔹 Generar nombre de archivo
-            const cliente = obtenerIniciales(getValue("cliente"));
-            const empresa = obtenerIniciales(getValue("empresa"));
-            const empleado = obtenerIniciales(getValue("empleado_asignado"));
-            const fecha = getValue("fecha_inicio") || new Date().toISOString().split("T")[0];
-            const tipoServicio = obtenerIniciales(getValue("tipo_servicio") || "");
-    
-            const nombreArchivo = `${cliente}_${empresa}_${empleado}_${fecha}_${tipoServicio}.pdf`;
-    
-            // 🔹 Guardar PDF en el navegador
-            doc.save(nombreArchivo);
-    
-            // 🔹 Generar el PDF como un blob
-            const pdfBlob = doc.output("blob");
-    
-            // 🔹 Crear FormData para enviar al servidor
-            const formData = new FormData();
-            formData.append("pdf", pdfBlob, nombreArchivo);
-    
-            // 🔹 Subir el PDF al servidor
-            subirPDFAlServidor(formData);
-        };
-    }
+            doc.text(valorCampo, margin + columnWidths[0] + 2, y + 5);
+
+            y += rowHeight;
+        });
+
+        // 🔹 Nombre de archivo
+        const cliente = obtenerIniciales(getValue("cliente"));
+        const empresa = obtenerIniciales(getValue("empresa"));
+        const empleado = obtenerIniciales(getValue("empleado_asignado"));
+        const fecha = getValue("fecha_inicio") || new Date().toISOString().split("T")[0];
+        const tipoServicio = obtenerIniciales(getValue("tipo_servicio") || "");
+
+        const nombreArchivo = `${cliente}_${empresa}_${empleado}_${fecha}_${tipoServicio}.pdf`;
+
+        // 🔹 Guardar y subir PDF
+        doc.save(nombreArchivo);
+        const pdfBlob = doc.output("blob");
+
+        const formData = new FormData();
+        formData.append("pdf", pdfBlob, nombreArchivo);
+        subirPDFAlServidor(formData);
+    };
+}
+
     document.getElementById("actualizarOT").addEventListener("click", async function () {
         // Obtener datos del formulario
         const formData = {
