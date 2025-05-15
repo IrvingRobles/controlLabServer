@@ -100,7 +100,8 @@
                                             <option value="COBRANZAS">Cobranzas</option>
                                             <option value="RECURSOS HUMANOS">Recursos Humanos</option>
                                         </select>
-                                        <i class="bi bi-pencil-square edit-icon" onclick="toggleEdit('departamento')"></i>
+                                        <i class="bi bi-pencil-square edit-icon"
+                                            onclick="toggleEdit('departamento')"></i>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
@@ -180,10 +181,15 @@
 
                             <!-- Botones (como en tus ejemplos) -->
                             <div class="d-flex justify-content-end mt-4">
-                                <button type="button" class="btn btn-outline-secondary me-2"
-                                    onclick="cancelEdit()">Cerrar</button>
-                                <button type="button" id="saveBtn" class="btn btn-primary" disabled
-                                    onclick="guardarCambios()">Guardar</button>
+                                <button type="button" class="btn btn-outline-secondary me-3" onclick="history.back()">
+                                    Salir
+                                </button>
+                             
+                                    <button type="button" class="btn btn-outline-secondary me-3"
+                                        onclick="cancelEdit()">Cerrar</button>
+                                    <button type="button" id="saveBtn" class="btn btn-primary" disabled
+                                        onclick="guardarCambios()">Guardar</button>
+                               
                             </div>
                         </form>
                     </div>
@@ -218,6 +224,8 @@
             window.location.href = "login.html"; // Redirigir al login
         }
     </script>
+
+
 
 </body>
 
