@@ -92,25 +92,32 @@ exports.obtenerOTC = async (req, res) => {
                 [cotizacionIds]
             );
         }
-
-        // 🔢 Generar número de cotización sugerido
+        // 🔢 Generar número de cotización sugerido de forma global
         let nuevoNumeroCotizacion = '';
         const ot = ordenTrabajo[0];
+
         if (ot) {
             const añoActual = new Date().getFullYear();
-            const empleado = ot.empleado_asignado || 'SINEMP';
 
-            const numeros = cotizaciones
-                .map(c => c.num_cotizacion)
-                .filter(n => /^C\d{3}/.test(n))
-                .map(n => parseInt(n.slice(1, 4)))
+            const [resultado] = await db.query(
+                `SELECT num_cotizacion FROM cotizaciones
+         WHERE num_cotizacion LIKE ?`,
+                [`C-%-${añoActual}`]
+            );
+
+            const numeros = resultado
+                .map(row => row.num_cotizacion)
+                .filter(n => /^C-\d{3}-\d{4}$/.test(n))
+                .map(n => parseInt(n.split("-")[1])) // Extraer el consecutivo
                 .filter(n => !isNaN(n));
 
             const ultimoConsecutivo = numeros.length > 0 ? Math.max(...numeros) : 0;
             const nuevoConsecutivo = String(ultimoConsecutivo + 1).padStart(3, '0');
 
-            nuevoNumeroCotizacion = `C-${nuevoConsecutivo}-${añoActual}-${empleado.toUpperCase()}`;
+            nuevoNumeroCotizacion = `C-${nuevoConsecutivo}-${añoActual}`;
         }
+
+
 
         // 🟢 Respuesta al frontend
         res.json({
