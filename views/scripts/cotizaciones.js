@@ -40,6 +40,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         setValue('fechaExpiracion', cotizaciones.length > 0 ? formatDate(cotizaciones[0].fecha_expiracion) : '');
         setValue('metodoEmbarque', cotizaciones.length > 0 ? cotizaciones[0].metodo_embarque : '');
         setValue('empleado_asignado', ordenTrabajo.empleado_asignado);
+        setValue('moneda', cotizaciones.length > 0 ? cotizaciones[0].moneda : '');
+        setValue('observaciones', cotizaciones.length > 0 ? cotizaciones[0].observaciones : '');
+        setValue('condicionDePago', cotizaciones.length > 0 ? cotizaciones[0].condicion_de_pago : '');
+        setValue('tiempoEntrega', cotizaciones.length > 0 ? cotizaciones[0].tiempo_entrega : '');
+
 
         // 🟢 Guardar id de cotización en campo oculto
         const idCotizacion = cotizaciones.length > 0 ? cotizaciones[0].id : '';
@@ -175,6 +180,12 @@ async function guardarCotizacion() {
     const fecha_expiracion = document.getElementById('fechaExpiracion').value;
     const metodo_embarque = document.getElementById('metodoEmbarque').value;
     const realizado_por = document.getElementById('empleado_asignado').value;
+    const moneda = document.getElementById('moneda').value;
+    const observaciones = document.getElementById('observaciones').value;
+
+    // 🔥 Nuevos campos
+    const condicion_de_pago = document.getElementById('condicionDePago').value;
+    const tiempo_entrega = document.getElementById('tiempoEntrega').value;
 
     const materiales = [];
     let totalImporteCotizado = 0;
@@ -201,14 +212,18 @@ async function guardarCotizacion() {
         return;
     }
 
-    const datosCotizacion = { 
-        id,    // 👈 Enviamos el ID aquí
-        id_ot, 
-        referencia, 
-        num_cotizacion, 
-        fecha_expiracion, 
-        metodo_embarque, 
-        realizado_por, 
+    const datosCotizacion = {
+        id,
+        id_ot,
+        referencia,
+        num_cotizacion,
+        fecha_expiracion,
+        metodo_embarque,
+        realizado_por,
+        moneda,
+        observaciones,
+        condicion_de_pago, // ✅ Nuevo campo
+        tiempo_entrega,     // ✅ Nuevo campo
         materiales,
         importe_cotizado: totalImporteCotizado
     };
@@ -233,124 +248,8 @@ async function guardarCotizacion() {
 }
 
 
+
 document.getElementById("generarPDF").addEventListener("click", generarPDF);
-
-async function generarPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const marginLeft = 10;
-
-    // Configuración de fuente y márgenes
-    doc.setFont("helvetica", "normal");
-
-    // Cargar el logo como DataURL para evitar problemas de carga
-    const logoPath = "../img/logo.jpg";
-    try {
-        const response = await fetch(logoPath);
-        const blob = await response.blob();
-        const reader = new FileReader();
-
-        reader.onload = function (event) {
-            const logoDataURL = event.target.result;
-            doc.addImage(logoDataURL, "JPEG", marginLeft, 5, 30, 30);
-
-            // Encabezado
-            doc.setFontSize(12);
-            doc.text("CALIBRACIONES TÉCNICAS DE MÉXICO, S.A. DE C.V.", 105, 15, { align: "center" });
-            doc.setFontSize(9);
-            doc.text("REG. FED. CTES.: CTM-050602-332", 105, 20, { align: "center" });
-            doc.text("Servicios de mantenimiento, calibración y evaluación de equipos analíticos", 105, 25, { align: "center" });
-            doc.text("Calle 18 de Marzo No. 85, Col. Obrera, C.P. 96740, Minatitlán, Ver., México.", 105, 30, { align: "center" });
-            doc.text("Tel. / Fax:  923 223 0870    E-mail: caltecmex@gmail.com", 105, 35, { align: "center" });
-
-            // Línea horizontal
-            doc.line(marginLeft, 40, 200, 40);
-
-            // Información del cliente
-            const cliente = document.getElementById("cliente").value || "-";
-            const referencia = document.getElementById("referencia").value || "-";
-            const direccion = document.getElementById("direccion").value || "-";
-            const cotizacionNo = document.getElementById("cotizacionNo").value || "-";
-            const fecha = document.getElementById("fecha").value || "-";
-            const metodoEmbarque = document.getElementById("metodoEmbarque").value || "-";
-            const empleado_asignado = document.getElementById("empleado_asignado").value || "-";
-            const fechaExpiracion = document.getElementById("fechaExpiracion").value || "-";
-            const totalImporteCotizado = document.getElementById("totalGeneral").textContent || "0.00";
-
-            doc.setFontSize(10);
-            doc.roundedRect(marginLeft, 45, 190, 25, 2, 2);
-            doc.text(`Cliente: ${cliente}`, marginLeft + 5, 50);
-            doc.text(`Dirección: ${direccion}`, marginLeft + 5, 55);
-            doc.text(`Referencia: ${referencia}`, 130, 50);
-            doc.text(`Cotización No: ${cotizacionNo}`, 130, 55);
-            doc.text(`Fecha: ${convertirFecha(fecha)}`, 130, 60);
-            doc.text(`Método de Embarque: ${metodoEmbarque}`, marginLeft + 5, 60);
-            doc.text(`Realizó la cotización: ${empleado_asignado}`, marginLeft + 5, 65);
-            doc.text(`Total: $${totalImporteCotizado}`, 130, 65);
-
-            // Número de folio continuo
-            let folio = localStorage.getItem("folioActual");
-            if (!folio) {
-                folio = 1; // Valor inicial si no hay folios previos
-            } else {
-                folio = parseInt(folio, 10) + 1; // Incrementar el folio
-            }
-            localStorage.setItem("folioActual", folio);
-            doc.text(`Folio: ${folio}`, 180, 45, { align: "right" });
-
-            // Número de revisión fijo
-            const revision = "Rev: 04";
-            doc.text(revision, 180, 38, { align: "right" });
-
-            // Generar tabla de materiales
-            const yFinal = generarTablaMateriales(doc, marginLeft);
-
-            // Si el espacio restante es menor a 100, hacer salto de página
-            if (yFinal + 20 > doc.internal.pageSize.height) {
-                doc.addPage();
-            }
-
-            // Firmas y otros datos
-            const cuadroYPos = doc.internal.pageSize.height - 90;
-            doc.setFontSize(8);
-            doc.rect(marginLeft, cuadroYPos, 190, 40);
-            doc.text("AUTORIZÓ:", marginLeft + 5, cuadroYPos + 6);
-            doc.text("Ing. Héctor Manuel Rivera Domínguez", marginLeft + 5, cuadroYPos + 12);
-            doc.text("Firma: ____________________________________", marginLeft + 5, cuadroYPos + 18);
-
-            // Número de página
-            const pageCount = doc.internal.getNumberOfPages();
-            doc.text(`Página ${doc.internal.getCurrentPageInfo().pageNumber} de ${pageCount}`, 180, doc.internal.pageSize.height - 10, { align: "right" });
-
-            // Canal de denuncias
-            doc.setFontSize(7);
-            const denunciaText = "CALTECMEX pone a su disposición el canal de denuncias: Correo electrónico: denuncia.caltecmex@gmail.com. Se garantiza la confidencialidad de toda persona que proporcione información, o colabore en alguna investigación donde se presuma el incumplimiento a lo establecido a nuestras políticas y procedimientos.";
-            doc.text(denunciaText, marginLeft + 5, doc.internal.pageSize.height - 20, { maxWidth: 190 });
-
-            // Fechas en formato día/mes/año
-            const fechaActual = new Date();
-            const fechaEmision = convertirFecha(`${fechaActual.getFullYear()}-${(fechaActual.getMonth() + 1).toString().padStart(2, "0")}-${fechaActual.getDate().toString().padStart(2, "0")}`);
-            doc.setFontSize(8);
-            doc.text(`Fecha de emisión: ${fechaEmision}`, 180, doc.internal.pageSize.height - 35, { align: "right" });
-            doc.text(`Fecha de expiración: ${convertirFecha(fechaExpiracion)}`, 180, doc.internal.pageSize.height - 30, { align: "right" });
-
-            // Guardar y enviar PDF
-            const pdfBlob = doc.output("blob");
-            const formData = new FormData();
-            const nombreArchivo = `cotizacion_${cliente}_${folio}_rev04_${fechaEmision.replace(/\//g, "-")}.pdf`;
-            formData.append("pdf", pdfBlob, nombreArchivo);
-
-            doc.save(nombreArchivo);
-
-            subirPDFAlServidor(formData);
-        };
-
-        reader.readAsDataURL(blob);
-    } catch (error) {
-        alert("Error al cargar el logo. Verifica la ruta o el archivo.");
-        console.error(error);
-    }
-}
 
 // Función para convertir fechas al formato día/mes/año
 function convertirFecha(fechaISO) {
@@ -375,98 +274,279 @@ async function subirPDFAlServidor(formData) {
         alert("Hubo un error al subir el PDF.");
     }
 }
-function generarTablaMateriales(doc, marginLeft) {
-    const margenSuperior = 80;
-    const anchoTabla = 190;
-    const altoFila = 8;
-    const maxAltoPagina = doc.internal.pageSize.height - 30;
-    let y = margenSuperior + 5;
 
-    doc.setFontSize(10);
-    doc.text("Materiales:", marginLeft, margenSuperior);
+async function generarPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const marginLeft = 10;
 
-    const filas = document.querySelectorAll("#tablaMateriales tbody tr");
+    const data = {
+        cliente: document.getElementById("cliente").value || "-",
+        direccion: document.getElementById("direccion").value || "-",
+        atn: document.getElementById("empleado_asignado").value || "-",
+        referencia: document.getElementById("referencia").value || "-",
+        cotizacionNo: document.getElementById("cotizacionNo").value || "-",
+        fecha: document.getElementById("fecha").value || "-",
+        fechaExpiracion: document.getElementById("fechaExpiracion").value || "-",
+        metodoEmbarque: document.getElementById("metodoEmbarque").value || "-",
+        moneda: document.getElementById("moneda").value || "M.N.",
+        observaciones: document.getElementById("observaciones").value || "-",
+        tiempoEntrega: document.getElementById("tiempoEntrega").value || "-",
+        condicionDePago: document.getElementById("condicionDePago").value || "-"
+    };
 
-    if (filas.length === 0) {
-        doc.text("No hay materiales registrados.", marginLeft, margenSuperior + 5);
+
+    let logoDataURL = null;
+    try {
+        const response = await fetch("../img/logo.jpg");
+        const blob = await response.blob();
+        logoDataURL = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.readAsDataURL(blob);
+        });
+    } catch (error) {
+        alert("Error al cargar el logo.");
+        console.error(error);
+        return;
+    }
+
+    function imprimirEncabezado(doc, logoDataURL) {
+        if (logoDataURL) {
+            doc.addImage(logoDataURL, "PNG", marginLeft, 5, 30, 30);
+        }
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.text("CALIBRACIONES TÉCNICAS DE MÉXICO, S.A. DE C.V.", 105, 13, { align: "center" });
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.text("REG. FED. CTES.: CTM-050602-332", 105, 18, { align: "center" });
+        doc.text("Servicios de mantenimiento, calibración y evaluación de equipos analíticos", 105, 23, { align: "center" });
+        doc.text("Calle 18 de Marzo No. 85, Col. Obrera, C.P. 96740, Minatitlán, Ver., México.", 105, 28, { align: "center" });
+        doc.text("Tel. / Fax:  923 223 0870    E-mail: caltecmex@gmail.com", 105, 33, { align: "center" });
+
+        doc.line(marginLeft, 38, 200, 38);
+    }
+
+    function imprimirPie(doc, pageNumber, pageCount) {
+        const pieY = doc.internal.pageSize.height;
+        doc.setFontSize(7);
+        const textoDenuncia = "CALTECMEX pone a su disposición el canal de denuncias: Correo electrónico: denuncia.caltecmex@gmail.com. " +
+            "Se garantiza la confidencialidad de toda persona que proporcione información, o colabore en alguna investigación " +
+            "donde se presuma el incumplimiento a lo establecido a nuestras políticas y procedimientos.";
+        const textoDividido = doc.splitTextToSize(textoDenuncia, 190);
+        doc.text(textoDividido, marginLeft, pieY - 15);
+        doc.setFontSize(8);
+        doc.text(`Página ${pageNumber} de ${pageCount}`, 200, pieY - 5, { align: "right" });
+    }
+
+    function imprimirDatosGenerales(doc, data) {
+        const x = 10;
+        const y = 42;
+        const ancho = 190;
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.text("COTIZACIÓN", 105, y, { align: "center" });
+
+        doc.setLineWidth(0.3);
+        doc.roundedRect(x, y + 5, ancho, 30, 2, 2);
+
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "bold");
+        doc.text("CLIENTE:", x + 3, y + 11);
+        doc.text("DIRECCIÓN:", x + 3, y + 16);
+        doc.text("ATN:", x + 3, y + 21);
+
+        doc.setFont("helvetica", "normal");
+        doc.text(data.cliente, x + 28, y + 11);
+        doc.text(data.direccion, x + 28, y + 16);
+        doc.text(data.atn, x + 28, y + 21);
+
+        doc.setFont("helvetica", "bold");
+        doc.text("REFERENCIA:", x + 125, y + 11);
+        doc.text("COTIZACIÓN No:", x + 125, y + 16);
+
+        doc.setFont("helvetica", "normal");
+        doc.text(data.referencia, x + 165, y + 11);
+        doc.text(data.cotizacionNo, x + 165, y + 16);
+
+        doc.setFont("helvetica", "bold");
+        doc.text("FECHA:", x + 125, y + 21);
+        doc.setFont("helvetica", "normal");
+        doc.text(data.fecha, x + 165, y + 21);
+
+        doc.setFont("helvetica", "bold");
+        doc.rect(x, y + 36, ancho, 10);
+        doc.line(x + 63, y + 36, x + 63, y + 46);
+        doc.line(x + 126, y + 36, x + 126, y + 46);
+
+        doc.text("TIEMPO DE ENTREGA", x + 5, y + 41);
+        doc.text("MÉTODO DE EMBARQUE", x + 65, y + 41);
+        doc.text("PRECIOS EN:", x + 128, y + 41);
+
+        doc.setFont("helvetica", "normal");
+        doc.text(data.tiempoEntrega, x + 5, y + 44);
+        doc.text(data.metodoEmbarque, x + 65, y + 44);
+        doc.text(data.moneda, x + 128, y + 44);
+    }
+
+    function generarTablaMateriales(doc, yInicial) {
+        const altoFila = 8;
+        const margenIzquierdo = 10;
+        const anchoColumnas = [15, 15, 20, 90, 25, 25];
+        const headers = ["PDA.", "CANT.", "UNIDAD", "DESCRIPCIÓN", "PRECIO UNITARIO", "IMPORTE TOTAL"];
+        let y = yInicial;
+
+        const maxY = doc.internal.pageSize.height - 35; // espacio para el pie
+
+        const imprimirEncabezadoTabla = () => {
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(7); // encabezado más pequeño
+            let x = margenIzquierdo;
+            for (let i = 0; i < headers.length; i++) {
+                doc.rect(x, y, anchoColumnas[i], altoFila);
+                doc.text(headers[i], x + anchoColumnas[i] / 2, y + 6, { align: "center" }); // centrado vertical ajustado
+                x += anchoColumnas[i];
+            }
+            y += altoFila;
+
+            doc.setFont("helvetica", "normal"); // ¡Volver a normal después del encabezado!
+        };
+
+        imprimirEncabezadoTabla();
+
+        const filas = document.querySelectorAll("#tablaMateriales tbody tr");
+
+        filas.forEach(row => {
+            let x = margenIzquierdo;
+
+            const getValue = (index) => {
+                const cell = row.cells[index];
+                if (!cell) return "-";
+                const input = cell.querySelector("input");
+                if (input) return input.value.trim();
+                const select = cell.querySelector("select");
+                if (select) return select.value.trim();
+                return "-";
+            };
+
+            const datos = [
+                getValue(0),
+                getValue(1),
+                getValue(2),
+                getValue(3),
+                `$${parseFloat(getValue(4) || 0).toFixed(2)}`,
+                `$${parseFloat(getValue(5) || 0).toFixed(2)}`
+            ];
+
+            const descripcionFormateada = doc.splitTextToSize(datos[3], anchoColumnas[3] - 6); // ← margen más seguro
+            const altoDinamico = altoFila * descripcionFormateada.length;
+
+            // 👉 SALTO DE PÁGINA si no cabe
+            if (y + altoDinamico > maxY) {
+                doc.addPage();
+                imprimirEncabezado(doc, logoDataURL); // encabezado general
+                y = 45;
+                imprimirEncabezadoTabla(); // solo encabezado de tabla
+            }
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(7); // texto de contenido un poco más pequeño
+
+            x = margenIzquierdo;
+            for (let i = 0; i < datos.length; i++) {
+                const ancho = anchoColumnas[i];
+                doc.rect(x, y, ancho, altoDinamico);
+
+                if (i === 3) {
+                    descripcionFormateada.forEach((linea, j) => {
+                        doc.text(linea, x + 2, y + altoFila * (j + 1) - 3, { align: "left" });
+                    });
+                } else {
+                    doc.text(datos[i], x + ancho / 2, y + altoFila - 3, { align: "center" });
+                }
+
+                x += ancho;
+            }
+
+            y += altoDinamico;
+        });
+
         return y;
     }
 
-    const encabezados = ["PDA", "Cantidad", "Unidad", "Descripción", "Precio Unitario", "Importe Total"];
-    const anchosColumnas = [20, 20, 20, 80, 25, 25];
+    function imprimirDatosFinales(doc, y, data) {
+        const x = 10;
+        const ancho = 190;
+        const altoFila = 6;
 
-    const imprimirEncabezados = () => {
-        let x = marginLeft;
-        doc.setFillColor(0, 0, 0);
-        doc.setTextColor(255, 255, 255);
-        doc.rect(x, y, anchoTabla, altoFila, "F");
-        doc.setFontSize(9);
-        encabezados.forEach((text, index) => {
-            doc.text(text, x + anchosColumnas[index] / 2, y + altoFila - 3, { align: "center" });
-            x += anchosColumnas[index];
-        });
-        doc.setTextColor(0, 0, 0);
-        y += altoFila;
-    };
+        doc.setLineWidth(0.3);
+        doc.roundedRect(x, y, ancho, altoFila * 3 + 6, 2, 2);
 
-    imprimirEncabezados();
+        // Líneas horizontales
+        doc.line(x, y + altoFila + 2, x + ancho, y + altoFila + 2);
+        doc.line(x, y + altoFila * 2 + 4, x + ancho, y + altoFila * 2 + 4);
 
-    let totalImporte = 0;
+        // Línea vertical para monto
+        doc.line(x + 120, y, x + 120, y + altoFila + 2);
 
-    filas.forEach(row => {
-        let x = marginLeft;
+        doc.setFontSize(7.5);
+        doc.setFont("helvetica", "bold");
+        const condicionesPago = doc.splitTextToSize(`Condiciones de pago: ${data.condicionDePago || '-'}`, 110);
+        doc.text(condicionesPago, x + 2, y + 4);
 
-        const getValue = (index) => {
-            const input = row.cells[index]?.querySelector("input");
-            return input && input.value.trim() !== "" ? input.value : "-";
-        };
+        doc.text("MONTO PARCIAL COTIZADO (SIN I.V.A.):", x + 122, y + 4);
 
-        let descripcion = getValue(3) || "-";
-        let descripcionFormateada = doc.splitTextToSize(descripcion, anchosColumnas[3] - 5);
-        let numLineasDescripcion = descripcionFormateada.length;
-        let altoDinamico = altoFila * numLineasDescripcion;
+        doc.setFont("helvetica", "normal");
+        doc.text(`$${document.getElementById("totalGeneral")?.textContent || "-"}`, x + 188, y + 4, { align: "right" });
 
-        if (y + altoDinamico > maxAltoPagina) {
-            doc.addPage();
-            y = 20;
-            imprimirEncabezados();
-        }
+        // Segunda fila
+        doc.setFont("helvetica", "bold");
+        doc.text("Esta cotización expira el:", x + 2, y + altoFila + 7);
+        doc.text("AUTORIZÓ:", x + 122, y + altoFila + 7);
 
-        let filaDatos = [
-            getValue(0),
-            getValue(1),
-            getValue(2),
-            descripcionFormateada,
-            `$${parseFloat(getValue(4) || 0).toFixed(2)}`,
-            `$${parseFloat(getValue(5) || 0).toFixed(2)}`
-        ];
+        doc.setFont("helvetica", "normal");
+        doc.text(data.fechaExpiracion, x + 50, y + altoFila + 7);
+        doc.text("Ing. Héctor Manuel Rivera Domínguez", x + 140, y + altoFila + 7);
 
-        let importe = parseFloat(getValue(5));
-        if (!isNaN(importe)) totalImporte += importe;
+        // Tercera fila
+        doc.setFont("helvetica", "bold");
+        doc.text("COTIZÓ:", x + 2, y + altoFila * 2 + 10);
+        doc.setFont("helvetica", "normal");
+        doc.text(data.atn, x + 25, y + altoFila * 2 + 10);
+    }
+    // 1. Primera página: encabezado + datos generales
+    imprimirEncabezado(doc, logoDataURL);
+    imprimirDatosGenerales(doc, data);
 
-        filaDatos.forEach((dato, index) => {
-            doc.rect(x, y, anchosColumnas[index], altoDinamico);
-            if (Array.isArray(dato)) {
-                dato.forEach((linea, i) => {
-                    doc.text(linea, x + anchosColumnas[index] / 2, y + altoFila * (i + 1) - 3, { align: "center" });
-                });
-            } else {
-                doc.text(dato, x + anchosColumnas[index] / 2, y + altoFila - 3, { align: "center" });
-            }
-            x += anchosColumnas[index];
-        });
+    // 2. Generar tabla de materiales debajo
+    const yFinal = generarTablaMateriales(doc, 95);
+    imprimirDatosFinales(doc, yFinal + 5, data);
 
-        y += altoDinamico;
-    });
 
-    // Fila del total
-    y += altoFila;
-    doc.setFont("helvetica", "bold");
-    doc.text("TOTAL:", marginLeft + anchoTabla - anchosColumnas[5] - anchosColumnas[4] / 2, y + altoFila - 3, { align: "center" });
-    doc.text(`$${totalImporte.toFixed(2)}`, marginLeft + anchoTabla - anchosColumnas[5] / 2, y + altoFila - 3, { align: "center" });
+    // 3. Encabezado y pie en todas las páginas
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        imprimirEncabezado(doc, logoDataURL);
+        imprimirPie(doc, i, pageCount);
+    }
 
-    doc.rect(marginLeft, margenSuperior + 5, anchoTabla, y - margenSuperior - 5);
+    // 4. Guardar y subir PDF al servidor
+    const fechaActual = new Date();
+    const fechaEmision = `${fechaActual.getFullYear()}-${(fechaActual.getMonth() + 1).toString().padStart(2, "0")}-${fechaActual.getDate().toString().padStart(2, "0")}`;
 
-    return y + altoFila * 2; // Devolver coordenada final
+    const nombreArchivo = `cotizacion_${data.cliente}_${data.cotizacionNo}_rev04_${fechaEmision}.pdf`.replace(/\s+/g, "_");
+
+    const pdfBlob = doc.output("blob");
+    const formData = new FormData();
+    formData.append("pdf", pdfBlob, nombreArchivo);
+
+    doc.save(nombreArchivo); // descarga en el navegador
+    subirPDFAlServidor(formData); // envía al servidor
+
 }
 

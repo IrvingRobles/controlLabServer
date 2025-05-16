@@ -62,7 +62,7 @@ exports.obtenerOTC = async (req, res) => {
                 c.telefono_contacto, c.calle, c.ciudad, c.estado, c.pais, c.codigo_postal
             FROM registros r
             LEFT JOIN cliente c ON r.id_cliente = c.id_cliente
-            WHERE r.id = ?`, 
+            WHERE r.id = ?`,
             [id]
         );
 
@@ -72,10 +72,15 @@ exports.obtenerOTC = async (req, res) => {
 
         // 🟢 Obtener cotizaciones relacionadas
         const [cotizaciones] = await db.query(
-            `SELECT id, referencia, num_cotizacion, fecha_expiracion, metodo_embarque, realizado_por
-             FROM cotizaciones WHERE id_ot = ?`, 
+            `SELECT id, referencia, num_cotizacion, fecha_expiracion, 
+            metodo_embarque, realizado_por, moneda, observaciones, 
+            condicion_de_pago, tiempo_entrega
+            FROM cotizaciones WHERE id_ot = ?`,
             [id]
         );
+
+
+
 
         // 🟢 Obtener materiales si hay cotizaciones
         let materiales = [];
@@ -83,7 +88,7 @@ exports.obtenerOTC = async (req, res) => {
             const cotizacionIds = cotizaciones.map(cot => cot.id);
             [materiales] = await db.query(
                 `SELECT id, id_cotizacion, pda, cantidad, unidad, descripcion, precio_unitario, importe_total
-                 FROM materiales WHERE id_cotizacion IN (?)`, 
+                 FROM materiales WHERE id_cotizacion IN (?)`,
                 [cotizacionIds]
             );
         }
@@ -155,8 +160,14 @@ exports.guardarCotizacion = async (req, res) => {
         fecha_expiracion = null,
         metodo_embarque = '',
         realizado_por = '',
+        moneda = '',
+        observaciones = '',
+        condicion_de_pago = '',
+        tiempo_entrega = '',
         materiales = []
     } = req.body;
+
+
 
     if (!id_ot || !num_cotizacion || !fecha_expiracion) {
         return res.status(400).json({ mensaje: "Faltan datos obligatorios en la cotización" });
@@ -171,11 +182,14 @@ exports.guardarCotizacion = async (req, res) => {
         if (id) {
             const [result] = await connection.query(`
                 UPDATE cotizaciones SET
-                    referencia = ?, num_cotizacion = ?, fecha_expiracion = ?, 
-                    metodo_embarque = ?, realizado_por = ?
+                referencia = ?, num_cotizacion = ?, fecha_expiracion = ?, 
+                metodo_embarque = ?, realizado_por = ?, moneda = ?, observaciones = ?,
+                condicion_de_pago = ?, tiempo_entrega = ?
                 WHERE id = ? AND id_ot = ?`, [
                 referencia, num_cotizacion, fecha_expiracion,
-                metodo_embarque, realizado_por, id, id_ot
+                metodo_embarque, realizado_por, moneda, observaciones,
+                condicion_de_pago, tiempo_entrega,
+                id, id_ot
             ]);
 
             if (result.affectedRows === 0) {
@@ -184,12 +198,15 @@ exports.guardarCotizacion = async (req, res) => {
         } else {
             const [result] = await connection.query(`
                 INSERT INTO cotizaciones (
-                    id_ot, referencia, num_cotizacion, fecha_expiracion, 
-                    metodo_embarque, realizado_por
-                ) VALUES (?, ?, ?, ?, ?, ?)`, [
+                id_ot, referencia, num_cotizacion, fecha_expiracion, 
+                metodo_embarque, realizado_por, moneda, observaciones,
+                condicion_de_pago, tiempo_entrega
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
                 id_ot, referencia, num_cotizacion, fecha_expiracion,
-                metodo_embarque, realizado_por
+                metodo_embarque, realizado_por, moneda, observaciones,
+                condicion_de_pago, tiempo_entrega
             ]);
+
 
             cotizacionId = result.insertId;
         }
