@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="../styles/styles.css">
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const user = localStorage.getItem('user');
@@ -17,11 +18,12 @@
             }
         });
     </script>
-    
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script defer src="../scripts/detalleSolicitud.js"></script>
     <script defer src="../scripts/cotizaciones.js"></script>
 </head>
+
 <body>
     <div class="container py-4">
         <header class="d-flex align-items-center border-bottom pb-3 mb-4">
@@ -55,7 +57,8 @@
                     </div>
                     <div class="col-md-6">
                         <label for="cotizacionNo" class="form-label">Cotización No:</label>
-                        <input type="text" id="cotizacionNo" class="form-control" placeholder="Número de cotización" readonly>
+                        <input type="text" id="cotizacionNo" class="form-control" placeholder="Número de cotización"
+                            readonly>
                     </div>
                     <div class="col-md-6">
                         <label for="fecha" class="form-label">Fecha:</label>
@@ -103,8 +106,20 @@
                     </div>
                     <div class="col-md-6">
                         <label for="empleado_asignado" class="form-label">Realizó la cotización:</label>
-                        <input type="text" id="empleado_asignado" class="form-control" placeholder="Nombre del responsable">
+                        <input type="text" id="empleado_asignado" class="form-control"
+                            placeholder="Nombre del responsable">
                     </div>
+                    <div class="col-md-6">
+                        <label for="condicionDePago" class="form-label">Condición de Pago:</label>
+                        <input type="text" id="condicionDePago" class="form-control" placeholder="Condición de pago">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="tiempoEntrega" class="form-label">Tiempo de Entrega:</label>
+                        <input type="text" id="tiempoEntrega" class="form-control"
+                            placeholder="Tiempo estimado de entrega">
+                    </div>
+
                 </div>
             </form>
         </section>
@@ -129,15 +144,15 @@
             <section class="mb-4">
                 <h3>Total: $<span id="totalGeneral">0.00</span></h3>
             </section>
-            
+
             <div class="d-flex gap-2">
                 <button id="btnAgregarFila" class="btn btn-primary">Agregar Fila</button>
-                <button id="cargarDetalles" class="btn btn-secondary">Cargar Detalles</button>
             </div>
         </section>
         <section class="mb-4">
             <h2 class="h5 mb-3">Observaciones</h2>
-            <textarea id="observaciones" class="form-control" rows="4" placeholder="Escriba aquí las observaciones"></textarea>
+            <textarea id="observaciones" class="form-control" rows="4"
+                placeholder="Escriba aquí las observaciones"></textarea>
         </section>
 
         <section class="text-center">
@@ -168,4 +183,5 @@
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 </body>
+
 </html>
