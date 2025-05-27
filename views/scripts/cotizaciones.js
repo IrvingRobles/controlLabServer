@@ -593,7 +593,3 @@ const imprimirDatosGenerales = () => {
     doc.save(nombreArchivo);
     subirPDFAlServidor(formData);
 }
-
-
-
-
